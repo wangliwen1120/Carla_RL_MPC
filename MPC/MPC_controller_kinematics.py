@@ -42,11 +42,12 @@ class MPC_controller_kinematics:
         self.Matrix_Cy[1, 1] = 1
         self.Matrix_Cy[2, 2] = 1
 
+
         self.U_min = [[0], [-0.194]]
-        self.U_max = [[50 / 3.6], [0.194]]
-        self.ext_U_min = [[-5], [-0.08]]
-        self.ext_U_max = [[3], [0.08]]
-        self.delta_ext_U_min = [[-2], [-0.005]]
+        self.U_max = [[50/3.6], [0.194]]
+        self.ext_U_min = [[-5],[-0.08]]
+        self.ext_U_max = [[3],[0.08]]
+        self.delta_ext_U_min = [[-2],[-0.005]]
         self.delta_ext_U_max = [[1], [0.005]]
         self.Matrix_U_max = np.zeros([self.Nc * self.Nu, 1])
         self.Matrix_U_min = np.zeros([self.Nc * self.Nu, 1])
@@ -88,6 +89,7 @@ class MPC_controller_kinematics:
         for i in range(self.Nc):
             self.Matrix_dU[i * self.Nu:(i + 1) * self.Nu] = self.U
 
+        self.Matrix_state_new[0] = self.x[0] - self.ref[0]
         self.Matrix_state_new[1] = self.x[1] - self.ref[1]  # Y
         self.Matrix_state_new[2] = self.x[2] - self.ref[2]  # PHI
         self.Matrix_state_new[3] = self.U[0]  # da??

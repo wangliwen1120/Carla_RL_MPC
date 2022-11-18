@@ -50,7 +50,7 @@ if __name__ == '__main__':
     while not done:
 
         for i in range(100000):
-            print("Episode {} start!".format(i))
+
             action = env.action_space.sample()
             next_state, reward, done, info = env.step([action])
 

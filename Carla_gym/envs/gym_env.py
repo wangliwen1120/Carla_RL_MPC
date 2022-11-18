@@ -94,7 +94,7 @@ class CarlagymEnv(gym.Env):
     def __init__(self):
 
         self.Input_coupling = None
-        self.u_coupling_last = None
+        self.u_coupling_last = [0,0]
 
         self.lat_error = None
         self.__version__ = "9.9.2"
@@ -332,27 +332,29 @@ class CarlagymEnv(gym.Env):
         cmdWP = [fpath.x[self.f_idx], fpath.y[self.f_idx]]
         cmdWP2 = [fpath.x[self.f_idx + 1], fpath.y[self.f_idx + 1]]
 
-        self.Input_coupling = self.coupling_controller.calc_input(x=np.array([[ego_s], [ego_d], psi_Frenet]),
+        obj = self.obj_info()
+        self.Input_coupling = self.coupling_controller.calc_input(x=np.array([[ego_state[0]], [ego_state[1]], [psi]]),
                                                                   ref=np.array(
-                                                                      [[fpath.s[30]], [fpath.d[30]], [0.0], [0.0],
-                                                                       [0.0]]))
+                                                                      [[fpath.x[0]], [fpath.y[0]], [fpath.yaw[0]], [self.u_coupling_last[0]],
+                                                                       [self.u_coupling_last[1]]]))
 
         self.u_coupling_last = self.Input_coupling
 
-        cmdSpeed = 10.0
-
+        # cmdSpeed = self.Input_coupling[0][0]
+        cmdSpeed = 5
+        print("cmdSpeed=",cmdSpeed)
         control = self.vehicleController.run_step_2_wp(cmdSpeed, cmdWP, cmdWP2)  # calculate control
         throttle = control.throttle
         brake = control.brake
 
-        steer = self.Input_coupling[0] * np.pi / 35
-
+        steer = self.Input_coupling[1] * np.pi / 80
+        print("steer =", self.Input_coupling[1])
         vehicle_control = carla.VehicleControl(
             throttle=float(throttle),
             steer=float(steer),
             brake=float(brake),
             hand_brake=False,
-            reverse=False,
+                    reverse=False,
             manual_gear_shift=False
         )
 
