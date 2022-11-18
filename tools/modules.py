@@ -62,8 +62,9 @@ from carla import ColorConverter as cc
 # from operator import itemgetter
 from agents.low_level_controller.controller import VehiclePIDController
 from agents.low_level_controller.controller import IntelligentDriverModel
+
 from agents.local_planner.frenet_optimal_trajectory import frenet_to_inertial, velocity_inertial_to_frenet, \
-    get_obj_S_yaw, update_d
+    get_obj_S_yaw, update_d, get_calc_curvature
 from agents.tools.misc import get_speed
 from config import cfg
 from queue import Queue
@@ -1186,7 +1187,7 @@ class ModuleWorld:
         self.los_sensor.reset()
 
         # Set ego transform
-        self.init_s = 0.1
+        self.init_s = 2150
         # self.init_s = np.random.uniform(50, self.max_s - self.track_length - 50)  # ego initial s location
         #  should be larger than 50. bc other actors will be spawned in range: s = [init_s-50, init_s+150]
         #  should be smaller than max_s - track_length to have all tracks with the same length
@@ -1758,7 +1759,50 @@ class TrafficManager:
 
         return estimated_s
 
+    # def spawn_one_actor(self, s, lane, targetSpeed, velocity_curve):
+    #     """
+    #     Spawn an actor on the main road based on the frenet s and d values
+    #     """
+    #     if self.global_csp is None:
+    #         return
+    #
+    #     d = lane * self.LANE_WIDTH
+    #     x, y, z, yaw = frenet_to_inertial(s, d, self.global_csp)
+    #
+    #     blueprint = random.choice(self.blueprints)
+    #     if blueprint.has_attribute('color'):
+    #         color = random.choice(blueprint.get_attribute('color').recommended_values)
+    #         blueprint.set_attribute('color', color)
+    #
+    #     transform = carla.Transform(location=carla.Location(x=x, y=y, z=z + 0.3),
+    #                                 rotation=carla.Rotation(pitch=0.0, yaw=math.degrees(yaw), roll=0.0))
+    #
+    #     otherActor = self.world.try_spawn_actor(blueprint, transform)
+    #
+    #     # otherActor.set_transform(transform)
+    #     if otherActor is not None:
+    #         # create a line of sight sensor attached to the vehicle
+    #         los_sensor = LineOfSightSensor(otherActor)
+    #         otherActor.set_autopilot(False, self.tm_port)
+    #         otherActor.set_target_velocity(carla.Vector3D(x=0, y=0, z=0))
+    #         otherActor.set_target_angular_velocity(carla.Vector3D(x=0, y=0, z=0))
+    #         # keep actors and sensors to destroy them when an episode is finished
+    #         cruiseControl = CruiseControl(otherActor, los_sensor, s, d, lane, self.module_manager,
+    #                                       targetSpeed=targetSpeed, velocity_curve=velocity_curve)
+    #         deq_s = deque([s], maxlen=50)
+    #
+    #         v_S, v_D = velocity_inertial_to_frenet(s, otherActor.get_velocity().x, otherActor.get_velocity().y,
+    #                                                self.global_csp)
+    #         psi = math.radians(otherActor.get_transform().rotation.yaw)
+    #         psi_Frenet = get_obj_S_yaw(psi, s, self.global_csp)
+    #         delta_f = cruiseControl.tick()[7] * 35 / np.pi
+    #         speed = get_speed(otherActor)
+    #         self.actors_batch.append({'Actor': otherActor, 'Sensor': los_sensor, 'Cruise Control': cruiseControl,
+    #                                   'Frenet State': [deq_s, d], 'Obj_Frenet_state': [s, d, v_S, v_D, psi_Frenet,
+    #                                                                                    x, y, z, psi,delta_f,speed]})
+    #     return otherActor
     def spawn_one_actor(self, s, lane, targetSpeed, velocity_curve):
+
         """
         Spawn an actor on the main road based on the frenet s and d values
         """
@@ -1766,7 +1810,7 @@ class TrafficManager:
             return
 
         d = lane * self.LANE_WIDTH
-        x, y, z, yaw = frenet_to_inertial(s, d, self.global_csp)
+        x, y, z, yaw = frenet_to_inertial(s-20, d, self.global_csp)
 
         blueprint = random.choice(self.blueprints)
         if blueprint.has_attribute('color'):
@@ -1786,19 +1830,23 @@ class TrafficManager:
             otherActor.set_target_velocity(carla.Vector3D(x=0, y=0, z=0))
             otherActor.set_target_angular_velocity(carla.Vector3D(x=0, y=0, z=0))
             # keep actors and sensors to destroy them when an episode is finished
+            # cruiseControl = CruiseControl(otherActor, los_sensor, s, d, lane, self.module_manager,
+            #                                targetSpeed= targetSpeed)
             cruiseControl = CruiseControl(otherActor, los_sensor, s, d, lane, self.module_manager,
                                           targetSpeed=targetSpeed, velocity_curve=velocity_curve)
             deq_s = deque([s], maxlen=50)
-
-            v_S, v_D = velocity_inertial_to_frenet(s, otherActor.get_velocity().x, otherActor.get_velocity().y,
-                                                   self.global_csp)
+            v_S, v_D = velocity_inertial_to_frenet(s, otherActor.get_velocity().x, otherActor.get_velocity().y, self.global_csp)
             psi = math.radians(otherActor.get_transform().rotation.yaw)
             psi_Frenet = get_obj_S_yaw(psi, s, self.global_csp)
+            K_Frenet = get_calc_curvature(s, self.global_csp)
+            delta_f = cruiseControl.tick()[7] * 35 / np.pi
+            speed = get_speed(otherActor)
 
             self.actors_batch.append({'Actor': otherActor, 'Sensor': los_sensor, 'Cruise Control': cruiseControl,
-                                      'Frenet State': [deq_s, d], 'Obj_Frenet_state': [s, d, v_S, v_D, psi_Frenet]})
+                                      'Frenet State': [deq_s, d], 'Obj_Frenet_state': [s, d, v_S, v_D, psi_Frenet, K_Frenet],
+                                       'Obj_Cartesian_state': [x,y,otherActor.get_velocity().x, otherActor.get_velocity().y
+                                           ,psi,speed,delta_f,targetSpeed]})
         return otherActor
-
     def start(self):
         self.world_module = self.module_manager.get_module(MODULE_WORLD)
         self.world = self.world_module.world
@@ -1835,9 +1883,9 @@ class TrafficManager:
         # re-spawn N_INIT_CARS of actors
         ego_lane = int(ego_d / self.LANE_WIDTH)
         ego_grid_n = ego_lane + 9  # in Grid world (see notes above), ego is in column 2 so its grid number will be based on its lane number
-        grid_choices = np.arange(29, 41, 4)
+        # grid_choices = np.arange(16, 60)
         # grid_choices = np.arange(21, 38, 4)
-        # grid_choices = [29]  ## 40:25  50:29  60:33
+        grid_choices = [29]  ## 40:25  50:29  60:33
         # 通过设置grid_choices可以设置其可能出现的初始位置，可以看上面的Grid world indices示意图。
         # 设置self.N_SPAWN_CARS为需要的障碍车个数
         rnd_indices = np.random.choice(grid_choices, self.N_SPAWN_CARS, replace=False)
@@ -1860,6 +1908,36 @@ class TrafficManager:
             actor_dic['Actor'].destroy()
             actor_dic['Sensor'].destroy()
 
+    # def tick(self):
+    #
+    #     for actor_dic in self.actors_batch:
+    #         control = actor_dic['Cruise Control']
+    #
+    #         state = control.tick()
+    #         s = self.estimate_s(control.s, state[0], state[1], state[-2])
+    #
+    #         d = update_d(s, state[0], state[1], self.global_csp)
+    #
+    #         v_S, v_D = velocity_inertial_to_frenet(s, state[-2].x, state[-2].y, self.global_csp)
+    #         psi_Frenet = get_obj_S_yaw(state[-3], s, self.global_csp)
+    #
+    #         actor_dic['Frenet State'][0].append(s)
+    #         actor_dic['Obj_Frenet_state'][0] = s
+    #         actor_dic['Obj_Frenet_state'][1] = d
+    #         actor_dic['Obj_Frenet_state'][2] = v_S
+    #         actor_dic['Obj_Frenet_state'][3] = v_D
+    #         actor_dic['Obj_Frenet_state'][4] = psi_Frenet
+    #         actor_dic['Obj_Frenet_state'][5] = state[0]
+    #         actor_dic['Obj_Frenet_state'][6] = state[1]
+    #         actor_dic['Obj_Frenet_state'][7] = state[2]
+    #         actor_dic['Obj_Frenet_state'][8] = math.radians(state[5])
+    #         actor_dic['Obj_Frenet_state'][9] = state[-1] * 35 / np.pi
+    #         actor_dic['Obj_Frenet_state'][10] = state[3]
+    #
+    #         # append current actor s value
+    #         # actor_dic['Frenet State'][0] = s
+    #         # IMPORTANT actor d is NOT updated
+    #         control.update_s(s)
     def tick(self):
 
         for actor_dic in self.actors_batch:
@@ -1867,23 +1945,36 @@ class TrafficManager:
 
             state = control.tick()
             s = self.estimate_s(control.s, state[0], state[1], state[-2])
-
             d = update_d(s, state[0], state[1], self.global_csp)
-
-            v_S, v_D = velocity_inertial_to_frenet(s, state[-1].x, state[-1].y, self.global_csp)
-            psi_Frenet = get_obj_S_yaw(state[-2], s, self.global_csp)
-
+            v_S, v_D = velocity_inertial_to_frenet(s, state[6].x, state[6].y, self.global_csp)
+            psi_Frenet = get_obj_S_yaw(state[5], s, self.global_csp)
+            K_Frenet = get_calc_curvature(s, self.global_csp)
+            x, y, z, yaw = frenet_to_inertial(s - 20, d, self.global_csp)
+            v_x = state[6].x
+            v_y = state[6].y
+            speed = state[3]
+            steer = state[7]
+            delta_f = steer * 35 / np.pi
+            targetSpeed = state[8]
             actor_dic['Frenet State'][0].append(s)
             actor_dic['Obj_Frenet_state'][0] = s
             actor_dic['Obj_Frenet_state'][1] = d
             actor_dic['Obj_Frenet_state'][2] = v_S
             actor_dic['Obj_Frenet_state'][3] = v_D
             actor_dic['Obj_Frenet_state'][4] = psi_Frenet
+            actor_dic['Obj_Frenet_state'][5] = K_Frenet
+            actor_dic['Obj_Cartesian_state'][0] = x
+            actor_dic['Obj_Cartesian_state'][1] = y
+            actor_dic['Obj_Cartesian_state'][2] =v_x
+            actor_dic['Obj_Cartesian_state'][3] = v_y
+            actor_dic['Obj_Cartesian_state'][4] = yaw
+            actor_dic['Obj_Cartesian_state'][5] = speed
+            actor_dic['Obj_Cartesian_state'][6] = delta_f
+            actor_dic['Obj_Cartesian_state'][7] = targetSpeed
             # append current actor s value
             # actor_dic['Frenet State'][0] = s
             # IMPORTANT actor d is NOT updated
             control.update_s(s)
-
 
 class LineOfSightSensor(object):
     def __init__(self, parent_actor):
@@ -2002,14 +2093,53 @@ class CruiseControl:
 
         vehicle_ahead = self.los_sensor.get_vehicle_ahead()
 
+        if self.steps >= 1001:
+            self.steps = self.steps - self.steps//1000 * 1000
+
         timesteps = self.steps
         targetSpeed = self.velocity_curve[timesteps - 1] + 1e-6
-
+        # targetSpeed = self.targetSpeed
         cmdSpeed = self.IDM.run_step(vd=targetSpeed, vehicle_ahead=vehicle_ahead)
         self.velocity = self.vehicle.get_velocity()
+
         control = self.vehicleController.run_step(cmdSpeed, targetWP)
 
         self.vehicle.apply_control(control)
         self.steps += 1
         return [self.location.x, self.location.y, self.location.z, self.speed, self.acceleration, self.yaw,
-                self.velocity]
+                self.velocity,control.steer,targetSpeed]
+
+    # def tick(self):
+    #
+    #     self.location = self.vehicle.get_location()
+    #     speed_ = self.speed  # speed in previous tick
+    #     self.speed = get_speed(self.vehicle)
+    #     self.acceleration = (self.speed - speed_) / self.dt
+    #     self.yaw = math.radians(self.vehicle.get_transform().rotation.yaw)
+    #
+    #     nextWP = self.world.town_map.get_waypoint(self.location, project_to_road=True).next(distance=5)[0]
+    #
+    #     targetWP = [nextWP.transform.location.x, nextWP.transform.location.y]
+    #
+    #     if self.lane == 2 and nextWP.is_junction:  # only if in right most lane
+    #         temploc = self.body_to_inertial_frame(xb=0, yb=-self.LANE_WIDTH)
+    #         tempWP = \
+    #             self.world.town_map.get_waypoint(carla.Location(x=temploc[0], y=temploc[1]), project_to_road=True).next(
+    #                 distance=10)[0]
+    #         tempWPb = self.inertial_to_body_frame(xi=tempWP.transform.location.x, yi=tempWP.transform.location.y)
+    #         targetWP = self.body_to_inertial_frame(xb=tempWPb[0], yb=tempWPb[1] + self.LANE_WIDTH)
+    #
+    #     vehicle_ahead = self.los_sensor.get_vehicle_ahead()
+    #     if self.steps >= 1001:
+    #         self.steps = self.steps - self.steps//1000 * 1000
+    #     timesteps = self.steps
+    #     targetSpeed = self.velocity_curve[timesteps - 1] + 1e-6
+    #
+    #     cmdSpeed = self.IDM.run_step(vd=targetSpeed, vehicle_ahead=vehicle_ahead)
+    #     self.velocity = self.vehicle.get_velocity()
+    #     control = self.vehicleController.run_step(cmdSpeed, targetWP)
+    #
+    #     self.vehicle.apply_control(control)
+    #     self.steps += 1
+    #     return [self.location.x, self.location.y, self.location.z, self.speed, self.acceleration, self.yaw,
+    #             self.velocity,control.steer]

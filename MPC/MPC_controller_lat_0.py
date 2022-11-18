@@ -2,17 +2,15 @@ import numpy as np
 import math
 from scipy import sparse
 from cvxopt import matrix, solvers
-from MPC.qpoases import PyOptions as Options
-from MPC.qpoases import PyQProblem as QProblem
-from MPC.qpoases import PyPrintLevel as PrintLevel
 
 
 class MPC_controller_lat:
 
-    def __init__(self, param):
+    def __init__(self, path, param):
 
         self.param = param
         self.T = self.param.T
+        self.D_ref = path
         self.lanewidth = self.param.lanewidth
 
         self.Nx = self.param.Nx
@@ -85,7 +83,19 @@ class MPC_controller_lat:
                 self.du_max_ext_lat[i * self.Nu: (i + 1) * self.Nu] = np.array([[self.d_delta_f_max]])
                 self.du_min_ext_lat[i * self.Nu: (i + 1) * self.Nu] = np.array([[self.d_delta_f_min]])
 
+        # 权重矩阵
+        self.q_lat = 1 * 10 * np.diag([1 / self.K_max ** 2, 1 / (self.lanewidth + eps) ** 2])
+        # q_lat_last = 1 * q_lat
+        self.ru_lat = 1 / 100 * np.diag([1 / (self.delta_f_max + eps) ** 2])  # 控制量的权重矩阵
+        '''
+        用到动态量D，因此要放在动态计算中，下方先给出一个静态约束
+        # if D >= 1.75:
+        #     self.rdu_lat = 0 / 100000 * np.diag([1 / (self.d_delta_f_max + eps) ** 2])     #控制量增量的权重矩阵，当偏离很大时，设为0，让他可以快速调节，保证安全性
+        # else:
+        #     self.rdu_lat = 1 / 100000 * np.diag([1 / (self.d_delta_f_max + eps) ** 2])   #偏离不大时，让他微调，保证舒适性
+        '''
 
+        self.rdu_lat = 1 / 100000 * np.diag([1 / (self.d_delta_f_max + eps) ** 2])
 
         # 预测时域和控制时域内的分块权重矩阵
         # Q_cell = np.empty((self.Np, self.Np), dtype=object)
@@ -105,7 +115,19 @@ class MPC_controller_lat:
         #     for j in range(self.Nc):
         #         Rdu_cell[i, j] = self.rdu_lat if i == j else np.zeros_like(self.rdu_lat)
         # self.Rdu_lat = np.vstack([np.hstack(row) for row in Rdu_cell])
-
+        self.Q_lat = np.zeros([self.Np * self.Ny, self.Np * self.Ny])
+        self.Ru_lat = np.zeros([self.Nc * self.Nu, self.Nc * self.Nu])
+        self.Rdu_lat = np.zeros([self.Nc * self.Nu, self.Nc * self.Nu])
+        for i in range(self.Np - 2):
+            self.Q_lat[i * self.Ny:(i + 1) * self.Ny, i * self.Ny: (i + 1) * self.Ny] = self.q_lat
+        for i in range(self.Np - 2, self.Np):
+            self.Q_lat[i * self.Ny:(i + 1) * self.Ny, i * self.Ny: (i + 1) * self.Ny] = self.q_lat
+        for i in range(self.Nc - 1):
+            self.Ru_lat[i * self.Nu: (i + 1) * self.Nu, i * self.Nu: (i + 1) * self.Nu] = self.ru_lat
+        for i in range(self.Nc - 1 + 1, self.Nc):
+            self.Ru_lat[i * self.Nu: (i + 1) * self.Nu, i * self.Nu: (i + 1) * self.Nu] = self.ru_lat
+        for i in range(self.Nc):
+            self.Rdu_lat[i * self.Ny: (i + 1) * self.Ny, i * self.Ny: (i + 1) * self.Ny] = self.rdu_lat
         # 存放输入量
         # self.u = np.zeros((self.Nu, 1))         #真实控制量与参考控制量的差
         self.u_real = np.zeros((self.Nu, 1))  # 真实控制量
@@ -125,13 +147,13 @@ class MPC_controller_lat:
         D = x_current[1, 0]
         delta_f = u_last
 
+        '''
         #vS也是vx和vy和K的表达的，此处偏导是否存在问题？  代入换一下
-        Matrix = np.array([[cur*(vx * math.sin(K)+vy*math.cos(K)/(1-D*cur)),
-        -cur*cur*(vx * math.cos(K) - vy * math.sin(K))/(1-D*cur)**2],
+        Matrix = np.array([[cur*(vx * math.sin(K)+vy*math.cos(K)/(1-D*cur)), cur*cur*(vx * math.cos(K) - vy * math.sin(K))/(1-D*cur)**2],
                            [vx * math.cos(K) - vy * math.sin(K), 0]])
-
-        # Matrix = np.array([[0, 0],
-        #                    [vx * math.cos(K) - vy * math.sin(K), 0]])
+        '''
+        Matrix = np.array([[0, 0],
+                           [vx * math.cos(K) - vy * math.sin(K), 0]])
 
         return Matrix
 
@@ -144,28 +166,12 @@ class MPC_controller_lat:
                            [0.]])
         return Matrix
 
-    def calc_input(self, D_ref, vx, vy,  x_current_lat, u_lat_last, cur, vS):
-        eps= 0.01
+    def calc_input(self, D_ref, vx, vy, x_current_lat, u_lat_last, cur):
+
         K = x_current_lat[0, 0]
         D = x_current_lat[1, 0]
-        # vS = (vx * math.cos(K) - vy * math.sin(K)) / (1 - D * cur)
-        # vS = vx
+        vS = (vx * math.cos(K) - vy * math.sin(K)) / (1 - D * cur)
         # X_current_lat是列向量，其他的是标量，vx为车身坐标系下纵向车身速度(后轴速度)，vy为车身坐标系下横向速度，vS为frenet下纵向速度
-
-
-        # 权重矩阵
-        self.q_lat = 1 * 10 * np.diag([1 / self.K_max ** 2, 1 / (self.lanewidth + eps) ** 2])
-        # q_lat_last = 1 * q_lat
-        self.ru_lat = 1 / 100 * np.diag([1 / (self.delta_f_max + eps) ** 2])  # 控制量的权重矩阵
-        self.rdu_lat = 1 / 100000 * np.diag([1 / (self.d_delta_f_max + eps) ** 2])
-
-        # 用到动态量D，因此要放在动态计算中，下方先给出一个静态约束
-        # if D >= 1.75:
-        #     self.rdu_lat = 0 / 100000 * np.diag(
-        #         [1 / (self.d_delta_f_max + eps) ** 2])  # 控制量增量的权重矩阵，当偏离很大时，设为0，让他可以快速调节，保证安全性
-        # else:
-        #     self.rdu_lat = 1 / 100000 * np.diag([1 / (self.d_delta_f_max + eps) ** 2])  # 偏离不大时，让他微调，保证舒适性
-
 
         # 计算参考轨迹
         y_ref_ext_lat = np.zeros([self.Ny * self.Np, 1])  # 要跟随的参考观测量
@@ -178,16 +184,16 @@ class MPC_controller_lat:
             y_ref_ext_lat[i * self.Ny: (i + 1) * self.Ny, 0] = [self.K_ref, D_ref0]  # K_ref一直为0，理想状况
 
         #####################################模型线性化#######################################################
-
+        '''
         #当纵向速度会变时用这个
         vx_cell = np.zeros([self.Np, 1])
         for i in range(self.Np):
-            if i == 0:
+            if i == 1:
                 vx_cell[i] = vx
             else:
-                vx_cell[i] = vx_cell[i - 1] + vx * self.T      #意义何在？  预测的Np步的每步vx
-
-        # vx_cell = vx * np.ones([self.Np, 1])
+                vx_cell[i] = vx_cell[i - 1] + 0 * self.T      #意义何在？  预测的Np步的每步vx
+        '''
+        vx_cell = vx * np.ones([self.Np, 1])
 
         # 假设控制量不变，来预测车辆的未来轨迹作为参考轨迹
         SV_r_cell = np.zeros([self.Nx * self.Np, 1])  # 保存施加不变的控制量下预测的每个时刻的状态量，作为参考轨迹X_r，用来进行线性化;u_r为上一时刻输入不变
@@ -252,23 +258,11 @@ class MPC_controller_lat:
                 C_ext_lat[i * self.Nx: (i + 1) * self.Nx] = C_cell_lat[:, i:i + 1]
             else:  # C的上一行乘以新的Ak再加上新的Ck得到C_bar
                 C_ext_lat[i * self.Nx: (i + 1) * self.Nx] = A_cell_lat[:, :, i] @ C_ext_lat[(
-                                                             i - 1) * self.Nx: i * self.Nx] + C_cell_lat[ :,
-                                                             i:i + 1]  # 写成[:,i:i+1]能够保证都为二维数组
+                                                                                                    i - 1) * self.Nx: i * self.Nx] + C_cell_lat[
+                                                                                                                                     :,
+                                                                                                                                     i:i + 1]  # 写成[:,i:i+1]能够保证都为二维数组
 
         Cy_ext = np.eye(self.Np * self.Ny)  # 观测矩阵，2Np * 2Np，是一个单位阵
-        self.Q_lat = np.zeros([self.Np * self.Ny, self.Np * self.Ny])
-        self.Ru_lat = np.zeros([self.Nc * self.Nu, self.Nc * self.Nu])
-        self.Rdu_lat = np.zeros([self.Nc * self.Nu, self.Nc * self.Nu])
-        for i in range(self.Np - 2):
-            self.Q_lat[i * self.Ny:(i + 1) * self.Ny, i * self.Ny: (i + 1) * self.Ny] = self.q_lat
-        for i in range(self.Np - 2, self.Np):
-            self.Q_lat[i * self.Ny:(i + 1) * self.Ny, i * self.Ny: (i + 1) * self.Ny] = self.q_lat
-        for i in range(self.Nc - 1):
-            self.Ru_lat[i * self.Nu: (i + 1) * self.Nu, i * self.Nu: (i + 1) * self.Nu] = self.ru_lat
-        for i in range(self.Nc - 1 + 1, self.Nc):
-            self.Ru_lat[i * self.Nu: (i + 1) * self.Nu, i * self.Nu: (i + 1) * self.Nu] = self.ru_lat
-        for i in range(self.Nc):
-            self.Rdu_lat[i * self.Ny: (i + 1) * self.Ny, i * self.Ny: (i + 1) * self.Ny] = self.rdu_lat
         Q = self.Q_lat  # 误差的大权重矩阵，2Np * 2Np，对角阵
         Ru = self.Ru_lat  # 状态量的大权重矩阵，2Np * 2Np，对角阵
         Rdu = self.Rdu_lat  # 状态量增量的大权重矩阵，2Np * 2Np，对角阵
@@ -340,9 +334,9 @@ class MPC_controller_lat:
         # A_du_eCons_lat[9,1] = np.array([[-1.]])
         A_du_eCons_lat = np.vstack([np.hstack(Mat_size) for Mat_size in A_du_eCons_lat])
 
-        ubA_du_eCons_lat[0, 0] = self.u_max_ext_lat + np.linalg.inv(Cdu1_lat) @ Cdu2_lat
-        ubA_du_eCons_lat[1, 0] = self.x_max_ext_lat - A_ext_lat @ x_current_lat - C_ext_lat + B_ext_lat @\
-                                 np.linalg.inv(Cdu1_lat) @ Cdu2_lat
+        ubA_du_eCons_lat[0, 0] = self.u_max_ext_lat + Cdu1_lat @ Cdu2_lat
+        ubA_du_eCons_lat[1, 0] = self.x_max_ext_lat - A_ext_lat @ x_current_lat - C_ext_lat + B_ext_lat @ np.linalg.inv(
+            Cdu1_lat) @ Cdu2_lat
         ubA_du_eCons_lat[2, 0] = self.y_max_ext_lat - Cy_ext @ (
                 A_ext_lat @ x_current_lat + C_ext_lat - B_ext_lat @ np.linalg.inv(Cdu1_lat) @ Cdu2_lat)
         ubA_du_eCons_lat[3, 0] = -self.u_min_ext_lat - Cdu1_lat @ Cdu2_lat
@@ -359,7 +353,6 @@ class MPC_controller_lat:
         lb = np.vstack((self.du_min_ext_lat, self.e_min_lat))  # 使用vstack堆叠数组
         ub = np.vstack((self.du_max_ext_lat, self.e_max_lat))
 
-        ##CVXOPT
         P = matrix(H_QP_du_e_lat)
         q = matrix(f_QP_du_e_lat)
         G = matrix(np.vstack((A_du_eCons_lat, np.eye(self.Nc * self.Nu + 1), -np.eye(self.Nc * self.Nu + 1))))
@@ -368,38 +361,10 @@ class MPC_controller_lat:
         result = solvers.qp(P, q, G, h)  # 1/2x'Px+q'x   Gx<=h  Ax=b 注意使用qp时，每个参数要换成matrix
         # 重要：print可被关闭
         X = result['x']  # 'x'为result中的解，'status'表示是否找到最优解。
+
         u_incr = X[0]  # 控制量增量
+        delta_fc = u_lat_last + u_incr
 
-
-        # # # qpoases求解过程
-        # # Setting up QProblem object.
-        # qp = QProblem(11, 340)
-        # options = Options()
-        # options.printLevel = PrintLevel.NONE
-        # qp.setOptions(options)
-        #
-        # H = H_QP_du_e_lat
-        # g = f_QP_du_e_lat.astype(np.double)[:, 0]
-        # A = A_du_eCons_lat
-        # lb = lb[:, 0]
-        # ub = ub[:, 0]
-        # lbA = -1e8 * np.ones(340)
-        # ubA = ubA_du_eCons_lat[:, 0]
-        #
-        # # Solve first QP.
-        # nWSR = np.array([100])
-        # qp.init(H, g, A, lb, ub, lbA,
-        #         ubA, nWSR)
-        #
-        # result = np.zeros(11)
-        # qp.getPrimalSolution(result)
-        # X = result.reshape(11, 1)
-
-        # u_incr = X[0]
-        # delta_fc = u_lat_last + u_incr
-
-        delta_fc = np.hstack([np.linalg.inv(Cdu1_lat), np.zeros([self.Nu * self.Nc, 1])]) @ np.array(X) + np.linalg.inv(
-            Cdu1_lat) @ (-Cdu2_lat)
-        Input = delta_fc[0,0]
+        Input = delta_fc
 
         return Input

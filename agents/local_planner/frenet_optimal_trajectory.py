@@ -79,6 +79,9 @@ def get_obj_S_yaw(obj_yaw, s, csp):
 
     return psi_Frenet
 
+def get_calc_curvature(s, csp):
+    K_Frenet = csp.calc_curvature(s)
+    return K_Frenet
 
 def frenet_to_inertial(s, d, csp):
     """

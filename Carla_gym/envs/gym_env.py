@@ -10,11 +10,15 @@ from agents.low_level_controller.controller import PIDLongitudinalController
 from agents.low_level_controller.controller import PIDLateralController
 from agents.tools.misc import get_speed
 from agents.low_level_controller.controller import IntelligentDriverModel
-from MPC.MPC_controller_lon import MPC_controller_lon
+
+from MPC.MPC_controller_kinematics import MPC_controller_kinematics
 from MPC.parameter_config import MPC_lon_Config
+from MPC.parameter_config import MPC_lat_Config
+from MPC.parameter_config_kinematics import MPC_Config_0
 from datas.data_log import data_collection
 
 MPC_lon_Config = MPC_lon_Config()
+MPC_lat_Config = MPC_lat_Config()
 from agents.local_planner.frenet_optimal_trajectory_lon import velocity_inertial_to_frenet, \
     get_obj_S_yaw
 
@@ -71,7 +75,9 @@ def cal_lat_error(waypoint1, waypoint2, vehicle_transform):
     v_begin = vehicle_transform.location
     v_end = v_begin + carla.Location(x=math.cos(math.radians(vehicle_transform.rotation.yaw)),
                                      y=math.sin(math.radians(vehicle_transform.rotation.yaw)))
-    v_vec_0 = np.array([math.cos(math.radians(vehicle_transform.rotation.yaw)), math.sin(math.radians(vehicle_transform.rotation.yaw)), 0.0])
+    v_vec_0 = np.array(
+        [math.cos(math.radians(vehicle_transform.rotation.yaw)), math.sin(math.radians(vehicle_transform.rotation.yaw)),
+         0.0])
     v_vec = np.array([v_end.x - v_begin.x, v_end.y - v_begin.y, 0.0])
     w_vec = np.array([waypoint2[0] -
                       waypoint1[0], waypoint2[1] -
@@ -87,12 +93,16 @@ class CarlagymEnv(gym.Env):
     # metadata = {'render.modes': ['human']}
     def __init__(self):
 
-        self.du_lon_last = None
-        self.Input_lon = None
+        self.Input_coupling = None
+        self.u_coupling_last = None
+
         self.lat_error = None
         self.__version__ = "9.9.2"
         self.lon_param = MPC_lon_Config
-        self.lon_controller = MPC_controller_lon(self.lon_param)
+        self.lat_param = MPC_lat_Config
+        self.MPC_Config_0 = MPC_Config_0()
+
+        self.coupling_controller = MPC_controller_kinematics(self.MPC_Config_0)
 
         # simulation
         self.verbosity = 0
@@ -144,6 +154,8 @@ class CarlagymEnv(gym.Env):
         self.eps_rew = 0
         self.u_lon_last = 0.0
         self.u_lon_llast = 0.0
+        self.u_lat_last = 0.0
+        self.u_lat_llast = 0.0
         self.fig, self.ax = plt.subplots()
         self.x = []
         self.y = []
@@ -222,26 +234,6 @@ class CarlagymEnv(gym.Env):
 
             return self.traffic_module.actors_batch[vehicle_ahead_idx]['Obj_Frenet_state']
 
-    def obj_info(self):
-        """
-        Frenet:  [s,d,v_s, v_d, phi_Frenet]
-        """
-        others_s = np.zeros(self.N_SPAWN_CARS)
-        others_d = np.zeros(self.N_SPAWN_CARS)
-        others_v_S = np.zeros(self.N_SPAWN_CARS)
-        others_v_D = np.zeros(self.N_SPAWN_CARS)
-        others_phi_Frenet = np.zeros(self.N_SPAWN_CARS)
-
-        for i, actor in enumerate(self.traffic_module.actors_batch):
-            act_s, act_d, act_v_S, act_v_D, act_psi_Frenet = actor['Obj_Frenet_state']
-            others_s[i] = act_s
-            others_d[i] = act_d
-            others_v_S[i] = act_v_S
-            others_v_D[i] = act_v_D
-            others_phi_Frenet[i] = act_psi_Frenet
-        obj_info_Mux = np.vstack((others_s, others_d, others_v_S, others_v_D, others_phi_Frenet))
-        return obj_info_Mux
-
     def state_input_vector(self, v_S, ego_s):
         # Paper: Automated Speed and Lane Change Decision Making using Deep Reinforcement Learning
         obj_mat = self.obj_info()
@@ -259,41 +251,49 @@ class CarlagymEnv(gym.Env):
 
         return state_vector
 
+    def obj_info(self):
+        """
+        Actor:  [actor_id]
+        Frenet:  [s,d,v_s, v_d, phi_Frenet, K_Frenet]
+        Cartesian:  [x, y, v_x, v_y, phi, speed, delta_f]
+        """
+        obj_info = {}
+        obj_actor = [0 for _ in range(self.N_SPAWN_CARS)]
+        obj_frenet = [0 for _ in range(self.N_SPAWN_CARS)]
+        obj_cartesian = [0 for _ in range(self.N_SPAWN_CARS)]
+
+        for i, actor in enumerate(self.traffic_module.actors_batch):
+            obj_idx = i
+            obj_actor[obj_idx] = actor['Actor']
+            obj_frenet[obj_idx] = actor['Obj_Frenet_state']
+            obj_cartesian[obj_idx] = actor['Obj_Cartesian_state']
+
+        obj_dict = ({'Obj_actor': obj_actor, 'Obj_frenet': obj_frenet, 'Obj_cartesian': obj_cartesian})
+
+        return obj_dict
+
+    def not_zero(self, x, eps: float = 1e-2) -> float:
+        if abs(x) > eps:
+            return x
+        elif x >= 0:
+            return eps
+        else:
+            return -eps
+
     def step(self, action):
         self.n_step += 1
         self.u_lon_llast = self.u_lon_last
+        self.u_lat_llast = self.u_lat_last
+
         # birds-eye view
         spectator = self.world_module.world.get_spectator()
         transform = self.ego.get_transform()
         spectator.set_transform(carla.Transform(transform.location + carla.Location(z=50), carla.Rotation(pitch=-90)))
+
         # # third person view
         # spectator = self.world.get_spectator()
         # transform = ego_vehicle.get_transform()
         # spectator.set_transform(carla.Transform(transform.location + carla.Location(x=0, y=7, z=5), carla.Rotation(pitch=-20, yaw=-90)))
-
-        """
-                **********************************************************************************************************************
-                *********************************************** OBJ_info *******************************************************
-                **********************************************************************************************************************
-        """
-        """
-          Frenet:  [s,d,v_s, v_d, phi_Frenet]
-          """
-        others_s = np.zeros(self.N_SPAWN_CARS)
-        others_d = np.zeros(self.N_SPAWN_CARS)
-        others_v_S = np.zeros(self.N_SPAWN_CARS)
-        others_v_D = np.zeros(self.N_SPAWN_CARS)
-        others_phi_Frenet = np.zeros(self.N_SPAWN_CARS)
-
-        for i, actor in enumerate(self.traffic_module.actors_batch):
-            act_s, act_d, act_v_S, act_v_D, act_psi_Frenet = actor['Obj_Frenet_state']
-            others_s[i] = act_s
-            others_d[i] = act_d
-            others_v_S[i] = act_v_S
-            others_v_D[i] = act_v_D
-            others_phi_Frenet[i] = act_psi_Frenet
-
-        obj_info_Mux = np.vstack((others_s, others_d, others_v_S, others_v_D, others_phi_Frenet))
 
         """
                 **********************************************************************************************************************
@@ -322,7 +322,7 @@ class CarlagymEnv(gym.Env):
         collision = False
         vx_ego = self.ego.get_velocity().x
         vy_ego = self.ego.get_velocity().y
-        ego_s = self.motionPlanner.estimate_frenet_state(ego_state, self.f_idx)[0]  # estimated current ego_s
+        ego_s = self.motionPlanner.estimate_frenet_state(ego_state, self.f_idx)[0]
         ego_d = fpath.d[self.f_idx]
         v_S, v_D = velocity_inertial_to_frenet(ego_s, vx_ego, vy_ego, self.motionPlanner.csp)
         psi_Frenet = get_obj_S_yaw(psi, ego_s, self.motionPlanner.csp)
@@ -332,49 +332,31 @@ class CarlagymEnv(gym.Env):
         cmdWP = [fpath.x[self.f_idx], fpath.y[self.f_idx]]
         cmdWP2 = [fpath.x[self.f_idx + 1], fpath.y[self.f_idx + 1]]
 
-        # if action.ndim == 2:
-        #     q = action[0, 0]
-        #     ru = action[0, 1]
-        #     rdu = action[0, 2]
-        # else:
-        #     q = action[0]
-        #     ru = action[1]
-        #     rdu = action[2]
-        # for sb3 vec state
-        #
-        # self.lat_error = cal_lat_error(cmdWP, cmdWP2, transform)
-        # self.Input_lon = self.lon_controller.calc_input(S_obj=obj_info_Mux[0], v_obj=obj_info_Mux[2],
-        #                                                 x_current_lon=np.array([[ego_s], [v_S]]),
-        #                                                 u_lon_last=self.u_lon_last, q=q, ru=ru, rdu=rdu)
-        q = action[0] / 10
-        ru = 1
-        rdu = 1
-        self.lat_error = cal_lat_error(cmdWP, cmdWP2, transform)
-        self.Input_lon = self.lon_controller.calc_input(S_obj=obj_info_Mux[0], v_obj=obj_info_Mux[2],
-                                                        x_current_lon=np.array([[ego_s], [v_S]]),
-                                                        u_lon_last=self.u_lon_last, q=q, ru=ru, rdu=rdu)
+        self.Input_coupling = self.coupling_controller.calc_input(x=np.array([[ego_s], [ego_d], psi_Frenet]),
+                                                                  ref=np.array(
+                                                                      [[fpath.s[30]], [fpath.d[30]], [0.0], [0.0],
+                                                                       [0.0]]))
 
-        direct_x = self.ego.get_transform().get_forward_vector().x
-        direct_y = self.ego.get_transform().get_forward_vector().y
+        self.u_coupling_last = self.Input_coupling
 
-        normal_dir_x = direct_x / math.sqrt(direct_x ** 2 + direct_y ** 2)
-        normal_dir_y = direct_y / math.sqrt(direct_x ** 2 + direct_y ** 2)
+        cmdSpeed = 10.0
 
-        current_acc = acc_vec.x * normal_dir_x + acc_vec.y * normal_dir_y
+        control = self.vehicleController.run_step_2_wp(cmdSpeed, cmdWP, cmdWP2)  # calculate control
+        throttle = control.throttle
+        brake = control.brake
 
-        target_acc = self.Input_lon[0]
-        cmdSpeed = get_speed(self.ego) + float(target_acc) * self.dt
+        steer = self.Input_coupling[0] * np.pi / 35
 
-        self.u_lon_last = target_acc
+        vehicle_control = carla.VehicleControl(
+            throttle=float(throttle),
+            steer=float(steer),
+            brake=float(brake),
+            hand_brake=False,
+            reverse=False,
+            manual_gear_shift=False
+        )
 
-        self.du_lon_last = (self.u_lon_last - self.u_lon_llast) / self.dt
-        MPC_no_answer = self.Input_lon[1]
-
-        control = self.vehicleController.run_step_acc_2_wp(self.Input_lon[0], current_acc, cmdWP,
-                                                           cmdWP2)  # calculate control
-        # control = self.vehicleController.run_step_2_wp(cmdSpeed, cmdWP, cmdWP2)  # calculate control
-
-        self.ego.apply_control(control)  # apply control
+        self.ego.apply_control(vehicle_control)
 
         '''******   Update carla world    ******'''
         self.module_manager.tick()  # Update carla world
@@ -428,60 +410,17 @@ class CarlagymEnv(gym.Env):
         """
 
         '''******   State Design    ******'''
-        state_vector = self.state_input_vector(v_S, ego_s)
-        # state_vector[0] = obj_info_Mux[0] - ego_s
-        # state_vector[1] = obj_info_Mux[2] - v_S
-        # state_vector[2] = v_S
+
+        state_vector = np.zeros(3)
 
         '''******   Reward Design   ******'''
         # # 碰撞惩罚
         if collision:
-            # reward_cl = np.array([[-15.0]])
+
             reward_cl = self.collision_penalty  ## -10.0
         else:
-            # reward_cl = np.array([[0.0]])
+
             reward_cl = 0.0
-
-            # 速度优先在某范围
-        # scaled_speed_l = lamp(state_vector[2], [0, self.minSpeed], [0, 1])  # 0-13.5
-        # scaled_speed_m = lamp(state_vector[2], [self.minSpeed, 0.75 * self.maxSpeed], [0, 1])  # 13.5-14.5
-        # scaled_speed_h = lamp(state_vector[2], [0.75 * self.maxSpeed, self.maxSpeed], [0, 1])  # 14.5-19.5
-        # reward_hs_l = self.low_speed_reward  # 0.3
-        # reward_hs_m = self.middle_speed_reward  # 4
-        # reward_hs_h = self.high_speed_reward  # 0.3
-
-        # 加速度
-        # if state_vector[0] > 30 or state_vector[1] > 0:
-        #     reward_acc = 1 * 1 / (abs(self.u_lon_last) + 0.1)
-        # elif state_vector[0] <= 30 and state_vector[1] < 0:
-        #     reward_acc = 2 * 1 * (-self.u_lon_last + 0.1)
-        # else:
-        #     reward_acc = 0
-
-        # if state_vector[0] > 30
-        #     reward_acc = 1 * 1 / (abs(self.u_lon_last)*0.05 + 0.1)
-        # elif state_vector[0] <= 30 and state_vector[1] < 0:
-        #     reward_acc = 2 * 1 * (-self.u_lon_last + 0.1)
-        # else:
-        #     reward_acc = 0
-        # grid search
-
-        # if state_vector[0] > 20 + 5:
-        #     if abs(self.u_lon_last) <= 2:
-        #         reward_acc = 10 * 1 / (abs(self.u_lon_last) + 0.1)
-        #     elif abs(self.u_lon_last) <= 3:
-        #         reward_acc = 1
-        #     else:
-        #         reward_acc = -50
-        # elif state_vector[0] <= 20 + 5:
-        #     reward_acc = 30 * (-(self.u_lon_last))
-        # else:
-        #     reward_acc = 0
-
-        # if self.u_lon_last <= 0:
-        #     reward_acc = 5
-        # else:
-        #     reward_acc = -2.0
 
         if -4 <= self.u_lon_last <= 3:
             if state_vector[0] > 20 + 2 or state_vector[1] >= 0:
@@ -492,72 +431,15 @@ class CarlagymEnv(gym.Env):
                 reward_acc = 0
         else:
             reward_acc = -100
-
-        # # 加加速度
-        if abs(self.du_lon_last) <= 3:
-            reward_d_acc = 0
-        else:
-            reward_d_acc = -30.0
-
-        # # 加加速度
-        # if abs(self.du_lon_last) <= 1:
-        #     reward_d_acc = 10 - 10 * abs(self.du_lon_last)
-        # elif abs(self.du_lon_last) <= 3:
-        #     reward_d_acc = 0
-        # else:
-        #     reward_d_acc = -100.0
-
-        # if -3 <= self.du_lon_last <= 3:
-        #     if state_vector[0] > 20 + 2 or state_vector[1] >= 0:
-        #         reward_d_acc = 30 - 10 * abs(self.du_lon_last)
-        #     elif state_vector[0] < 20 - 2 and state_vector[1] <= -1:
-        #         reward_d_acc = -10 * self.du_lon_last
-        #     else:
-        #         reward_d_acc = 0
-        # else:
-        #     reward_d_acc = -100
-        # if -3 <= self.du_lon_last <= 3:
-        #     if state_vector[0] > 20 + 2:
-        #         reward_d_acc = 150 - 50 * abs(self.du_lon_last)
-        #     elif state_vector[0] < 20 - 2:
-        #         reward_d_acc = -10 * self.du_lon_last
-        #     else:
-        #         reward_d_acc = 0
-        # else:
-        #     reward_d_acc = -500
-
-        # if abs(self.du_lon_last) <= 1:
-        #     reward_d_acc = 1.6666
-        # elif abs(self.du_lon_last) <= 3:
-        #     reward_d_acc = 0
-        # else:
-        #     reward_d_acc = -20.0
-
-        # if abs(self.du_lon_last) <= 3:
-        #     reward_d_acc = 0
-        # else:
-        #     reward_d_acc = -20.0
-
-        # 跟车 ++++
         s_d = 60
         if abs(state_vector[0]) > s_d:
             reward_dis = -41.0
         else:
             reward_dis = 0.0
 
-        # s_d = 20
-        # if abs(state_vector[0]) < s_d:
-        #     reward_dis = 8.0 * (float((state_vector[0] - s_d) / s_d))
-        # elif abs(state_vector[0]) < (2 * s_d):
-        #     reward_dis = 3.0 / (float((state_vector[0] - s_d) / s_d) + 1)
-        # else:
-        #     reward_dis = 0.0
-
-        # reward = reward_cl + reward_hs_l * np.clip(scaled_speed_l, 0, 1) + reward_hs_h * np.clip(scaled_speed_h, 0, 1) \
-        #          + reward_hs_m * np.clip(scaled_speed_m, 0, 1) + reward_dis + reward_d_acc + reward_acc
-        reward = reward_cl + reward_acc + reward_dis + reward_d_acc
+        reward = reward_cl + reward_acc + reward_dis
         done = False
-        if collision or MPC_no_answer or self.n_step >= 750 or state_vector[0] < -0.1 or state_vector[0] >= 100:
+        if collision or self.n_step >= 6750 or state_vector[0] < -0.1 or state_vector[0] >= 100:
             done = True
 
         info = {'reserved': 0}
