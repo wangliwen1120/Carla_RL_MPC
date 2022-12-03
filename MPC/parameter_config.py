@@ -71,3 +71,20 @@ class MPC_lon_Config(Config):
         self.mpc_Nc = 10
         self.mpc_Row = 0.01
         self.mpc_Cy = [[1, 0], [0, 1]]
+
+class MPC_lon_lat_Config(Config):
+
+    def __init__(self):
+        super().__init__()
+
+        self.dstop = 20
+        self.K_ref = 0
+        self.omega_ref = 0
+        self.mpc_Nx = 3  # State Size
+        self.mpc_Nu = 2  # Input Size
+        self.mpc_Ny = 3
+        self.mpc_Np = 30
+        self.mpc_Nc = 10
+        self.mpc_Row = 0.01
+        self.mpc_Cy = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+
