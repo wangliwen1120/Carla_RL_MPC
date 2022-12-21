@@ -627,8 +627,8 @@ class CarlagymEnv(gym.Env):
         throttle_and_brake = throttle_and_brake[0]
         throttle = max(throttle_and_brake, 0)
         brake = min(throttle_and_brake, 0)
-        print(steer)
-        print(speed)
+        print('steer =', steer)
+        print('speed =', speed)
         vehicle_control = carla.VehicleControl(
             throttle=float(throttle),
             steer=float(steer),

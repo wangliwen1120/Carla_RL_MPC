@@ -266,49 +266,49 @@ class MPC_controller_lon_lat:
         ubA_du_eCons = np.vstack([np.hstack(Mat_size) for Mat_size in ubA_du_eCons])
 
         # # cvxopt求解过程
-        P = matrix(H_QP_du_e)
-        q0 = f_QP_du_e.astype(np.double)
-        q = matrix(q0)
-        G = matrix(np.vstack((A_du_eCons, np.eye(self.Nc * self.Nu + 1), -np.eye(self.Nc * self.Nu + 1))))
-        h = matrix(np.vstack((ubA_du_eCons, ub, -lb)))
-        result = solvers.qp(P, q, G, h)  # 1/2x'Px+q'x   Gx<=h  Ax=b 注意使用qp时，每个参数要换成matrix
-        # 重要：print可被关闭
-        X = result['x']
+        # P = matrix(H_QP_du_e)
+        # q0 = f_QP_du_e.astype(np.double)
+        # q = matrix(q0)
+        # G = matrix(np.vstack((A_du_eCons, np.eye(self.Nc * self.Nu + 1), -np.eye(self.Nc * self.Nu + 1))))
+        # h = matrix(np.vstack((ubA_du_eCons, ub, -lb)))
+        # result = solvers.qp(P, q, G, h)  # 1/2x'Px+q'x   Gx<=h  Ax=b 注意使用qp时，每个参数要换成matrix
+        # # 重要：print可被关闭
+        # X = result['x']
 
         # # # qpoases求解过程
         # # Setting up QProblem object.
-        # qp = QProblem(21, 400)
-        # options = Options()
-        # options.printLevel = PrintLevel.NONE
-        # qp.setOptions(options)
-        #
-        # H = H_QP_du_e
-        # g = f_QP_du_e.astype(np.double)[:, 0]
-        # A = A_du_eCons
-        # lb = lb[:, 0]
-        # ub = ub[:, 0]
-        # lbA = -1e8 * np.ones(400)
-        # ubA = ubA_du_eCons[:, 0]
-        #
-        # # Solve first QP.
-        # nWSR = np.array([200])
-        # qp.init(H, g, A, lb, ub, lbA,
-        #         ubA, nWSR)
-        #
-        # # X = qp.getObjval()
-        # # print(nWSR)
-        # result = np.zeros(21)
-        # qp.getPrimalSolution(result)
+        qp = QProblem(21, 400)
+        options = Options()
+        options.printLevel = PrintLevel.NONE
+        qp.setOptions(options)
+
+        H = H_QP_du_e
+        g = f_QP_du_e.astype(np.double)[:, 0]
+        A = A_du_eCons
+        lb = lb[:, 0]
+        ub = ub[:, 0]
+        lbA = -1e8 * np.ones(400)
+        ubA = ubA_du_eCons[:, 0]
+
+        # Solve first QP.
+        nWSR = np.array([200])
+        qp.init(H, g, A, lb, ub, lbA,
+                ubA, nWSR)
+
+        # X = qp.getObjval()
+        # print(nWSR)
+        result = np.zeros(21)
+        qp.getPrimalSolution(result)
         # print("\nxOpt = [ %e, %e ];  objVal = %e\n\n" % (result[0], result[1], qp.getObjVal()))
         # qp.printOptions()
-        # # SolutionAnalysis.getKktViolation(qp,np.ndarray[0], np.ndarray[0], np.ndarray[0],0,0 )
-        #
-        # X = result.reshape(21, 1)
+        # SolutionAnalysis.getKktViolation(qp,np.ndarray[0], np.ndarray[0], np.ndarray[0],0,0 )
+
+        X = result.reshape(21, 1)
 
         Input = np.hstack([np.linalg.inv(Cdu1), np.zeros([self.Nu * self.Nc, 1])]) @ np.array(X) + np.linalg.inv(
             Cdu1) @ (-Cdu2)
 
-        MPC_no_answer = result['status']
-        print(MPC_no_answer)
-
+        # MPC_no_answer = result['status']
+        # print(MPC_no_answer)
+        MPC_no_answer = None
         return Input, MPC_no_answer
