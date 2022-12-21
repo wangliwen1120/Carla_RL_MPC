@@ -64,7 +64,7 @@ from agents.low_level_controller.controller import VehiclePIDController
 from agents.low_level_controller.controller import IntelligentDriverModel
 
 from agents.local_planner.frenet_optimal_trajectory import frenet_to_inertial, velocity_inertial_to_frenet, \
-    get_obj_S_yaw, update_d, get_calc_curvature
+    get_obj_S_yaw, update_d,get_calc_curvature
 from agents.tools.misc import get_speed
 from config import cfg
 from queue import Queue
@@ -1166,7 +1166,10 @@ class ModuleWorld:
                                       rotation=carla.Rotation(pitch=0.0, yaw=math.degrees(yaw), roll=0.0))
         self.hero_actor = self.world.spawn_actor(blueprint, spawn_point)
         self.hero_actor.set_autopilot(False, self.tm_port)
+        self.hero_actor.set_target_velocity(carla.Vector3D(x=0, y=0, z=0))
+
         print('Spawned ego in: ', spawn_point)
+
 
         self.hero_transform = self.hero_actor.get_transform()
 
@@ -1187,7 +1190,7 @@ class ModuleWorld:
         self.los_sensor.reset()
 
         # Set ego transform
-        self.init_s = 2150
+        self.init_s = 2135
         # self.init_s = np.random.uniform(50, self.max_s - self.track_length - 50)  # ego initial s location
         #  should be larger than 50. bc other actors will be spawned in range: s = [init_s-50, init_s+150]
         #  should be smaller than max_s - track_length to have all tracks with the same length
@@ -1195,7 +1198,7 @@ class ModuleWorld:
         # self.init_d = np.random.randint(-1,
         #                                 3) * self.LANE_WIDTH  # -1 and 3 because global route is defined on the second lane from left
 
-        self.init_d = 0.1
+        self.init_d = 0.01
 
         # self.init_s = 0.1
         # self.init_d = 0.1
@@ -1208,6 +1211,7 @@ class ModuleWorld:
         transform = carla.Transform(location=carla.Location(x=x, y=y, z=z),
                                     rotation=carla.Rotation(pitch=0.0, yaw=math.degrees(yaw), roll=0.0))
         self.hero_actor.set_transform(transform)
+
 
     def tick(self):
         actors = self.world.get_actors()
@@ -1885,7 +1889,7 @@ class TrafficManager:
         ego_grid_n = ego_lane + 9  # in Grid world (see notes above), ego is in column 2 so its grid number will be based on its lane number
         # grid_choices = np.arange(16, 60)
         # grid_choices = np.arange(21, 38, 4)
-        grid_choices = [29]  ## 40:25  50:29  60:33
+        grid_choices = [33]  ## 40:25  50:29  60:33
         # 通过设置grid_choices可以设置其可能出现的初始位置，可以看上面的Grid world indices示意图。
         # 设置self.N_SPAWN_CARS为需要的障碍车个数
         rnd_indices = np.random.choice(grid_choices, self.N_SPAWN_CARS, replace=False)
@@ -1895,7 +1899,7 @@ class TrafficManager:
             lane = idx - col * 4 - 1  # lane number [-1, 2]
             s = ego_s + col * 10 - 20  # -20 bc ego is on second column
             targetSpeed = random.uniform(self.min_speed, self.max_speed)  # m/s
-            data = xlrd.open_workbook(os.path.abspath('.')+ '/tools/ob_v_data.xlsx')
+            data = xlrd.open_workbook(os.path.abspath('.')+ '/tools/ob_v_data_0.xlsx')
             table = data.sheets()[0]
             # velocity_curve = table.row_values(0)
             velocity_curve_0 = table.row_values(0)

@@ -17,7 +17,7 @@ POLICY:
 GYM_ENV:
   FIXED_REPRESENTATION: True                                    # actors's states have fixed positions in the observation tensor
   TRACK_LENGTH: 750                                             # [int] distance to travel on s axis before terminating the episode. Must be less than CARLA.MAX_S - 50
-  TARGET_SPEED: 13.89                                           # Ego's target speed
+  TARGET_SPEED: 15                                           # Ego's target speed
   MAX_SPEED: 19.5
   MIN_SPEED: 13.5
   R_MAX_SPEED: 5
@@ -48,11 +48,11 @@ RL:
   COLLISION: -10                                                # Collison penalty
 
 LOCAL_PLANNER:
-  MIN_SPEED: 13.89 # 5.56                                       # Allowed min speed for ego vehicle; RL's -1 action maps to this value
-  MAX_SPEED: 15.28                                              # Allowed max speed for ego vehicle; RL's 1 action maps to this value
+  MIN_SPEED: 13 # 5.56                                       # Allowed min speed for ego vehicle; RL's -1 action maps to this value
+  MAX_SPEED: 17                                              # Allowed max speed for ego vehicle; RL's 1 action maps to this value
 
 TRAFFIC_MANAGER:
-  N_SPAWN_CARS: 0                                           # number of cars spawned at each episode
+  N_SPAWN_CARS: 1                                             # number of cars spawned at each episode
   MIN_SPEED: 13.5                                               # Min speed for actors in random traffic
   MAX_SPEED: 14.5                                              # Max speed for actors in random traffic
   MAX_ACC: 2

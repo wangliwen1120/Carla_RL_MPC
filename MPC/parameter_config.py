@@ -86,5 +86,4 @@ class MPC_lon_lat_Config(Config):
         self.mpc_Np = 30
         self.mpc_Nc = 10
         self.mpc_Row = 0.01
-        self.mpc_Cy = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
-
+        self.mpc_Cy = [[1, 0, 0],[0, 1, 0], [0, 0, 1]]

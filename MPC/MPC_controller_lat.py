@@ -126,7 +126,7 @@ class MPC_controller_lat:
         delta_f = u_last
 
         #vS也是vx和vy和K的表达的，此处偏导是否存在问题？  代入换一下
-        Matrix = np.array([[cur*(vx * math.sin(K)+vy*math.cos(K)/(1-D*cur)),
+        Matrix = np.array([[cur*(vx * math.sin(K)+vy*math.cos(K)/(1-D*cur)), 
         -cur*cur*(vx * math.cos(K) - vy * math.sin(K))/(1-D*cur)**2],
                            [vx * math.cos(K) - vy * math.sin(K), 0]])
 
@@ -144,12 +144,11 @@ class MPC_controller_lat:
                            [0.]])
         return Matrix
 
-    def calc_input(self, D_ref, vx, vy,  x_current_lat, u_lat_last, cur, vS):
+    def calc_input(self, D_ref, vx, vy, x_current_lat, u_lat_last, cur):
         eps= 0.01
         K = x_current_lat[0, 0]
         D = x_current_lat[1, 0]
-        # vS = (vx * math.cos(K) - vy * math.sin(K)) / (1 - D * cur)
-        # vS = vx
+        vS = (vx * math.cos(K) - vy * math.sin(K)) / (1 - D * cur)
         # X_current_lat是列向量，其他的是标量，vx为车身坐标系下纵向车身速度(后轴速度)，vy为车身坐标系下横向速度，vS为frenet下纵向速度
 
 

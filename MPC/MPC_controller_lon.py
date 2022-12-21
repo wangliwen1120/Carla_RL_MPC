@@ -36,7 +36,7 @@ class MPC_controller_lon:
         # self.rdu_lon = 50 * np.diag([1 / self.delta_aS_max ** 2])
         # self.rou_lon = 0 * 0.005 * 1  # rho的值
 
-        # 纵向约束
+        # 约束
         self.vS_min = 0.0
         self.vS_max = 70 / 3.6
         self.aS_min = -4 / 1

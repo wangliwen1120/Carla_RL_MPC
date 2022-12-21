@@ -17,7 +17,7 @@ import copy
 import math
 from agents.local_planner import cubic_spline_planner
 from config import cfg
-
+import matplotlib.pyplot as plt
 
 def euclidean_distance(v1, v2):
     return math.sqrt(sum([(a - b) ** 2 for a, b in zip(v1, v2)]))
@@ -117,6 +117,7 @@ def update_frenet_coordinate(fpath, loc):
     d, d_d, d_dd = fpath.d[min_idx], fpath.d_d[min_idx], fpath.d_dd[min_idx]
 
     return s, s_d, s_dd, d, d_d, d_dd
+    # return [s, s_d, s_dd, d, d_d, d_dd]
 
 
 class quintic_polynomial:
@@ -145,6 +146,9 @@ class quintic_polynomial:
         self.a3 = x[0]
         self.a4 = x[1]
         self.a5 = x[2]
+        # self.a3 = 1.0/(2*(T**3))*(20*(xe-xs)-(8*vxe+12*vxs)*T+(axe-3*axs)*(T*T))
+        # self.a4 = 1.0/(2*(T**4))*((-30*(xe-xs)+(14*vxe+16*vxs)*T)+(3*axs-2*axe)*(T*T))
+        # self.a5 = 1.0/(2*(T**5))*(12*(xe-xs)-6*(vxe+vxs)*T+(axe-axs)*(T*T))
 
     def calc_point(self, t):
         xt = self.a0 + self.a1 * t + self.a2 * t ** 2 + \
@@ -304,15 +308,15 @@ class FrenetPlanner:
                    - if error larger than threshold, update the frenet state
 
         """
-        # Frenet state estimation [s, s_d, s_dd, d, d_d, d_dd]
+        # # Frenet state estimation [s, s_d, s_dd, d, d_d, d_dd]
         f_state = [self.path.s[idx], self.path.s_d[idx], self.path.s_dd[idx],
                    self.path.d[idx], self.path.d_d[idx], self.path.d_dd[idx]]
+        #
+        # if f_state[0] == 0:
+        #     return f_state
 
-        if f_state[0] == 0:
-            return f_state
-
-        # nnot be zero
-        # update_frenet_coordinate(self.path, ego_state[:2])
+        # # nnot be zero
+        # f_state = update_frenet_coordinate(self.path, ego_state[:2])
 
         # ------------------------ UPDATE S VALUE ------------------------------------ #
         # We calculate normal vector of s line and find error_s based on ego location. Note: This assumes error is small angle
@@ -324,8 +328,9 @@ class FrenetPlanner:
             v1 = [ego_state[0] - s_x, ego_state[1] - s_y]
             v1_norm = normalize(v1)
             angle = np.arccos(np.clip(np.dot(s_norm, v1_norm), -1.0, 1.0))
-            delta_s = np.sin(angle) * magnitude(
-                v1)  # Since we use last coordinate of trajectory as possible ego location we know actual location is behind most of the time
+            delta_s = np.sin(angle) * magnitude(v1)
+            # Since we use last coordinate of trajectory as possible ego location we know actual location is behind
+            # most of the time
             # print("delta_s:{}".format(delta_s))
             return delta_s
 
@@ -345,6 +350,7 @@ class FrenetPlanner:
         v1_norm = normalize(v1)
         angle = np.arccos(np.clip(np.dot(s_norm, v1_norm), -1.0, 1.0))
         d = np.cos(angle) * magnitude(v1)
+
 
         # print("S_ego:{},S:{},angle:{}".format(f_state[0], f_state[0] + delta_s, angle))
         # print("d_ego:{}, d:{}".format(f_state[3], d))
@@ -369,9 +375,10 @@ class FrenetPlanner:
         # f_state[2] = s_dd
         # f_state[5] = d_dd
 
+        # f_state = update_frenet_coordinate(self.path, ego_state[:2])
         return f_state
 
-    def generate_single_frenet_path(self, f_state, df=0, Tf=4, Vf=30 / 3.6):
+    def generate_single_frenet_path(self, f_state, df=0, Tf=3, Vf=15):
         """
         generate a single frenet path based on the current and terminal frenet state values
         input: ego's current frenet state and terminal frenet values (lateral displacement, time of arrival, and speed)
@@ -381,7 +388,9 @@ class FrenetPlanner:
 
         fp = Frenet_path()
         lat_qp = quintic_polynomial(d, d_d, d_dd, df, 0.0, 0.0, Tf)
-        lon_qp = quartic_polynomial(s, s_d, s_dd, Vf, 0.0, Tf)
+        # lon_qp = quartic_polynomial(s, Vf, s_dd, Vf, 0.0, Tf)
+        # lon_qp = quartic_polynomial(s, s_d, s_dd, Vf, 0.0, Tf)
+        lon_qp = quintic_polynomial(s, s_d, s_dd, s + Tf * Vf, Vf, 0, Tf)
 
         for t in np.arange(0.0, Tf, self.dt):
             fp.t.append(t)
@@ -396,10 +405,11 @@ class FrenetPlanner:
             fp.s_ddd.append(lon_qp.calc_third_derivative(t))
 
         fp = self.calc_global_paths([fp])[0]
-
+        # plt.plot(fp.s_d)
+        # plt.pause(0.001)
         return fp
 
-    def calc_frenet_paths(self, f_state, change_lane=0, target_speed=30 / 3.6):
+    def calc_frenet_paths(self, f_state, change_lane=0, target_speed=15):
         """
         generate lattices - discretized candidate frenet paths
         input: ego's current frenet state and actions
@@ -551,7 +561,7 @@ class FrenetPlanner:
 
         return [fplist[i] for i in okind]
 
-    def frenet_optimal_planning(self, f_state, change_lane=0, target_speed=30 / 3.6):
+    def frenet_optimal_planning(self, f_state, change_lane=0, target_speed=15):
         """
         input: current frenet state and actions
         output: candidate frenet paths and index of the optimal path
@@ -581,7 +591,7 @@ class FrenetPlanner:
         self.steps = 0
         self.update_global_route(route)
 
-    def reset(self, s, d, df_n=0, Tf=4, Vf_n=0, optimal_path=True):
+    def reset(self, s, d, df_n=0, Tf=3, Vf_n=0, optimal_path=True):
         # module_world reset should be executed beforehand to update the initial s and d values
         f_state = [s, 0, 0, d, 0, 0]
 
@@ -597,7 +607,7 @@ class FrenetPlanner:
 
             self.path = self.generate_single_frenet_path(f_state, df=df, Tf=Tf, Vf=Vf)
 
-    def run_step(self, ego_state, idx, change_lane=0, target_speed=30 / 3.6):
+    def run_step(self, ego_state, idx, change_lane=0, target_speed=15):
         """
         change lane: -1: go to left lane; 0: stay in current lane; 1: go to right lane;
         """
@@ -613,7 +623,7 @@ class FrenetPlanner:
         # print('trajectory planning time: {} s'.format(time.time() - t0))
         return self.path, fplist
 
-    def run_step_single_path(self, ego_state, idx, df_n=0, Tf=4, Vf_n=0):
+    def run_step_single_path(self, ego_state, idx, df_n=0, Tf=3, Vf_n=0):
         """
         input: ego states, current frenet path's waypoint index, actions
         output: frenet path
@@ -624,19 +634,19 @@ class FrenetPlanner:
         # estimate frenet state
         f_state = self.estimate_frenet_state(ego_state, idx)
         # convert lateral action value from range (-1, 1) to the desired value in [-3.5, 0.0, 3.0, 7.0]
-        # if df_n < -0.33:
-        #     df = -1
-        # elif df_n > 0.33:
-        #     df = 1
-        # else:
-        #     df = 0
-        df = 0
-        _df = df
+        if df_n < -0.33:
+            df = -1
+        elif df_n > 0.33:
+            df = 1
+        else:
+            df = 0
+        # df = 0
+        # _df = df
 
         d = self.path.d[idx]  # CHANGE THIS! when f_state estimation works fine. (self.path.d[idx])(d = f_state[3])
 
         _df = np.clip(df * self.LANE_WIDTH + d, -2 * self.LANE_WIDTH, 3 * self.LANE_WIDTH).item()
-        # df = closest([self.LANE_WIDTH * lane_n for lane_n in range(-1, 3)], _df)
+        df = closest([self.LANE_WIDTH * lane_n for lane_n in range(-1, 3)], _df)
 
         # df = np.round(df_n[0]) * self.LANE_WIDTH + d  # allows agent to drive off the road
 

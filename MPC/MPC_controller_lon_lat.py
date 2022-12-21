@@ -76,8 +76,8 @@ class MPC_controller_lon_lat:
         self.delta_d_delta_f_min = -0.0082
         self.delta_d_delta_f_max = 0.0082
         self.e_min = 0  # 松弛因子的约束
-        self.e_max = 0.02
-
+        # self.e_max = 0.02
+        self.e_max = 2
         # 约束矩阵
         self.u = np.zeros((self.Nu, 1))
         self.x_max_ext = np.zeros([self.Np * self.Nx, 1])
@@ -111,7 +111,7 @@ class MPC_controller_lon_lat:
             self.du_max_ext[i * self.Nu:(i + 1) * self.Nu] = np.array([[self.d_v_max], [self.d_delta_f_max]])
             self.du_min_ext[i * self.Nu:(i + 1) * self.Nu] = np.array([[self.d_v_min], [self.d_delta_f_min]])
 
-    def calc_input(self, x_current, ref, u_last, q, ru, rdu):
+    def calc_input(self, x_current, ref,fpath, u_last, q, ru, rdu):
 
         for i in range(self.Np):
             # self.x_ref[i] = x_current[0] + (i + 1) * (((ref[0] - self.dstop) - x_current[0]) / self.Np)
@@ -120,18 +120,18 @@ class MPC_controller_lon_lat:
             # self.x_ref[i] =x_current[0] + u_last[0] * np.cos(x_current[2]) * self.T * i
             # self.y_ref[i] = x_current[1] + u_last[0] * np.sin(x_current[2]) * self.T * i
             # self.phi_ref[i] = x_current[2] + u_last[1]* self.T * i
-            self.x_ref[i] = ref[0][i]
-            self.y_ref[i] = ref[1][i]
-            self.phi_ref[i] = ref[2][i]
+            self.x_ref[i] = fpath[0][i]
+            self.y_ref[i] = fpath[1][i]
+            self.phi_ref[i] = fpath[2][i]
         for i in range(self.Np):
             self.y_ref_ext[i * self.Ny: (i + 1) * self.Ny, 0] = [self.x_ref[i], self.y_ref[i], self.phi_ref[i]]
         for i in range(self.Np):
-            # self.ref_x_ref[i] = ref[0] + ref[3] * np.cos(ref[2]) * self.T * i
-            # self.ref_y_ref[i] = ref[1] + ref[3] * np.sin(ref[2]) * self.T * i
-            # self.ref_phi_ref[i] = ref[2] + ref[4] * self.T * i
-            self.ref_x_ref[i] = self.x_ref[i]
-            self.ref_y_ref[i] = self.y_ref[i]
-            self.ref_phi_ref[i] = self.phi_ref[i]
+            self.ref_x_ref[i] = ref[0] + ref[3] * np.cos(ref[2]) * self.T * i
+            self.ref_y_ref[i] = ref[1] + ref[3] * np.sin(ref[2]) * self.T * i
+            self.ref_phi_ref[i] = ref[2] + ref[4] * self.T * i
+            # self.ref_x_ref[i] = self.x_ref[i]
+            # self.ref_y_ref[i] = self.y_ref[i]
+            # self.ref_phi_ref[i] = self.phi_ref[i]
 
         for i in range(self.Np):
             # self.x_min[i] = x_current[0]
@@ -140,10 +140,11 @@ class MPC_controller_lon_lat:
             self.x_min[i] = -1000
             self.y_min[i] = -1000
             self.phi_min[i] = -1000
-
-        self.x_max =-self.x_min
-        self.y_max =-self.y_min
-        self.phi_max =-self.phi_min
+            self.x_max[i] =1000
+            # self.x_max[i] =self.ref_x_ref[i]-self.dstop
+            # self.y_max[i] =self.ref_y_ref[i] + self.lanewidth
+            self.y_max[i] = 1000
+            self.phi_max[i] = self.ref_phi_ref[i] +0.5
 
         for i in range(self.Np):
             self.x_max_ext[i * self.Nx: (i + 1) * self.Nx, :] = [[self.x_max[i]], [self.y_max[i]], [self.phi_max[i]]]
@@ -264,49 +265,50 @@ class MPC_controller_lon_lat:
                     A_ext @ x_current + C_ext - B_ext @ np.linalg.inv(Cdu1) @ Cdu2)
         ubA_du_eCons = np.vstack([np.hstack(Mat_size) for Mat_size in ubA_du_eCons])
 
-        # # # cvxopt求解过程
-        # P = matrix(H_QP_du_e)
-        # q0 = f_QP_du_e.astype(np.double)
-        # q = matrix(q0)
-        # G = matrix(np.vstack((A_du_eCons, np.eye(self.Nc * self.Nu + 1), -np.eye(self.Nc * self.Nu + 1))))
-        # h = matrix(np.vstack((ubA_du_eCons, ub, -lb)))
-        # result = solvers.qp(P, q, G, h)  # 1/2x'Px+q'x   Gx<=h  Ax=b 注意使用qp时，每个参数要换成matrix
-        # # 重要：print可被关闭
-        # X = result['x']
+        # # cvxopt求解过程
+        P = matrix(H_QP_du_e)
+        q0 = f_QP_du_e.astype(np.double)
+        q = matrix(q0)
+        G = matrix(np.vstack((A_du_eCons, np.eye(self.Nc * self.Nu + 1), -np.eye(self.Nc * self.Nu + 1))))
+        h = matrix(np.vstack((ubA_du_eCons, ub, -lb)))
+        result = solvers.qp(P, q, G, h)  # 1/2x'Px+q'x   Gx<=h  Ax=b 注意使用qp时，每个参数要换成matrix
+        # 重要：print可被关闭
+        X = result['x']
 
-        # # qpoases求解过程
-        # Setting up QProblem object.
-        qp = QProblem(21, 400)
-        options = Options()
-        options.printLevel = PrintLevel.NONE
-        qp.setOptions(options)
-
-        H = H_QP_du_e
-        g = f_QP_du_e.astype(np.double)[:, 0]
-        A = A_du_eCons
-        lb = lb[:, 0]
-        ub = ub[:, 0]
-        lbA = -1e8 * np.ones(400)
-        ubA = ubA_du_eCons[:, 0]
-
-        # Solve first QP.
-        nWSR = np.array([200])
-        qp.init(H, g, A, lb, ub, lbA,
-                ubA, nWSR)
-
-        # X = qp.getObjval()
-        # print(nWSR)
-        result = np.zeros(21)
-        qp.getPrimalSolution(result)
+        # # # qpoases求解过程
+        # # Setting up QProblem object.
+        # qp = QProblem(21, 400)
+        # options = Options()
+        # options.printLevel = PrintLevel.NONE
+        # qp.setOptions(options)
+        #
+        # H = H_QP_du_e
+        # g = f_QP_du_e.astype(np.double)[:, 0]
+        # A = A_du_eCons
+        # lb = lb[:, 0]
+        # ub = ub[:, 0]
+        # lbA = -1e8 * np.ones(400)
+        # ubA = ubA_du_eCons[:, 0]
+        #
+        # # Solve first QP.
+        # nWSR = np.array([200])
+        # qp.init(H, g, A, lb, ub, lbA,
+        #         ubA, nWSR)
+        #
+        # # X = qp.getObjval()
+        # # print(nWSR)
+        # result = np.zeros(21)
+        # qp.getPrimalSolution(result)
         # print("\nxOpt = [ %e, %e ];  objVal = %e\n\n" % (result[0], result[1], qp.getObjVal()))
         # qp.printOptions()
-        # SolutionAnalysis.getKktViolation(qp,np.ndarray[0], np.ndarray[0], np.ndarray[0],0,0 )
-
-        X = result.reshape(21, 1)
+        # # SolutionAnalysis.getKktViolation(qp,np.ndarray[0], np.ndarray[0], np.ndarray[0],0,0 )
+        #
+        # X = result.reshape(21, 1)
 
         Input = np.hstack([np.linalg.inv(Cdu1), np.zeros([self.Nu * self.Nc, 1])]) @ np.array(X) + np.linalg.inv(
             Cdu1) @ (-Cdu2)
 
-        MPC_no_answer = False
+        MPC_no_answer = result['status']
+        print(MPC_no_answer)
 
         return Input, MPC_no_answer
