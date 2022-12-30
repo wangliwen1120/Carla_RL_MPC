@@ -120,6 +120,7 @@ class CarlagymEnv(gym.Env):
     # metadata = {'render.modes': ['human']}
     def __init__(self):
 
+        self.Input = None
         self.du_lon_last = None
         self.Input_lon = None
         self.Input_lt = None
@@ -595,10 +596,6 @@ class CarlagymEnv(gym.Env):
         obj_phi = obj_info['Obj_cartesian'][0][4]
         obj_speed = obj_info['Obj_cartesian'][0][5]
         obj_delta_f = obj_info['Obj_cartesian'][0][6]
-        # self.Input = self.lon_lat_controller.calc_input(x_current=np.array([[ego_state[0]], [ego_state[1]], [ego_state[2]]]),
-        #                                                 ref=np.array([ref_path_x, ref_path_y,ref_path_phi]),
-        #                                                 u_last=self.u_last,
-        #                                                 q=100, ru=1, rdu=1)
 
         self.Input = self.lon_lat_controller.calc_input(
             x_current=np.array([[ego_state[0]], [ego_state[1]], [ego_state[2]]]),
@@ -607,20 +604,7 @@ class CarlagymEnv(gym.Env):
             fpath=np.array([ref_path_x, ref_path_y, ref_path_phi]),
             u_last=self.u_last,
             q=100, ru=1, rdu=1)
-        # self.Input = self.lon_lat_controller.calc_input(
-        #     x_current=np.array([[ego_s], [ego_d], [psi_Frenet]]),
-        #     ref=np.array([fpath.s, fpath.d, fpath.yaw]),
-        #     u_last=self.u_last,
-        #     q=1, ru=1, rdu=1)
-        # self.Input = self.lon_lat_controller.calc_input(x_current=np.array([[ego_s], [ego_d], [psi_Frenet]]),
-        #                                                 ref=np.array([fpath.s[0]],
-        #                                                              [fpath.d[0]],
-        #                                                              [get_obj_S_yaw(fpath.yaw[0], fpath.s[0],
-        #                                                                             self.motionPlanner.csp)],
-        #                                                              [self.u_last[0][0]],
-        #                                                              [self.u_last[1][0]]),
-        #                                                 u_last=self.u_last,
-        #                                                 q=1, ru=1, rdu=1)
+
         self.u_last = self.Input[0]
         target_speed = self.Input[0][0]
         cmdSpeed = target_speed * np.cos(psi_Frenet)
@@ -644,81 +628,6 @@ class CarlagymEnv(gym.Env):
 
         self.ego.apply_control(vehicle_control)
 
-        # if self.n_step <= 30:
-        #     self.obj_frenet_history=np.row_stack((self.obj_frenet_history,obj_frenet))
-        #     self.obj_cartesian_history=np.row_stack((self.obj_cartesian_history,obj_cartesian))
-        # else:
-        #     j = self.n_step % 30 - 1
-        #
-        #     self.obj_frenet_history[j,:] = np.array(obj_frenet)
-        #     self.obj_cartesian_history[j,:] = np.array(obj_cartesian)
-        #
-        # vehicle_ahead_id = vehicle_ahead['Actor'].id
-        # for i in range(self.N_SPAWN_CARS):
-        #     id = obj_info['Obj_actor'][i].id
-        #     if id == vehicle_ahead_id:
-        #         vehicle_id = i
-
-        # obj_s = self.obj_frenet_history[vehicle_id][0]
-        # obj_d = self.obj_frenet_history[vehicle_id][1]
-        # obj_phi_Frenet = self.obj_frenet_history[vehicle_id][4]
-        # obj_x = self.obj_cartesian_history[vehicle_id][0]
-        # obj_y = self.obj_cartesian_history[vehicle_id][1]
-        # obj_phi = self.obj_cartesian_history[vehicle_id][4]
-        # obj_speed = self.obj_cartesian_history[vehicle_id][5]
-        # obj_delta_f = self.obj_cartesian_history[vehicle_id][6]
-        # else:
-        #     obj_s = self.obj_frenet_history[vehicle_id][0][0]
-        #     obj_d = self.obj_frenet_history[vehicle_id][0][1]
-        #     obj_phi_Frenet =self.obj_frenet_history[vehicle_id][0][4]
-        #     obj_x = self.obj_cartesian_history[vehicle_id][0][0]
-        #     obj_y = self.obj_cartesian_history[vehicle_id][0][1]
-        #     obj_phi = self.obj_cartesian_history[vehicle_id][0][4]
-        #     obj_speed = self.obj_cartesian_history[vehicle_id][0][5]
-        #     obj_delta_f = self.obj_cartesian_history[vehicle_id][0][6]
-
-        # obj_s = obj_info['Obj_frenet_hist'][vehicle_id][0][0]
-        # obj_d = obj_info['Obj_frenet_hist'][vehicle_id][0][1]
-        # obj_phi_Frenet = obj_info['Obj_frenet_hist'][vehicle_id][0][4]
-        # obj_x = obj_info['Obj_cartesian_hist'][vehicle_id][0][0]
-        # obj_y = obj_info['Obj_cartesian_hist'][vehicle_id][0][1]
-        # obj_phi = obj_info['Obj_cartesian_hist'][vehicle_id][0][4]
-        # obj_speed = obj_info['Obj_cartesian_hist'][vehicle_id][0][5]
-        # obj_delta_f = obj_info['Obj_cartesian_hist'][vehicle_id][0][6]
-
-        # self.Input = self.mpc_controller.calc_input(x=np.array([[ego_state[0]], [ego_state[1]], [ego_state[2]]]),
-        #                                             ref=np.array(
-        #                                                 [[obj_x], [obj_y], [obj_phi],
-        #                                                  [obj_speed], [obj_delta_f]]))
-        # self.Input = self.mpc_controller.calc_input(x=np.array([[ego_s], [ego_d], [psi_Frenet]]),
-        #                                             ref=np.array(
-        #                                                 [[obj_s], [obj_d], [obj_phi_Frenet],
-        #                                                  [obj_speed], [obj_delta_f]]))
-        #
-        # target_speed = self.Input[0, 0]
-        # cmdSpeed = target_speed * np.cos(psi_Frenet)
-        #
-        # self.u_lon_last = cmdSpeed
-        # self.du_lon_last = (self.u_lon_last - self.u_lon_llast) / self.dt
-        #
-        # throttle_and_brake = self.PIDLongitudinalController.run_step(cmdSpeed)  # calculate control
-        # throttle_and_brake = throttle_and_brake[0]
-        # print(self.n_step)
-        # steer = self.Input[1] * np.pi / 35
-        # throttle = max(throttle_and_brake, 0)
-        # brake = min(throttle_and_brake, 0)
-        #
-        # vehicle_control = carla.VehicleControl(
-        #     throttle=float(throttle),
-        #     steer=float(steer),
-        #     brake=float(brake),
-        #     hand_brake=False,
-        #     reverse=False,
-        #     manual_gear_shift=False
-        # )
-        #
-        # self.ego.apply_control(vehicle_control)
-
         '''******   Update carla world    ******'''
         self.module_manager.tick()  # Update carla world
 
@@ -735,12 +644,17 @@ class CarlagymEnv(gym.Env):
                 **********************************************************************************************************************
         """
 
-        if self.world_module.args.play_mode != 0:
-            for i in range(len(fpath.x)):
-                self.world_module.points_to_draw['path wp {}'.format(i)] = [
-                    carla.Location(x=fpath.x[i], y=fpath.y[i]),
-                    'COLOR_ALUMINIUM_0']
+        # if self.world_module.args.play_mode != 0:
+        #     for i in range(len(fpath.x)):
+        #         self.world_module.points_to_draw['path wp {}'.format(i)] = [
+        #             carla.Location(x=fpath.x[i], y=fpath.y[i]),
+        #             'COLOR_ALUMINIUM_0']
 
+        if self.world_module.args.play_mode != 0:
+            for i in range(len(self.ref_path_x)):
+                self.world_module.points_to_draw['path wp {}'.format(i)] = [
+                    carla.Location(x=self.ref_path_x[i], y=self.ref_path_y[i]),
+                    'COLOR_ALUMINIUM_0']
             self.world_module.points_to_draw['ego'] = [self.ego.get_location(), 'COLOR_SCARLET_RED_0']
         #     self.world_module.points_to_draw['waypoint ahead'] = carla.Location(x=cmdWP[0], y=cmdWP[1])
         #     self.world_module.points_to_draw['waypoint ahead 2'] = carla.Location(x=cmdWP2[0], y=cmdWP2[1])
