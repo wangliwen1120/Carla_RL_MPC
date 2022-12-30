@@ -66,6 +66,7 @@ def closest_wp_idx(ego_state, fpath, f_idx, w_size=10):
 
     return f_idx + closest_wp_index
 
+
 def closest_wp_idx_ref(ego_state, fpath, f_idx, w_size=10):
     """
     given the ego_state and frenet_path this function returns the closest WP in front of the vehicle that is within the w_size
@@ -86,8 +87,6 @@ def closest_wp_idx_ref(ego_state, fpath, f_idx, w_size=10):
     return f_idx + closest_wp_index
 
 
-
-
 def lamp(v, x, y):
     return y[0] + (v - x[0]) * (y[1] - y[0]) / (x[1] - x[0] + 1e-10)
 
@@ -103,7 +102,9 @@ def cal_lat_error(waypoint1, waypoint2, vehicle_transform):
     v_begin = vehicle_transform.location
     v_end = v_begin + carla.Location(x=math.cos(math.radians(vehicle_transform.rotation.yaw)),
                                      y=math.sin(math.radians(vehicle_transform.rotation.yaw)))
-    v_vec_0 = np.array([math.cos(math.radians(vehicle_transform.rotation.yaw)), math.sin(math.radians(vehicle_transform.rotation.yaw)), 0.0])
+    v_vec_0 = np.array(
+        [math.cos(math.radians(vehicle_transform.rotation.yaw)), math.sin(math.radians(vehicle_transform.rotation.yaw)),
+         0.0])
     v_vec = np.array([v_end.x - v_begin.x, v_end.y - v_begin.y, 0.0])
     w_vec = np.array([waypoint2[0] -
                       waypoint1[0], waypoint2[1] -
@@ -150,7 +151,7 @@ class CarlagymEnv(gym.Env):
         self.ref_path_x = self.ref_path.col_values(0)
         self.ref_path_y = self.ref_path.col_values(1)
         self.ref_path_phi = self.ref_path.col_values(2)
-        self.ref_path_x = self.ref_path_x[1430:2028]  #700-451    1800-1200   2135-1434
+        self.ref_path_x = self.ref_path_x[1430:2028]  # 700-451    1800-1200   2135-1434
         self.ref_path_y = self.ref_path_y[1430:2028]
         self.ref_path_phi = self.ref_path_phi[1430:2028]
 
@@ -196,7 +197,7 @@ class CarlagymEnv(gym.Env):
         self.init_transform = None  # ego initial transform to recover at each episode
         self.acceleration_ = 0
         self.eps_rew = 0
-        self.u_last = np.array([[0.0],[0.0]])
+        self.u_last = np.array([[0.0], [0.0]])
         self.u_lon_last = 0.0
         self.u_lon_llast = 0.0
         self.u_lat_last = 0.0
@@ -204,8 +205,8 @@ class CarlagymEnv(gym.Env):
         self.fig, self.ax = plt.subplots()
         self.x = []
         self.y = []
-        self.obj_frenet_history = np.zeros([1,6])
-        self.obj_cartesian_history =np.zeros([1,8])
+        self.obj_frenet_history = np.zeros([1, 6])
+        self.obj_cartesian_history = np.zeros([1, 8])
 
         self.motionPlanner = None
         self.vehicleController = None
@@ -326,7 +327,7 @@ class CarlagymEnv(gym.Env):
     #     obj_info_Mux = np.vstack((others_s, others_d, others_v_S, others_v_D, others_phi_Frenet, others_x, others_y,
     #                               others_z, others_psi, others_delta_f, others_speed))
 
-        # return obj_info_Mux
+    # return obj_info_Mux
 
     def state_input_vector(self, v_S, ego_s):
         # Paper: Automated Speed and Lane Change Decision Making using Deep Reinforcement Learning
@@ -369,9 +370,9 @@ class CarlagymEnv(gym.Env):
         #     self.obj_frenet_history[j] = obj_frenet
         #     self.obj_cartesian_history[j] = obj_cartesian
 
-        obj_dict=({'Obj_actor': obj_actor, 'Obj_frenet': obj_frenet, 'Obj_cartesian': obj_cartesian,
-                   # 'Obj_frenet_hist': self.obj_frenet_history, 'Obj_cartesian_hist': self.obj_cartesian_history
-                   })
+        obj_dict = ({'Obj_actor': obj_actor, 'Obj_frenet': obj_frenet, 'Obj_cartesian': obj_cartesian,
+                     # 'Obj_frenet_hist': self.obj_frenet_history, 'Obj_cartesian_hist': self.obj_cartesian_history
+                     })
 
         return obj_dict
 
@@ -409,21 +410,25 @@ class CarlagymEnv(gym.Env):
         angular_velocity = self.ego.get_angular_velocity()
         acc_angular = math.sqrt(angular_velocity.x ** 2 + angular_velocity.y ** 2 + angular_velocity.z ** 2)
         ego_state = [self.ego.get_location().x, self.ego.get_location().y, speed, acc, psi, temp, self.max_s]
-        if self.n_step>=150 and self.n_step<=173:
+
+        if 150 <= self.n_step <= 173:
             df_n = 1
-        elif self.n_step >= 250 and self.n_step <= 273:
+        elif 250 <= self.n_step <= 273:
             df_n = -1
         else:
             df_n = 0
-        if self.n_step ==1:
+
+        df_n = 0
+        if self.n_step == 1:
             fpath, self.lanechange, off_the_road = self.motionPlanner.run_step_single_path(ego_state, self.f_idx,
-                                                                                       # df_n=0,
-                                                                                       df_n=df_n,
-                                                                                       Tf=3,
-                                                                                       Vf_n=0)
+                                                                                           # df_n=0,
+                                                                                           df_n=df_n,
+                                                                                           Tf=3,
+                                                                                           Vf_n=0)
         else:
             self.ref_idx = closest_wp_idx_ref(ego_state, self.fpath, self.f_idx)
-            ego_state_ref = [self.fpath.x[self.ref_idx], self.fpath.y[self.ref_idx], speed, acc,  self.fpath.yaw[self.ref_idx], temp, self.max_s]
+            ego_state_ref = [self.fpath.x[self.ref_idx], self.fpath.y[self.ref_idx], speed, acc,
+                             self.fpath.yaw[self.ref_idx], temp, self.max_s]
             fpath, self.lanechange, off_the_road = self.motionPlanner.run_step_single_path(ego_state_ref, self.f_idx,
                                                                                            # df_n=0,
                                                                                            df_n=df_n,
@@ -454,6 +459,7 @@ class CarlagymEnv(gym.Env):
         vehicle_ahead = self.get_vehicle_ahead(ego_s, ego_d, ego_init_d, ego_target_d)
 
         print(self.n_step)
+
         ##MPC_LAT+PID
         # q = action[0] / 10
         # ru = 1
@@ -513,7 +519,6 @@ class CarlagymEnv(gym.Env):
         #
         # self.ego.apply_control(control)  # apply control
 
-
         # ##MPC_LON+PID
         # q = action[0] / 10
         # ru = 1
@@ -545,9 +550,6 @@ class CarlagymEnv(gym.Env):
         #
         # self.ego.apply_control(control)  # apply control
 
-
-
-
         ##MPCALL
 
         # obj_x = obj_info_Mux['Obj_cartesian'][0][0]
@@ -561,16 +563,16 @@ class CarlagymEnv(gym.Env):
         obj_info = self.obj_info()
         obj_frenet = obj_info['Obj_frenet']
         obj_cartesian = obj_info['Obj_cartesian']
-        if self.n_step ==204:
+        if self.n_step == 204:
             print("180")
 
         # self.f_ref_idx = closest_wp_idx_ref(ego_state, self.ref_path_x,self.ref_path_y, self.f_idx)
         # ref_path_x = self.ref_path_x[self.n_step:self.n_step + 30]
         # ref_path_y = self.ref_path_y[self.n_step:self.n_step + 30]
         # ref_path_phi = self.ref_path_phi[self.n_step:self.n_step + 30]
-        ref_path_x = self.ref_path_x[self.n_step:self.n_step+30]
-        ref_path_y = self.ref_path_y[self.n_step:self.n_step+30]
-        ref_path_phi = self.ref_path_phi[self.n_step:self.n_step+30]
+        ref_path_x = self.ref_path_x[self.n_step:self.n_step + 30]
+        ref_path_y = self.ref_path_y[self.n_step:self.n_step + 30]
+        ref_path_phi = self.ref_path_phi[self.n_step:self.n_step + 30]
         # if self.n_step%30 == 1:
         #     self.fpath = fpath
         # ref_path_x = self.fpath.x
@@ -583,8 +585,8 @@ class CarlagymEnv(gym.Env):
         ####MPC_lon_lat
         # plt.plot(self.n_step*0.1, speed,'o')
         # plt.plot(fpath.t,fpath.s_d)
-        plt.plot(fpath.x,fpath.y,'o')
-        plt.plot(ego_state[0],ego_state[1],'*')
+        plt.plot(fpath.x, fpath.y, 'o')
+        plt.plot(ego_state[0], ego_state[1], '*')
         plt.pause(0.001)
         plt.cla()
 
@@ -597,11 +599,12 @@ class CarlagymEnv(gym.Env):
         #                                                 ref=np.array([ref_path_x, ref_path_y,ref_path_phi]),
         #                                                 u_last=self.u_last,
         #                                                 q=100, ru=1, rdu=1)
+
         self.Input = self.lon_lat_controller.calc_input(
             x_current=np.array([[ego_state[0]], [ego_state[1]], [ego_state[2]]]),
-            ref=np.array([obj_x,obj_y,obj_phi,obj_speed,obj_delta_f]),
-            fpath=np.array([fpath.x[0:40], fpath.y[0:40], fpath.yaw[0:40]]),
-            # ref=np.array([fpath.x[self.f_idx:40], fpath.y[self.f_idx:40], fpath.yaw[self.f_idx:40]]),
+            ref=np.array([obj_x, obj_y, obj_phi, obj_speed, obj_delta_f]),
+            # fpath=np.array([fpath.x[0:40], fpath.y[0:40], fpath.yaw[0:40]]),
+            fpath=np.array([ref_path_x, ref_path_y, ref_path_phi]),
             u_last=self.u_last,
             q=100, ru=1, rdu=1)
         # self.Input = self.lon_lat_controller.calc_input(
@@ -619,10 +622,11 @@ class CarlagymEnv(gym.Env):
         #                                                 u_last=self.u_last,
         #                                                 q=1, ru=1, rdu=1)
         self.u_last = self.Input[0]
-        target_speed =self.Input[0][0]
+        target_speed = self.Input[0][0]
         cmdSpeed = target_speed * np.cos(psi_Frenet)
         # steer = self.Input[0][1] * np.pi / 35
         steer = self.Input[0][1] * 180.0 / 70.0 / np.pi
+        # steer = self.Input[0][1] * 180.0 / 500.0 / np.pi
         throttle_and_brake = self.PIDLongitudinalController.run_step(cmdSpeed)  # calculate control
         throttle_and_brake = throttle_and_brake[0]
         throttle = max(throttle_and_brake, 0)
@@ -639,7 +643,6 @@ class CarlagymEnv(gym.Env):
         )
 
         self.ego.apply_control(vehicle_control)
-
 
         # if self.n_step <= 30:
         #     self.obj_frenet_history=np.row_stack((self.obj_frenet_history,obj_frenet))
@@ -748,9 +751,9 @@ class CarlagymEnv(gym.Env):
         #             carla.Location(x=self.ref_path_x[i], y=self.ref_path_y[i]),
         #             'COLOR_ALUMINIUM_0']
 
-            # self.world_module.points_to_draw['ego'] = [self.ego.get_location(), 'COLOR_SCARLET_RED_0']
-            # self.world_module.points_to_draw['waypoint ahead'] = carla.Location(x=cmdWP[0], y=cmdWP[1])
-            # self.world_module.points_to_draw['waypoint ahead 2'] = carla.Location(x=cmdWP2[0], y=cmdWP2[1])
+        # self.world_module.points_to_draw['ego'] = [self.ego.get_location(), 'COLOR_SCARLET_RED_0']
+        # self.world_module.points_to_draw['waypoint ahead'] = carla.Location(x=cmdWP[0], y=cmdWP[1])
+        # self.world_module.points_to_draw['waypoint ahead 2'] = carla.Location(x=cmdWP2[0], y=cmdWP2[1])
 
         """
                 **********************************************************************************************************************
@@ -908,7 +911,7 @@ class CarlagymEnv(gym.Env):
         #          + reward_hs_m * np.clip(scaled_speed_m, 0, 1) + reward_dis + reward_d_acc + reward_acc
         reward = reward_cl + reward_acc + reward_dis
         done = False
-        if collision  or self.n_step >= 2000 or state_vector[0] < -0.1 or state_vector[0] >= 100:
+        if collision or self.n_step >= 2000 or state_vector[0] < -0.1 or state_vector[0] >= 100:
             done = True
 
         info = {'reserved': 0}

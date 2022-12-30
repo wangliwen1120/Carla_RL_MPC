@@ -40,7 +40,7 @@ class MPC_controller_lon_lat:
         self.q = 100
         self.ru = 30
         self.rdu = 30
-        self.rou = 1  # rho的值
+        self.rou = 0.5  # rho的值
         self.Q = self.q * np.eye(self.Nx)
         self.Ru = self.ru * np.eye(self.Nu)
         self.Rdu = self.rdu * np.eye(self.Nu)
@@ -77,7 +77,7 @@ class MPC_controller_lon_lat:
         self.delta_d_delta_f_max = 0.0082
         self.e_min = 0  # 松弛因子的约束
         # self.e_max = 0.02
-        self.e_max = 2
+        self.e_max = 0.02
         # 约束矩阵
         self.u = np.zeros((self.Nu, 1))
         self.x_max_ext = np.zeros([self.Np * self.Nx, 1])
@@ -111,7 +111,7 @@ class MPC_controller_lon_lat:
             self.du_max_ext[i * self.Nu:(i + 1) * self.Nu] = np.array([[self.d_v_max], [self.d_delta_f_max]])
             self.du_min_ext[i * self.Nu:(i + 1) * self.Nu] = np.array([[self.d_v_min], [self.d_delta_f_min]])
 
-    def calc_input(self, x_current, ref,fpath, u_last, q, ru, rdu):
+    def calc_input(self, x_current, ref, fpath, u_last, q, ru, rdu):
 
         for i in range(self.Np):
             # self.x_ref[i] = x_current[0] + (i + 1) * (((ref[0] - self.dstop) - x_current[0]) / self.Np)
@@ -140,11 +140,11 @@ class MPC_controller_lon_lat:
             self.x_min[i] = -1000
             self.y_min[i] = -1000
             self.phi_min[i] = -1000
-            self.x_max[i] =1000
-            # self.x_max[i] =self.ref_x_ref[i]-self.dstop
-            # self.y_max[i] =self.ref_y_ref[i] + self.lanewidth
-            self.y_max[i] = 1000
-            self.phi_max[i] = self.ref_phi_ref[i] +0.5
+            # self.x_max[i] = 1000
+            self.x_max[i] = self.ref_x_ref[i] - self.dstop
+            self.y_max[i] = self.ref_y_ref[i] + self.lanewidth
+            # self.y_max[i] = 1000
+            self.phi_max[i] = self.ref_phi_ref[i] + 0.5
 
         for i in range(self.Np):
             self.x_max_ext[i * self.Nx: (i + 1) * self.Nx, :] = [[self.x_max[i]], [self.y_max[i]], [self.phi_max[i]]]
@@ -164,14 +164,14 @@ class MPC_controller_lon_lat:
                                                   [np.tan(u_last[1]) / self.L,
                                                    u_last[0] / (self.L * (np.cos(u_last[1]) ** 2))]]))
             C_cell[:, :, i] = self.T * (
-                        np.array([u_last[0] * np.cos(self.phi_ref[i]), u_last[0] * np.sin(self.phi_ref[i]),
-                                  u_last[0] * np.tan(u_last[1]) / self.L]) - np.array(
-                    [[0, 0, -u_last[0] * np.sin(self.phi_ref[i])],
-                     [0, 0, u_last[0] * np.cos(self.phi_ref[i])], [0, 0, 0]]) @ np.array([self.x_ref[i], self.y_ref[i],
-                                                                                          self.phi_ref[i]]) - np.array(
-                    [[np.cos(self.phi_ref[i]), 0], [np.sin(self.phi_ref[i]), 0],
-                     [np.tan(u_last[1]) / self.L, u_last[0] / (self.L * (np.cos(u_last[1]) ** 2))]]) @ np.array(
-                    [u_last[0], u_last[1]]))
+                    np.array([u_last[0] * np.cos(self.phi_ref[i]), u_last[0] * np.sin(self.phi_ref[i]),
+                              u_last[0] * np.tan(u_last[1]) / self.L]) - np.array(
+                [[0, 0, -u_last[0] * np.sin(self.phi_ref[i])],
+                 [0, 0, u_last[0] * np.cos(self.phi_ref[i])], [0, 0, 0]]) @ np.array([self.x_ref[i], self.y_ref[i],
+                                                                                      self.phi_ref[i]]) - np.array(
+                [[np.cos(self.phi_ref[i]), 0], [np.sin(self.phi_ref[i]), 0],
+                 [np.tan(u_last[1]) / self.L, u_last[0] / (self.L * (np.cos(u_last[1]) ** 2))]]) @ np.array(
+                [u_last[0], u_last[1]]))
 
         # dynamicmatrix:
         A_ext = np.zeros([self.Nx * self.Np, self.Nx])  # 3Np * 3的分块列矩阵
@@ -218,9 +218,14 @@ class MPC_controller_lon_lat:
 
         # 标准形式min (1/2x'Px+q'x)   s.t. Gx<=h
         H_QP_du_e = np.empty((2, 2), dtype=object)
-        H_QP_du_e[0, 0] = np.transpose(self.Cy_ext @ B_ext @ np.linalg.inv(Cdu1)) @ self.Q_cell @ (
-                self.Cy_ext @ B_ext @ np.linalg.inv(Cdu1)) + np.transpose(
-            np.linalg.inv(Cdu1)) @ self.Ru_cell @ np.linalg.inv(Cdu1) + self.Rdu_cell
+        # H_QP_du_e[0, 0] = np.transpose(self.Cy_ext @ B_ext @ np.linalg.inv(Cdu1)) @ self.Q_cell @ (
+        #         self.Cy_ext @ B_ext @ np.linalg.inv(Cdu1)) + np.transpose(
+        #     np.linalg.inv(Cdu1)) @ self.Rdu_cell @ np.linalg.inv(Cdu1) + self.Ru_cell
+
+        H_QP_du_e[0, 0] = np.transpose(self.Cy_ext @ B_ext) @ self.Q_cell @ (
+                self.Cy_ext @ B_ext) + np.transpose(
+            Cdu1) @ self.Rdu_cell @ Cdu1 + self.Ru_cell
+
         H_QP_du_e[0, 1] = np.zeros([self.Nc * self.Nu, 1])
         H_QP_du_e[1, 0] = np.zeros([1, self.Nc * self.Nu])
         H_QP_du_e[1, 1] = self.rou * np.eye(1)
@@ -229,40 +234,42 @@ class MPC_controller_lon_lat:
 
         # q为列向量
         f_QP_du_e = np.empty((1, 2), dtype=object)
-        f_QP_du_e[0, 0] = 2 * np.transpose(self.Cy_ext @ (A_ext @ x_current - B_ext @ np.linalg.inv(
-            Cdu1) @ Cdu2 + C_ext) - self.y_ref_ext) @ self.Q_cell @ self.Cy_ext @ B_ext @ np.linalg.inv(
-            Cdu1) + 2 * np.transpose(np.linalg.inv(Cdu1) @ (-Cdu2)) @ self.Ru_cell @ np.linalg.inv(Cdu1)
+        # f_QP_du_e[0, 0] = 2 * np.transpose(self.Cy_ext @ (A_ext @ x_current - B_ext @ np.linalg.inv(
+        #     Cdu1) @ Cdu2 + C_ext) - self.y_ref_ext) @ self.Q_cell @ self.Cy_ext @ B_ext @ np.linalg.inv(
+        #     Cdu1) + 2 * np.transpose(np.linalg.inv(Cdu1) @ (-Cdu2)) @ self.Ru_cell @ np.linalg.inv(Cdu1)
+        f_QP_du_e[0, 0] = 2 * np.transpose(self.Cy_ext @ (
+                A_ext @ x_current + C_ext) - self.y_ref_ext) @ self.Q_cell @ self.Cy_ext @ B_ext + 2 * np.transpose(
+            Cdu2) @ self.Rdu_cell @ Cdu1
+
         f_QP_du_e[0, 1] = np.zeros([1, 1])
         f_QP_du_e = np.vstack([np.hstack(Mat_size) for Mat_size in f_QP_du_e])
         f_QP_du_e = np.transpose(f_QP_du_e)
 
-        lb = np.vstack((self.du_min_ext, self.e_min))
-        ub = np.vstack((self.du_max_ext, self.e_max))
+        lb = np.vstack((self.u_min_ext, self.e_min))
+        ub = np.vstack((self.u_max_ext, self.e_max))
 
         A_du_eCons = np.empty([6, 2], dtype=object)
         ubA_du_eCons = np.empty([6, 1], dtype=object)
-        A_du_eCons[0, 0] = np.linalg.inv(Cdu1)
+        A_du_eCons[0, 0] = Cdu1
         A_du_eCons[0, 1] = np.zeros([self.Nc * self.Nu, 1])
-        A_du_eCons[1, 0] = B_ext @ np.linalg.inv(Cdu1)
-        A_du_eCons[1, 1] = np.zeros([self.Nx * self.Np, 1])
-        A_du_eCons[2, 0] = self.Cy_ext @ B_ext @ np.linalg.inv(Cdu1)
-        A_du_eCons[2, 1] = np.zeros([self.Np * self.Ny, 1])
-        A_du_eCons[3, 0] = -np.linalg.inv(Cdu1)
-        A_du_eCons[3, 1] = np.zeros([self.Nc * self.Nu, 1])
-        A_du_eCons[4, 0] = -B_ext @ np.linalg.inv(Cdu1)
-        A_du_eCons[4, 1] = np.zeros([self.Nx * self.Np, 1])
-        A_du_eCons[5, 0] = -self.Cy_ext @ B_ext @ np.linalg.inv(Cdu1)
-        A_du_eCons[5, 1] = np.zeros([self.Np * self.Ny, 1])
+        A_du_eCons[1, 0] = - Cdu1
+        A_du_eCons[1, 1] = np.zeros([self.Nc * self.Nu, 1])
+        A_du_eCons[2, 0] = B_ext
+        A_du_eCons[2, 1] = -np.ones([self.Np * self.Ny, 1])
+        A_du_eCons[3, 0] = -B_ext
+        A_du_eCons[3, 1] = -np.ones([self.Np * self.Ny, 1])
+        A_du_eCons[4, 0] = self.Cy_ext @ B_ext
+        A_du_eCons[4, 1] = -np.ones([self.Np * self.Ny, 1])
+        A_du_eCons[5, 0] = -self.Cy_ext @ B_ext
+        A_du_eCons[5, 1] = -np.ones([self.Np * self.Ny, 1])
         A_du_eCons = np.vstack([np.hstack(Mat_size) for Mat_size in A_du_eCons])
 
-        ubA_du_eCons[0, 0] = self.u_max_ext + Cdu1 @ Cdu2
-        ubA_du_eCons[1, 0] = self.x_max_ext - A_ext @ x_current - C_ext - B_ext @ np.linalg.inv(Cdu1) @ (-Cdu2)
-        ubA_du_eCons[2, 0] = self.y_max_ext - self.Cy_ext @ (
-                A_ext @ x_current + C_ext + B_ext @ np.linalg.inv(Cdu1) @ (-Cdu2))
-        ubA_du_eCons[3, 0] = -self.u_min_ext - np.linalg.inv(Cdu1) @ Cdu2
-        ubA_du_eCons[4, 0] = -self.x_min_ext + A_ext @ x_current + C_ext - B_ext @ np.linalg.inv(Cdu1) @ Cdu2
-        ubA_du_eCons[5, 0] = -self.y_min_ext + self.Cy_ext @ (
-                    A_ext @ x_current + C_ext - B_ext @ np.linalg.inv(Cdu1) @ Cdu2)
+        ubA_du_eCons[0, 0] = self.du_max_ext - Cdu2
+        ubA_du_eCons[1, 0] = -self.du_min_ext + Cdu2
+        ubA_du_eCons[2, 0] = self.x_max_ext - (A_ext @ x_current + C_ext)
+        ubA_du_eCons[3, 0] = -self.x_min_ext + (A_ext @ x_current + C_ext)
+        ubA_du_eCons[4, 0] = self.y_max_ext - self.Cy_ext @ (A_ext @ x_current + C_ext)
+        ubA_du_eCons[5, 0] = -self.y_min_ext + self.Cy_ext @ (A_ext @ x_current + C_ext)
         ubA_du_eCons = np.vstack([np.hstack(Mat_size) for Mat_size in ubA_du_eCons])
 
         # # cvxopt求解过程
@@ -277,7 +284,8 @@ class MPC_controller_lon_lat:
 
         # # # qpoases求解过程
         # # Setting up QProblem object.
-        qp = QProblem(21, 400)
+
+        qp = QProblem(self.Nc * self.Nu + 1, self.Nc * self.Nu * self.Nc * self.Nu)
         options = Options()
         options.printLevel = PrintLevel.NONE
         qp.setOptions(options)
@@ -289,7 +297,7 @@ class MPC_controller_lon_lat:
         ub = ub[:, 0]
         lbA = -1e8 * np.ones(400)
         ubA = ubA_du_eCons[:, 0]
-
+        # ubA = 1e8 * np.ones(400)
         # Solve first QP.
         nWSR = np.array([200])
         qp.init(H, g, A, lb, ub, lbA,
@@ -297,17 +305,17 @@ class MPC_controller_lon_lat:
 
         # X = qp.getObjval()
         # print(nWSR)
-        result = np.zeros(21)
+        result = np.zeros(self.Nc * self.Nu + 1)
         qp.getPrimalSolution(result)
-        # print("\nxOpt = [ %e, %e ];  objVal = %e\n\n" % (result[0], result[1], qp.getObjVal()))
+        print("\nxOpt = [ %e, %e ];  objVal = %e\n\n" % (result[0], result[1], qp.getObjVal()))
         # qp.printOptions()
         # SolutionAnalysis.getKktViolation(qp,np.ndarray[0], np.ndarray[0], np.ndarray[0],0,0 )
 
-        X = result.reshape(21, 1)
+        X = result.reshape(self.Nc * self.Nu + 1, 1)
 
-        Input = np.hstack([np.linalg.inv(Cdu1), np.zeros([self.Nu * self.Nc, 1])]) @ np.array(X) + np.linalg.inv(
-            Cdu1) @ (-Cdu2)
-
+        # Input = np.hstack([np.linalg.inv(Cdu1), np.zeros([self.Nu * self.Nc, 1])]) @ np.array(X) + np.linalg.inv(
+        #     Cdu1) @ (-Cdu2)
+        Input = X
         # MPC_no_answer = result['status']
         # print(MPC_no_answer)
         MPC_no_answer = None
