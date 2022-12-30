@@ -419,7 +419,7 @@ class CarlagymEnv(gym.Env):
         else:
             df_n = 0
 
-        df_n = 0
+        # df_n = 0
         if self.n_step == 1:
             fpath, self.lanechange, off_the_road = self.motionPlanner.run_step_single_path(ego_state, self.f_idx,
                                                                                            # df_n=0,
@@ -597,7 +597,7 @@ class CarlagymEnv(gym.Env):
         obj_speed = obj_info['Obj_cartesian'][0][5]
         obj_delta_f = obj_info['Obj_cartesian'][0][6]
 
-        self.Input = self.lon_lat_controller.calc_input(
+        self.Input, MPC_unsolved = self.lon_lat_controller.calc_input(
             x_current=np.array([[ego_state[0]], [ego_state[1]], [ego_state[2]]]),
             ref=np.array([obj_x, obj_y, obj_phi, obj_speed, obj_delta_f]),
             # fpath=np.array([fpath.x[0:40], fpath.y[0:40], fpath.yaw[0:40]]),
@@ -605,11 +605,11 @@ class CarlagymEnv(gym.Env):
             u_last=self.u_last,
             q=100, ru=1, rdu=1)
 
-        self.u_last = self.Input[0]
-        target_speed = self.Input[0][0]
+        self.u_last = self.Input
+        target_speed = self.Input[0]
         cmdSpeed = target_speed * np.cos(psi_Frenet)
         # steer = self.Input[0][1] * np.pi / 35
-        steer = self.Input[0][1] * 180.0 / 70.0 / np.pi
+        steer = self.Input[1] * 180.0 / 70.0 / np.pi
         # steer = self.Input[0][1] * 180.0 / 500.0 / np.pi
         throttle_and_brake = self.PIDLongitudinalController.run_step(cmdSpeed)  # calculate control
         throttle_and_brake = throttle_and_brake[0]
@@ -703,7 +703,7 @@ class CarlagymEnv(gym.Env):
 
         '''******   Reward Design   ******'''
         # # 碰撞惩罚
-        if collision:
+        if collision :
             # reward_cl = np.array([[-15.0]])
             reward_cl = self.collision_penalty  ## -10.0
         else:
@@ -825,7 +825,7 @@ class CarlagymEnv(gym.Env):
         #          + reward_hs_m * np.clip(scaled_speed_m, 0, 1) + reward_dis + reward_d_acc + reward_acc
         reward = reward_cl + reward_acc + reward_dis
         done = False
-        if collision or self.n_step >= 2000 or state_vector[0] < -0.1 or state_vector[0] >= 100:
+        if collision or MPC_unsolved or self.n_step >= 2000 or state_vector[0] < -0.1 or state_vector[0] >= 100:
             done = True
 
         info = {'reserved': 0}

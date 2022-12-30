@@ -317,9 +317,9 @@ class MPC_controller_lon_lat:
         # Input = np.hstack([np.linalg.inv(Cdu1), np.zeros([self.Nu * self.Nc, 1])]) @ np.array(X) + np.linalg.inv(
         #     Cdu1) @ (-Cdu2)
         Input = X
-        MPC_no_answer = False
+        MPC_unsolved = False
         if return_flag == 37:
-            MPC_no_answer = True
+            MPC_unsolved = True
 
         # print(MPC_no_answer)
-        return Input, MPC_no_answer
+        return Input, MPC_unsolved
