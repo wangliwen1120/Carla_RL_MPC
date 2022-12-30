@@ -287,7 +287,8 @@ class MPC_controller_lon_lat:
 
         qp = QProblem(self.Nc * self.Nu + 1, self.Nc * self.Nu * self.Nc * self.Nu)
         options = Options()
-        options.printLevel = PrintLevel.NONE
+
+        # options.printLevel = PrintLevel.NONE
         qp.setOptions(options)
 
         H = H_QP_du_e
@@ -300,14 +301,14 @@ class MPC_controller_lon_lat:
         # ubA = 1e8 * np.ones(400)
         # Solve first QP.
         nWSR = np.array([200])
-        qp.init(H, g, A, lb, ub, lbA,
-                ubA, nWSR)
+        return_flag = qp.init(H, g, A, lb, ub, lbA,
+                              ubA, nWSR)
 
         # X = qp.getObjval()
         # print(nWSR)
         result = np.zeros(self.Nc * self.Nu + 1)
         qp.getPrimalSolution(result)
-        print("\nxOpt = [ %e, %e ];  objVal = %e\n\n" % (result[0], result[1], qp.getObjVal()))
+
         # qp.printOptions()
         # SolutionAnalysis.getKktViolation(qp,np.ndarray[0], np.ndarray[0], np.ndarray[0],0,0 )
 
@@ -316,7 +317,9 @@ class MPC_controller_lon_lat:
         # Input = np.hstack([np.linalg.inv(Cdu1), np.zeros([self.Nu * self.Nc, 1])]) @ np.array(X) + np.linalg.inv(
         #     Cdu1) @ (-Cdu2)
         Input = X
-        # MPC_no_answer = result['status']
+        MPC_no_answer = False
+        if return_flag == 37:
+            MPC_no_answer = True
+
         # print(MPC_no_answer)
-        MPC_no_answer = None
         return Input, MPC_no_answer

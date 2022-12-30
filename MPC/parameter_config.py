@@ -68,7 +68,7 @@ class MPC_lon_Config(Config):
         self.mpc_Nu = 1  # Input Size
         self.mpc_Ny = 2
         self.mpc_Np = 5
-        self.mpc_Nc = 10
+        self.mpc_Nc = 3
         self.mpc_Row = 0.01
         self.mpc_Cy = [[1, 0], [0, 1]]
 
