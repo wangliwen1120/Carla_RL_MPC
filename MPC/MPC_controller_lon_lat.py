@@ -38,8 +38,8 @@ class MPC_controller_lon_lat:
         # 预测时域和控制时域内的分块权重矩阵
         # 权重矩阵
         self.q = 100
-        self.ru = 30
-        self.rdu = 30
+        self.ru = 10
+        self.rdu = 10
         self.rou = 0.5  # rho的值
         self.Q = self.q * np.eye(self.Nx)
         self.Ru = self.ru * np.eye(self.Nu)
@@ -140,10 +140,11 @@ class MPC_controller_lon_lat:
             self.x_min[i] = -1000
             self.y_min[i] = -1000
             self.phi_min[i] = -1000
-            # self.x_max[i] = 1000
-            self.x_max[i] = self.ref_x_ref[i] - self.dstop
-            self.y_max[i] = self.ref_y_ref[i] + self.lanewidth
-            # self.y_max[i] = 1000
+
+            # self.x_max[i] = self.ref_x_ref[i] - self.dstop
+            # self.y_max[i] = self.ref_y_ref[i] + self.lanewidth
+            self.x_max[i] = 1000
+            self.y_max[i] = 1000
             self.phi_max[i] = self.ref_phi_ref[i] + 0.5
 
         for i in range(self.Np):

@@ -412,10 +412,10 @@ class CarlagymEnv(gym.Env):
         acc_angular = math.sqrt(angular_velocity.x ** 2 + angular_velocity.y ** 2 + angular_velocity.z ** 2)
         ego_state = [self.ego.get_location().x, self.ego.get_location().y, speed, acc, psi, temp, self.max_s]
 
-        if 80 <= self.n_step <= 150:
-            df_n = 1
-        elif 200 <= self.n_step <= 273:
-            df_n = -1
+        if 100 <= self.n_step <= 173:
+            df_n = 3.5
+        elif 250 <= self.n_step <= 273:
+            df_n = 0
         else:
             df_n = 0
 
@@ -650,11 +650,11 @@ class CarlagymEnv(gym.Env):
                     carla.Location(x=fpath.x[i], y=fpath.y[i]),
                     'COLOR_ALUMINIUM_0']
 
-        # if self.world_module.args.play_mode != 0:
-        #     for i in range(len(self.ref_path_x)):
-        #         self.world_module.points_to_draw['path wp {}'.format(i)] = [
-        #             carla.Location(x=self.ref_path_x[i], y=self.ref_path_y[i]),
-        #             'COLOR_ALUMINIUM_0']
+            # if self.world_module.args.play_mode != 0:
+            #     for i in range(len(self.ref_path_x)):
+            #         self.world_module.points_to_draw['path wp {}'.format(i)] = [
+            #             carla.Location(x=self.ref_path_x[i], y=self.ref_path_y[i]),
+            #             'COLOR_ALUMINIUM_0']
             self.world_module.points_to_draw['ego'] = [self.ego.get_location(), 'COLOR_SCARLET_RED_0']
         #     self.world_module.points_to_draw['waypoint ahead'] = carla.Location(x=cmdWP[0], y=cmdWP[1])
         #     self.world_module.points_to_draw['waypoint ahead 2'] = carla.Location(x=cmdWP2[0], y=cmdWP2[1])
@@ -703,7 +703,7 @@ class CarlagymEnv(gym.Env):
 
         '''******   Reward Design   ******'''
         # # 碰撞惩罚
-        if collision :
+        if collision:
             # reward_cl = np.array([[-15.0]])
             reward_cl = self.collision_penalty  ## -10.0
         else:

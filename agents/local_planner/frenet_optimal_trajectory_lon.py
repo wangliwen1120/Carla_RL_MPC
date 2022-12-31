@@ -634,19 +634,20 @@ class FrenetPlanner:
         # estimate frenet state
         f_state = self.estimate_frenet_state(ego_state, idx)
         # convert lateral action value from range (-1, 1) to the desired value in [-3.5, 0.0, 3.0, 7.0]
-        if df_n < -0.33:
-            df = -1
-        elif df_n > 0.33:
-            df = 1
-        else:
-            df = 0
-        # df = 0
-        # _df = df
-
+        # if df_n < -0.33:
+        #     df = -1
+        # elif df_n > 0.33:
+        #     df = 1
+        # else:
+        #     df = 0
+        # # df = 0
+        # # _df = df
+        #
         d = self.path.d[idx]  # CHANGE THIS! when f_state estimation works fine. (self.path.d[idx])(d = f_state[3])
-
+        #
+        df = df_n
         _df = np.clip(df * self.LANE_WIDTH + d, -2 * self.LANE_WIDTH, 3 * self.LANE_WIDTH).item()
-        df = closest([self.LANE_WIDTH * lane_n for lane_n in range(-1, 3)], _df)
+        # df = closest([self.LANE_WIDTH * lane_n for lane_n in range(-1, 3)], _df)
 
         # df = np.round(df_n[0]) * self.LANE_WIDTH + d  # allows agent to drive off the road
 
