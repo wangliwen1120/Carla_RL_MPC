@@ -83,7 +83,7 @@ class MPC_lon_lat_Config(Config):
         self.mpc_Nx = 3  # State Size
         self.mpc_Nu = 2  # Input Size
         self.mpc_Ny = 3
-        self.mpc_Np = 2
+        self.mpc_Np = 5
         self.mpc_Nc = 1
         self.mpc_Row = 0.01
         self.mpc_Cy = [[1, 0, 0],[0, 1, 0], [0, 0, 1]]

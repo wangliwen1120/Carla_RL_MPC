@@ -250,6 +250,10 @@ class MPC_controller_lon_lat:
         f_QP_du_e[0, 0] = 2 * np.transpose(self.Cy_ext @ (
                 A_ext @ x_current + C_ext) - self.y_ref_ext) @ self.Q_cell @ self.Cy_ext @ B_ext + 2 * np.transpose(
             Cdu2) @ self.Rdu_cell @ Cdu1
+        b11 = 2 * np.transpose(self.Cy_ext @ (
+                A_ext @ x_current + C_ext) - self.y_ref_ext) @ self.Q_cell @ self.Cy_ext @ B_ext
+        b12 = 2 * np.transpose(
+            Cdu2) @ self.Rdu_cell @ Cdu1
 
         f_QP_du_e[0, 1] = np.zeros([1, 1])
         f_QP_du_e = np.vstack([np.hstack(Mat_size) for Mat_size in f_QP_du_e])
