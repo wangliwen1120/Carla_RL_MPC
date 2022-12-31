@@ -226,6 +226,15 @@ class MPC_controller_lon_lat:
                 self.Cy_ext @ B_ext) + np.transpose(
             Cdu1) @ self.Rdu_cell @ Cdu1 + self.Ru_cell
 
+        a11 = np.transpose(self.Cy_ext @ B_ext) @ self.Q_cell @ (
+                self.Cy_ext @ B_ext)
+        a12 = np.transpose(
+            Cdu1) @ self.Rdu_cell @ Cdu1
+        a13 = self.Ru_cell
+
+        a14 = np.transpose(self.Cy_ext @ B_ext) @ self.Q_cell @ (
+                self.Cy_ext @ B_ext) + np.transpose(
+            Cdu1) @ self.Rdu_cell @ Cdu1 + self.Ru_cell
         H_QP_du_e[0, 1] = np.zeros([self.Nc * self.Nu, 1])
         H_QP_du_e[1, 0] = np.zeros([1, self.Nc * self.Nu])
         H_QP_du_e[1, 1] = self.rou * np.eye(1)
@@ -316,9 +325,10 @@ class MPC_controller_lon_lat:
 
         # Input = np.hstack([np.linalg.inv(Cdu1), np.zeros([self.Nu * self.Nc, 1])]) @ np.array(X) + np.linalg.inv(
         #     Cdu1) @ (-Cdu2)
+
         Input = X
         MPC_unsolved = False
-        if return_flag == 37:
+        if return_flag == 37:  # qp.init返回37说明无解，返回0说明有解
             MPC_unsolved = True
 
         # print(MPC_no_answer)
