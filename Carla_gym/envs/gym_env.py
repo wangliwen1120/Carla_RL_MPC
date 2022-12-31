@@ -597,11 +597,20 @@ class CarlagymEnv(gym.Env):
         obj_speed = obj_info['Obj_cartesian'][0][5]
         obj_delta_f = obj_info['Obj_cartesian'][0][6]
 
+        if self.n_step == 100:
+            ref_path_y = list(map(lambda x: x+3.5, ref_path_y))
+
+        elif self.n_step == 200:
+            ref_path_y = list(map(lambda x: x-3.5, ref_path_y))
+        else:
+            df_n = 0
+
+
         self.Input, MPC_unsolved = self.lon_lat_controller.calc_input(
             x_current=np.array([[ego_state[0]], [ego_state[1]], [ego_state[2]]]),
             ref=np.array([obj_x, obj_y, obj_phi, obj_speed, obj_delta_f]),
-            fpath=np.array([fpath.x[0:40], fpath.y[0:40], fpath.yaw[0:40]]),
-            # fpath=np.array([ref_path_x, ref_path_y, ref_path_phi]),
+            # fpath=np.array([fpath.x[0:40], fpath.y[0:40], fpath.yaw[0:40]]),
+            fpath=np.array([ref_path_x, ref_path_y, ref_path_phi]),
             u_last=self.u_last,
             q=100, ru=1, rdu=1)
 
@@ -644,17 +653,17 @@ class CarlagymEnv(gym.Env):
                 **********************************************************************************************************************
         """
 
-        if self.world_module.args.play_mode != 0:
-            for i in range(len(fpath.x)):
-                self.world_module.points_to_draw['path wp {}'.format(i)] = [
-                    carla.Location(x=fpath.x[i], y=fpath.y[i]),
-                    'COLOR_ALUMINIUM_0']
+        # if self.world_module.args.play_mode != 0:
+        #     for i in range(len(fpath.x)):
+        #         self.world_module.points_to_draw['path wp {}'.format(i)] = [
+        #             carla.Location(x=fpath.x[i], y=fpath.y[i]),
+        #             'COLOR_ALUMINIUM_0']
 
-            # if self.world_module.args.play_mode != 0:
-            #     for i in range(len(self.ref_path_x)):
-            #         self.world_module.points_to_draw['path wp {}'.format(i)] = [
-            #             carla.Location(x=self.ref_path_x[i], y=self.ref_path_y[i]),
-            #             'COLOR_ALUMINIUM_0']
+        if self.world_module.args.play_mode != 0:
+            for i in range(len(self.ref_path_x)):
+                self.world_module.points_to_draw['path wp {}'.format(i)] = [
+                    carla.Location(x=self.ref_path_x[i], y=self.ref_path_y[i]),
+                    'COLOR_ALUMINIUM_0']
             self.world_module.points_to_draw['ego'] = [self.ego.get_location(), 'COLOR_SCARLET_RED_0']
         #     self.world_module.points_to_draw['waypoint ahead'] = carla.Location(x=cmdWP[0], y=cmdWP[1])
         #     self.world_module.points_to_draw['waypoint ahead 2'] = carla.Location(x=cmdWP2[0], y=cmdWP2[1])
