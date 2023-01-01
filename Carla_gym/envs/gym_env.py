@@ -412,14 +412,14 @@ class CarlagymEnv(gym.Env):
         acc_angular = math.sqrt(angular_velocity.x ** 2 + angular_velocity.y ** 2 + angular_velocity.z ** 2)
         ego_state = [self.ego.get_location().x, self.ego.get_location().y, speed, acc, psi, temp, self.max_s]
 
-        if 100 <= self.n_step <= 173:
+        if 80 <= self.n_step <= 230:
             df_n = 3.5
-        elif 250 <= self.n_step <= 273:
+        elif 230 <= self.n_step <= 300:
             df_n = 0
         else:
             df_n = 0
 
-        # df_n = 0
+        df_n = 0
         if self.n_step == 1:
             fpath, self.lanechange, off_the_road = self.motionPlanner.run_step_single_path(ego_state, self.f_idx,
                                                                                            # df_n=0,
@@ -597,20 +597,17 @@ class CarlagymEnv(gym.Env):
         obj_speed = obj_info['Obj_cartesian'][0][5]
         obj_delta_f = obj_info['Obj_cartesian'][0][6]
 
-        if self.n_step == 100:
-            ref_path_y = list(map(lambda x: x+3.5, ref_path_y))
-
-        elif self.n_step == 200:
-            ref_path_y = list(map(lambda x: x-3.5, ref_path_y))
-        else:
-            df_n = 0
-
+        # if 80 <= self.n_step <= 230:
+        #     ref_path_y = list(map(lambda x: x + 3.5, ref_path_y))
+        #
+        # elif 230 <= self.n_step <= 300:
+        #     ref_path_y = list(map(lambda x: x - 0, ref_path_y))
 
         self.Input, MPC_unsolved = self.lon_lat_controller.calc_input(
             x_current=np.array([[ego_state[0]], [ego_state[1]], [ego_state[2]]]),
             ref=np.array([obj_x, obj_y, obj_phi, obj_speed, obj_delta_f]),
-            # fpath=np.array([fpath.x[0:40], fpath.y[0:40], fpath.yaw[0:40]]),
-            fpath=np.array([ref_path_x, ref_path_y, ref_path_phi]),
+            fpath=np.array([fpath.x[0:40], fpath.y[0:40], fpath.yaw[0:40]]),
+            # fpath=np.array([ref_path_x, ref_path_y, ref_path_phi]),
             u_last=self.u_last,
             q=100, ru=1, rdu=1)
 
@@ -653,17 +650,17 @@ class CarlagymEnv(gym.Env):
                 **********************************************************************************************************************
         """
 
-        # if self.world_module.args.play_mode != 0:
-        #     for i in range(len(fpath.x)):
-        #         self.world_module.points_to_draw['path wp {}'.format(i)] = [
-        #             carla.Location(x=fpath.x[i], y=fpath.y[i]),
-        #             'COLOR_ALUMINIUM_0']
-
         if self.world_module.args.play_mode != 0:
-            for i in range(len(self.ref_path_x)):
+            for i in range(len(fpath.x)):
                 self.world_module.points_to_draw['path wp {}'.format(i)] = [
-                    carla.Location(x=self.ref_path_x[i], y=self.ref_path_y[i]),
+                    carla.Location(x=fpath.x[i], y=fpath.y[i]),
                     'COLOR_ALUMINIUM_0']
+
+        # if self.world_module.args.play_mode != 0:
+        #     for i in range(len(ref_path_x)):
+        #         self.world_module.points_to_draw['path wp {}'.format(i)] = [
+        #             carla.Location(x=ref_path_x[i], y=ref_path_y[i]),
+        #             'COLOR_ALUMINIUM_0']
             self.world_module.points_to_draw['ego'] = [self.ego.get_location(), 'COLOR_SCARLET_RED_0']
         #     self.world_module.points_to_draw['waypoint ahead'] = carla.Location(x=cmdWP[0], y=cmdWP[1])
         #     self.world_module.points_to_draw['waypoint ahead 2'] = carla.Location(x=cmdWP2[0], y=cmdWP2[1])
@@ -834,6 +831,7 @@ class CarlagymEnv(gym.Env):
         #          + reward_hs_m * np.clip(scaled_speed_m, 0, 1) + reward_dis + reward_d_acc + reward_acc
         reward = reward_cl + reward_acc + reward_dis
         done = False
+        MPC_unsolved = False
         if collision or MPC_unsolved or self.n_step >= 2000 or state_vector[0] < -0.1 or state_vector[0] >= 100:
             done = True
 

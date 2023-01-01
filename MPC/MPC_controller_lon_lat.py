@@ -77,7 +77,7 @@ class MPC_controller_lon_lat:
         self.delta_d_delta_f_max = 0.0082
         self.e_min = 0  # 松弛因子的约束
         # self.e_max = 0.02
-        self.e_max = 0.02
+        self.e_max = 2
         # 约束矩阵
         self.u = np.zeros((self.Nu, 1))
         self.x_max_ext = np.zeros([self.Np * self.Nx, 1])
@@ -88,14 +88,14 @@ class MPC_controller_lon_lat:
         self.u_min_ext = np.zeros([self.Nc * self.Nu, 1])
         self.du_max_ext = np.zeros([self.Nc * self.Nu, 1])
         self.du_min_ext = np.zeros([self.Nc * self.Nu, 1])
-        self.x_max = np.zeros((self.Np, 1))
-        self.x_min = np.zeros((self.Np, 1))
+        self.pos_x_max = np.zeros((self.Np, 1))
+        self.pos_x_min = np.zeros((self.Np, 1))
         self.x_ref = np.zeros((self.Np, 1))
-        self.y_max = np.zeros((self.Np, 1))
-        self.y_min = np.zeros((self.Np, 1))
+        self.pos_y_max = np.zeros((self.Np, 1))
+        self.pos_y_min = np.zeros((self.Np, 1))
         self.y_ref = np.zeros((self.Np, 1))
-        self.phi_max = np.zeros((self.Np, 1))
-        self.phi_min = np.zeros((self.Np, 1))
+        self.pos_phi_max = np.zeros((self.Np, 1))
+        self.pos_phi_min = np.zeros((self.Np, 1))
         self.phi_ref = np.zeros((self.Np, 1))
         self.y_ref_ext = np.zeros([self.Np * self.Ny, 1])
 
@@ -104,6 +104,9 @@ class MPC_controller_lon_lat:
         self.ref_phi_ref = np.zeros((self.Np, 1))
         self.ref_v = np.zeros((self.Np, 1))
         self.ref_delta_f = np.zeros((self.Np, 1))
+
+        self.y_max = np.zeros((self.Np, 1))
+        self.y_min = np.zeros((self.Np, 1))
 
         for i in range(self.Nc):
             self.u_max_ext[i * self.Nu:(i + 1) * self.Nu] = np.array([[self.v_max], [self.delta_f_max]])
@@ -137,21 +140,25 @@ class MPC_controller_lon_lat:
             # self.x_min[i] = x_current[0]
             # self.y_min[i] = x_current[1]
             # self.phi_min[i] = x_current[2]
-            self.x_min[i] = -1000
-            self.y_min[i] = -1000
-            self.phi_min[i] = -1000
-
-            # self.x_max[i] = self.ref_x_ref[i] - self.dstop
-            # self.y_max[i] = self.ref_y_ref[i] + self.lanewidth
-            self.x_max[i] = 1000
+            self.pos_x_min[i] = -1000
+            # self.y_min[i] = -1000
+            self.pos_phi_min[i] = -1000
+            self.pos_y_min[i] = self.ref_y_ref[i] - self.lanewidth
+            self.pos_x_max[i] = self.ref_x_ref[i] - self.dstop
+            self.pos_y_max[i] = self.ref_y_ref[i] + self.lanewidth * 3
+            # self.x_max[i] = 1000
+            # self.y_max[i] = 1000
+            # self.phi_max[i] = self.ref_phi_ref[i] + 0.5
+            self.pos_phi_max[i] = 1000
             self.y_max[i] = 1000
-            self.phi_max[i] = self.ref_phi_ref[i] + 0.5
+            self.y_min[i] = -1000
+
 
         for i in range(self.Np):
-            self.x_max_ext[i * self.Nx: (i + 1) * self.Nx, :] = [[self.x_max[i]], [self.y_max[i]], [self.phi_max[i]]]
-            self.x_min_ext[i * self.Nx: (i + 1) * self.Nx, :] = [[self.x_min[i]], [self.y_min[i]], [self.phi_min[i]]]
-            self.y_max_ext[i * self.Ny: (i + 1) * self.Ny, :] = [[self.x_max[i]], [self.y_max[i]], [self.phi_max[i]]]
-            self.y_min_ext[i * self.Ny: (i + 1) * self.Ny, :] = [[self.x_min[i]], [self.y_min[i]], [self.phi_min[i]]]
+            self.x_max_ext[i * self.Nx: (i + 1) * self.Nx, :] = [[self.pos_x_max[i]], [self.pos_y_max[i]], [self.pos_phi_max[i]]]
+            self.x_min_ext[i * self.Nx: (i + 1) * self.Nx, :] = [[self.pos_x_min[i]], [self.pos_y_min[i]], [self.pos_phi_min[i]]]
+            self.y_max_ext[i * self.Ny: (i + 1) * self.Ny, :] = [[self.y_max[i]], [self.y_max[i]], [self.y_max[i]]]
+            self.y_min_ext[i * self.Ny: (i + 1) * self.Ny, :] = [[self.y_min[i]], [self.y_min[i]], [self.y_min[i]]]
 
         # model linearization
         A_cell = np.zeros([self.Nx, self.Nx, self.Np])  # 2 * 2 * Np的矩阵，第三个维度为每个时刻的对应的A矩阵
@@ -250,6 +257,8 @@ class MPC_controller_lon_lat:
         f_QP_du_e[0, 0] = 2 * np.transpose(self.Cy_ext @ (
                 A_ext @ x_current + C_ext) - self.y_ref_ext) @ self.Q_cell @ self.Cy_ext @ B_ext + 2 * np.transpose(
             Cdu2) @ self.Rdu_cell @ Cdu1
+        b00 = self.Cy_ext @ (
+                A_ext @ x_current + C_ext) - self.y_ref_ext
         b11 = 2 * np.transpose(self.Cy_ext @ (
                 A_ext @ x_current + C_ext) - self.y_ref_ext) @ self.Q_cell @ self.Cy_ext @ B_ext
         b12 = 2 * np.transpose(
@@ -262,6 +271,13 @@ class MPC_controller_lon_lat:
         lb = np.vstack((self.u_min_ext, self.e_min))
         ub = np.vstack((self.u_max_ext, self.e_max))
 
+        H_QP_du_e[0, 1] = H_QP_du_e[0, 1] * 1
+        H_QP_du_e[1, 0] = H_QP_du_e[1, 0] * 1
+        H_QP_du_e[1, 1] = H_QP_du_e[1, 1] * 1
+
+        f_QP_du_e[0, 0] = f_QP_du_e[0, 0] * 1
+        f_QP_du_e[1, 0] = f_QP_du_e[1, 0] * 1
+
         A_du_eCons = np.empty([6, 2], dtype=object)
         ubA_du_eCons = np.empty([6, 1], dtype=object)
         A_du_eCons[0, 0] = Cdu1
@@ -270,7 +286,7 @@ class MPC_controller_lon_lat:
         A_du_eCons[1, 1] = np.zeros([self.Nc * self.Nu, 1])
         A_du_eCons[2, 0] = B_ext
         A_du_eCons[2, 1] = -np.ones([self.Np * self.Ny, 1])
-        A_du_eCons[3, 0] = -B_ext
+        A_du_eCons[3, 0] = - B_ext
         A_du_eCons[3, 1] = -np.ones([self.Np * self.Ny, 1])
         A_du_eCons[4, 0] = self.Cy_ext @ B_ext
         A_du_eCons[4, 1] = -np.ones([self.Np * self.Ny, 1])
@@ -280,7 +296,7 @@ class MPC_controller_lon_lat:
 
         ubA_du_eCons[0, 0] = self.du_max_ext - Cdu2
         ubA_du_eCons[1, 0] = -self.du_min_ext + Cdu2
-        ubA_du_eCons[2, 0] = self.x_max_ext - (A_ext @ x_current + C_ext)
+        ubA_du_eCons[2, 0] = self.x_min_ext - (A_ext @ x_current + C_ext)
         ubA_du_eCons[3, 0] = -self.x_min_ext + (A_ext @ x_current + C_ext)
         ubA_du_eCons[4, 0] = self.y_max_ext - self.Cy_ext @ (A_ext @ x_current + C_ext)
         ubA_du_eCons[5, 0] = -self.y_min_ext + self.Cy_ext @ (A_ext @ x_current + C_ext)
@@ -331,7 +347,7 @@ class MPC_controller_lon_lat:
         # Input = np.hstack([np.linalg.inv(Cdu1), np.zeros([self.Nu * self.Nc, 1])]) @ np.array(X) + np.linalg.inv(
         #     Cdu1) @ (-Cdu2)
 
-        Input = X
+        Input = X * 1.0
         MPC_unsolved = False
         if return_flag == 37:  # qp.init返回37说明无解，返回0说明有解
             MPC_unsolved = True
