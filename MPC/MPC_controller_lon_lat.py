@@ -49,6 +49,7 @@ class MPC_controller_lon_lat:
         self.Q_cell = np.zeros([self.Np * self.Ny, self.Np * self.Ny])
         self.Ru_cell = np.zeros([self.Nc * self.Nu, self.Nc * self.Nu])
         self.Rdu_cell = np.zeros([self.Nc * self.Nu, self.Nc * self.Nu])
+
         for i in range(self.Np):
             self.Cy_ext[i * self.Ny:(i + 1) * self.Ny, i * self.Ny: (i + 1) * self.Ny] = self.Cy
         for i in range(self.Np - 2):
@@ -296,11 +297,21 @@ class MPC_controller_lon_lat:
 
         ubA_du_eCons[0, 0] = self.du_max_ext - Cdu2
         ubA_du_eCons[1, 0] = -self.du_min_ext + Cdu2
-        ubA_du_eCons[2, 0] = self.x_min_ext - (A_ext @ x_current + C_ext)
+        ubA_du_eCons[2, 0] = self.x_max_ext - (A_ext @ x_current + C_ext)
         ubA_du_eCons[3, 0] = -self.x_min_ext + (A_ext @ x_current + C_ext)
         ubA_du_eCons[4, 0] = self.y_max_ext - self.Cy_ext @ (A_ext @ x_current + C_ext)
         ubA_du_eCons[5, 0] = -self.y_min_ext + self.Cy_ext @ (A_ext @ x_current + C_ext)
         ubA_du_eCons = np.vstack([np.hstack(Mat_size) for Mat_size in ubA_du_eCons])
+
+        # ubA_du_eCons[0, 0] = 1e6 * np.ones([30, 1])
+        # ubA_du_eCons[1, 0] = 1e6 * np.ones([30, 1])
+        # ubA_du_eCons[2, 0] = 1e6 * np.ones([90, 1])
+        # ubA_du_eCons[3, 0] = 1e6 * np.ones([90, 1])
+        # ubA_du_eCons[4, 0] = 1e6 * np.ones([90, 1])
+        # ubA_du_eCons[5, 0] = 1e6 * np.ones([90, 1])
+        # ubA_du_eCons = np.vstack([np.hstack(Mat_size) for Mat_size in ubA_du_eCons])
+
+
 
         # # cvxopt求解过程
         # P = matrix(H_QP_du_e)
@@ -315,22 +326,27 @@ class MPC_controller_lon_lat:
         # # # qpoases求解过程
         # # Setting up QProblem object.
 
-        qp = QProblem(self.Nc * self.Nu + 1, self.Nc * self.Nu * self.Nc * self.Nu)
-        options = Options()
 
-        # options.printLevel = PrintLevel.NONE
-        qp.setOptions(options)
 
         H = H_QP_du_e
         g = f_QP_du_e.astype(np.double)[:, 0]
         A = A_du_eCons
         lb = lb[:, 0]
         ub = ub[:, 0]
-        lbA = -1e8 * np.ones(400)
+
         ubA = ubA_du_eCons[:, 0]
+        lbA = -1e8 * np.ones(np.size(ubA))
         # ubA = 1e8 * np.ones(400)
         # Solve first QP.
         nWSR = np.array([200])
+
+        # qp = QProblem(self.Nc * self.Nu + 1, self.Nc * self.Nu * self.Nc * self.Nu)
+        qp = QProblem(self.Nc * self.Nu + 1, np.size(ubA))
+        options = Options()
+
+        # options.printLevel = PrintLevel.NONE
+        qp.setOptions(options)
+
         return_flag = qp.init(H, g, A, lb, ub, lbA,
                               ubA, nWSR)
 
