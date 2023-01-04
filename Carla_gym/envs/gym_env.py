@@ -152,9 +152,18 @@ class CarlagymEnv(gym.Env):
         self.ref_path_x = self.ref_path.col_values(0)
         self.ref_path_y = self.ref_path.col_values(1)
         self.ref_path_phi = self.ref_path.col_values(2)
-        self.ref_path_x = self.ref_path_x[1430:2028]  # 700-451    1800-1200   2135-1434
-        self.ref_path_y = self.ref_path_y[1430:2028]
-        self.ref_path_phi = self.ref_path_phi[1430:2028]
+        self.ref_path_x = self.ref_path_x[1433:2028]  # 700-451    1800-1200   2135-1434
+        self.ref_path_y = self.ref_path_y[1433:2028]
+        self.ref_path_phi = self.ref_path_phi[1433:2028]
+
+        self.ref_path_left = xlrd.open_workbook(os.path.abspath('.') + '/tools/left_global_path.xlsx')
+        self.ref_path_left = self.ref_path_left.sheets()[0]
+        self.ref_path_left_x = self.ref_path_left.col_values(0)
+        self.ref_path_left_y = self.ref_path_left.col_values(1)
+        self.ref_path_left_phi = self.ref_path_left.col_values(2)
+        self.ref_path_left_x = self.ref_path_left_x[0:1520]  # 700-451    1800-1200   2135-1434
+        self.ref_path_left_y = self.ref_path_left_y[0:1520]
+        self.ref_path_left_phi = self.ref_path_left_phi[0:1520]
 
         # self.ref_path = xlrd.open_workbook(os.path.abspath('.') + '/tools/ref_global_path.xlsx')
         # self.ref_path = self.ref_path.sheets()[0]
@@ -574,6 +583,9 @@ class CarlagymEnv(gym.Env):
         ref_path_x = self.ref_path_x[self.n_step:self.n_step + 30]
         ref_path_y = self.ref_path_y[self.n_step:self.n_step + 30]
         ref_path_phi = self.ref_path_phi[self.n_step:self.n_step + 30]
+        ref_path_left_x = self.ref_path_left_x[self.n_step:self.n_step + 30]
+        ref_path_left_y = self.ref_path_left_y[self.n_step:self.n_step + 30]
+        ref_path_left_phi = self.ref_path_left_phi[self.n_step:self.n_step + 30]
         # if self.n_step%30 == 1:
         #     self.fpath = fpath
         # ref_path_x = self.fpath.x
@@ -605,11 +617,12 @@ class CarlagymEnv(gym.Env):
 
         self.Input, MPC_unsolved = self.lon_lat_controller.calc_input(
             x_current=np.array([[ego_state[0]], [ego_state[1]], [ego_state[2]]]),
-            ref=np.array([obj_x, obj_y, obj_phi, obj_speed, obj_delta_f]),
-            fpath=np.array([fpath.x[0:40], fpath.y[0:40], fpath.yaw[0:40]]),
-            # fpath=np.array([ref_path_x, ref_path_y, ref_path_phi]),
+            obj=np.array([obj_x, obj_y, obj_phi, obj_speed, obj_delta_f]),
+            # fpath=np.array([fpath.x[0:40], fpath.y[0:40], fpath.yaw[0:40]]),
+            ref=np.array([ref_path_x, ref_path_y, ref_path_phi]),
+            ref_left=np.array([ref_path_left_x, ref_path_left_y, ref_path_left_phi]),
             u_last=self.u_last,
-            q=100, ru=1, rdu=1)
+            q=1, ru=1, rdu=1)
 
         self.u_last = self.Input
         target_speed = self.Input[0]
