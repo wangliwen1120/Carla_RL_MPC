@@ -45,7 +45,7 @@ RL:
   LANE_CHANGE_PENALTY: 0.2                                      # Unnecesary Lane Change Penalty
   LANE_CHANGE_REWARD: 2                                         # Meaningful Lane Change Reward (w*speed_reward)
   OFF_THE_ROAD: -10                                             # Off-the-road attempt penalty
-  COLLISION: -10                                                # Collison penalty
+  COLLISION: -100                                                # Collison penalty
 
 LOCAL_PLANNER:
   MIN_SPEED: 13 # 5.56                                       # Allowed min speed for ego vehicle; RL's -1 action maps to this value

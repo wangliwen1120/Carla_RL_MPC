@@ -90,7 +90,7 @@ class MPC_controller_lon_lat:
             self.du_max_ext[i * self.Nu:(i + 1) * self.Nu] = np.array([[self.d_v_max], [self.d_delta_f_max]])
             self.du_min_ext[i * self.Nu:(i + 1) * self.Nu] = np.array([[self.d_v_min], [self.d_delta_f_min]])
 
-    def calc_input(self, x_current, obj, ref, ref_left, u_last, q, ru, rdu):
+    def calc_input(self, x_current, x_frenet_current, obj, ref, ref_left, u_last, q, ru, rdu):
 
         # y_ref
         for i in range(self.Np):
@@ -114,10 +114,13 @@ class MPC_controller_lon_lat:
         for i in range(self.Np):
             # 状态量约束
             self.pos_x_min[i] = -1000
-            self.pos_y_min[i] = -1000 #self.obj_y_ref[i] - self.lanewidth
+            self.pos_y_min[i] = self.obj_y_ref[i] - self.lanewidth * 1.5
             self.pos_phi_min[i] = -1000
-            self.pos_x_max[i] = 1000  #self.obj_x_ref[i] - self.dstop
-            self.pos_y_max[i] = 1000  #self.obj_y_ref[i] + self.lanewidth * 3
+            if x_frenet_current[1] <= -1.75:
+                self.pos_x_max[i] = 1000
+            else:
+                self.pos_x_max[i] = self.obj_x_ref[i] - self.dstop
+            self.pos_y_max[i] = self.obj_y_ref[i] + self.lanewidth * 2.5
             self.pos_phi_max[i] = 1000
 
             # 输出量约束
@@ -317,7 +320,7 @@ class MPC_controller_lon_lat:
         qp = QProblem(self.Nc * self.Nu + 1, np.size(ubA))
         options = Options()
 
-        # options.printLevel = PrintLevel.NONE
+        options.printLevel = PrintLevel.NONE
         qp.setOptions(options)
 
         return_flag = qp.init(H, g, A, lb, ub, lbA,

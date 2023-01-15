@@ -147,14 +147,14 @@ class CarlagymEnv(gym.Env):
         except IOError:
             self.global_route = None
 
-        self.ref_path = xlrd.open_workbook(os.path.abspath('.') + '/tools/global_path_15.xlsx')
+        self.ref_path = xlrd.open_workbook(os.path.abspath('.') + '/tools/second_global_path.xlsx')
         self.ref_path = self.ref_path.sheets()[0]
         self.ref_path_x = self.ref_path.col_values(0)
         self.ref_path_y = self.ref_path.col_values(1)
         self.ref_path_phi = self.ref_path.col_values(2)
-        self.ref_path_x = self.ref_path_x[1433:2028]  # 700-451    1800-1200   2135-1434
-        self.ref_path_y = self.ref_path_y[1433:2028]
-        self.ref_path_phi = self.ref_path_phi[1433:2028]
+        self.ref_path_x = self.ref_path_x[0:1520]
+        self.ref_path_y = self.ref_path_y[0:1520]
+        self.ref_path_phi = self.ref_path_phi[0:1520]
 
         self.ref_path_left = xlrd.open_workbook(os.path.abspath('.') + '/tools/left_global_path.xlsx')
         self.ref_path_left = self.ref_path_left.sheets()[0]
@@ -212,6 +212,7 @@ class CarlagymEnv(gym.Env):
         self.u_lon_llast = 0.0
         self.u_lat_last = 0.0
         self.u_lat_llast = 0.0
+        self.lane_last = 0
         self.fig, self.ax = plt.subplots()
         self.x = []
         self.y = []
@@ -228,8 +229,8 @@ class CarlagymEnv(gym.Env):
         else:
             self.dt = 0.05
 
-        action_low = 0.1
-        action_high = 0.9
+        action_low = 0
+        action_high = 1
         self.acton_dim = (1, 1)
         self.action_space = spaces.Box(action_low, action_high, shape=self.acton_dim, dtype='float32')
         self.obs_dim = (1, 3)
@@ -468,7 +469,7 @@ class CarlagymEnv(gym.Env):
         ego_init_d, ego_target_d = fpath.d[0], fpath.d[-1]
         vehicle_ahead = self.get_vehicle_ahead(ego_s, ego_d, ego_init_d, ego_target_d)
 
-        print(self.n_step)
+        # print(self.n_step)
 
         ##MPC_LAT+PID
         # q = action[0] / 10
@@ -573,7 +574,7 @@ class CarlagymEnv(gym.Env):
         obj_info = self.obj_info()
         obj_frenet = obj_info['Obj_frenet']
         obj_cartesian = obj_info['Obj_cartesian']
-        if self.n_step == 204:
+        if self.n_step == 104:
             print("180")
 
         # self.f_ref_idx = closest_wp_idx_ref(ego_state, self.ref_path_x,self.ref_path_y, self.f_idx)
@@ -608,7 +609,7 @@ class CarlagymEnv(gym.Env):
         obj_phi = obj_info['Obj_cartesian'][0][4]
         obj_speed = obj_info['Obj_cartesian'][0][5]
         obj_delta_f = obj_info['Obj_cartesian'][0][6]
-
+        obj_s = obj_info['Obj_frenet'][0][0]
         # if 80 <= self.n_step <= 230:
         #     ref_path_y = list(map(lambda x: x + 3.5, ref_path_y))
         #
@@ -617,12 +618,13 @@ class CarlagymEnv(gym.Env):
 
         self.Input, MPC_unsolved = self.lon_lat_controller.calc_input(
             x_current=np.array([[ego_state[0]], [ego_state[1]], [ego_state[2]]]),
+            x_frenet_current=np.array([ego_s,ego_d,v_S,v_D]),
             obj=np.array([obj_x, obj_y, obj_phi, obj_speed, obj_delta_f]),
             # fpath=np.array([fpath.x[0:40], fpath.y[0:40], fpath.yaw[0:40]]),
             ref=np.array([ref_path_x, ref_path_y, ref_path_phi]),
             ref_left=np.array([ref_path_left_x, ref_path_left_y, ref_path_left_phi]),
             u_last=self.u_last,
-            q=1, ru=1, rdu=1)
+            q=action, ru=1, rdu=1)
 
         self.u_last = self.Input
         target_speed = self.Input[0]
@@ -634,8 +636,8 @@ class CarlagymEnv(gym.Env):
         throttle_and_brake = throttle_and_brake[0]
         throttle = max(throttle_and_brake, 0)
         brake = min(throttle_and_brake, 0)
-        print('steer =', steer)
-        print('speed =', speed)
+        # print('steer =', steer)
+        # print('speed =', speed)
         vehicle_control = carla.VehicleControl(
             throttle=float(throttle),
             steer=float(steer),
@@ -646,6 +648,22 @@ class CarlagymEnv(gym.Env):
         )
 
         self.ego.apply_control(vehicle_control)
+
+        # lanechange should be set true if there is a lane change
+        if(-4.25<ego_d<-1.75):
+            lane = -1
+        elif(-1.75<ego_d<1.75):
+            lane = 0
+        elif(1.75<ego_d<5.25):
+            lane = 1
+        elif(5.25<ego_d<8.75):
+            lane = 2
+        else:
+            lane = -2
+            off_the_road = True
+
+        lanechange = True if self.lane_last != lane else False
+        self.lane_last = lane
 
         '''******   Update carla world    ******'''
         self.module_manager.tick()  # Update carla world
@@ -663,17 +681,17 @@ class CarlagymEnv(gym.Env):
                 **********************************************************************************************************************
         """
 
-        if self.world_module.args.play_mode != 0:
-            for i in range(len(fpath.x)):
-                self.world_module.points_to_draw['path wp {}'.format(i)] = [
-                    carla.Location(x=fpath.x[i], y=fpath.y[i]),
-                    'COLOR_ALUMINIUM_0']
-
         # if self.world_module.args.play_mode != 0:
-        #     for i in range(len(ref_path_x)):
+        #     for i in range(len(fpath.x)):
         #         self.world_module.points_to_draw['path wp {}'.format(i)] = [
-        #             carla.Location(x=ref_path_x[i], y=ref_path_y[i]),
+        #             carla.Location(x=fpath.x[i], y=fpath.y[i]),
         #             'COLOR_ALUMINIUM_0']
+
+        if self.world_module.args.play_mode != 0:
+            for i in range(len(ref_path_x)):
+                self.world_module.points_to_draw['path wp {}'.format(i)] = [
+                    carla.Location(x=ref_path_x[i], y=ref_path_y[i]),
+                    'COLOR_ALUMINIUM_0']
             self.world_module.points_to_draw['ego'] = [self.ego.get_location(), 'COLOR_SCARLET_RED_0']
         #     self.world_module.points_to_draw['waypoint ahead'] = carla.Location(x=cmdWP[0], y=cmdWP[1])
         #     self.world_module.points_to_draw['waypoint ahead 2'] = carla.Location(x=cmdWP2[0], y=cmdWP2[1])
@@ -723,12 +741,27 @@ class CarlagymEnv(gym.Env):
         '''******   Reward Design   ******'''
         # # 碰撞惩罚
         if collision:
-            # reward_cl = np.array([[-15.0]])
-            reward_cl = self.collision_penalty  ## -10.0
+            reward_cl = self.collision_penalty  ## -100.0
         else:
-            # reward_cl = np.array([[0.0]])
             reward_cl = 0.0
 
+        if lanechange:
+            reward_lanechange = -20
+        else:
+            reward_lanechange = 0
+
+        if off_the_road:
+            reward_offTheRoad = -50
+        else:
+            reward_offTheRoad = 0
+
+
+        if MPC_unsolved == True:
+            reward_mpcNoResult = -50
+        else:
+            reward_mpcNoResult = 0
+
+        reward_speed = v_S * 2
             # 速度优先在某范围
         # scaled_speed_l = lamp(state_vector[2], [0, self.minSpeed], [0, 1])  # 0-13.5
         # scaled_speed_m = lamp(state_vector[2], [self.minSpeed, 0.75 * self.maxSpeed], [0, 1])  # 13.5-14.5
@@ -770,15 +803,15 @@ class CarlagymEnv(gym.Env):
         # else:
         #     reward_acc = -2.0
 
-        if -4 <= self.u_lon_last <= 3:
-            if state_vector[0] > 20 + 2 or state_vector[1] >= 0:
-                reward_acc = 30 - 10 * abs(self.u_lon_last)
-            elif state_vector[0] < 20 - 2 and state_vector[1] <= -1:
-                reward_acc = -10 * self.u_lon_last
-            else:
-                reward_acc = 0
-        else:
-            reward_acc = -100
+        # if -4 <= self.u_lon_last <= 3:
+        #     if state_vector[0] > 20 + 2 or state_vector[1] >= 0:
+        #         reward_acc = 30 - 10 * abs(self.u_lon_last)
+        #     elif state_vector[0] < 20 - 2 and state_vector[1] <= -1:
+        #         reward_acc = -10 * self.u_lon_last
+        #     else:
+        #         reward_acc = 0
+        # else:
+        #     reward_acc = -100
 
         # # 加加速度
         # if abs(self.du_lon_last) <= 3:
@@ -826,11 +859,11 @@ class CarlagymEnv(gym.Env):
         #     reward_d_acc = -20.0
 
         # 跟车 ++++
-        s_d = 60
-        if abs(state_vector[0]) > s_d:
-            reward_dis = -41.0
-        else:
-            reward_dis = 0.0
+        # s_d = 60
+        # if abs(state_vector[0]) > s_d:
+        #     reward_dis = -41.0
+        # else:
+        #     reward_dis = 0.0
 
         # s_d = 20
         # if abs(state_vector[0]) < s_d:
@@ -842,10 +875,10 @@ class CarlagymEnv(gym.Env):
 
         # reward = reward_cl + reward_hs_l * np.clip(scaled_speed_l, 0, 1) + reward_hs_h * np.clip(scaled_speed_h, 0, 1) \
         #          + reward_hs_m * np.clip(scaled_speed_m, 0, 1) + reward_dis + reward_d_acc + reward_acc
-        reward = reward_cl + reward_acc + reward_dis
+        reward = reward_cl + reward_mpcNoResult + reward_speed + reward_lanechange + reward_offTheRoad
         done = False
-        MPC_unsolved = False
-        if collision or MPC_unsolved or self.n_step >= 2000 or state_vector[0] < -0.1 or state_vector[0] >= 100:
+
+        if collision or self.n_step >= 750 or ego_s-obj_s>=10 :
             done = True
 
         info = {'reserved': 0}
@@ -871,7 +904,7 @@ class CarlagymEnv(gym.Env):
         self.ego.set_simulate_physics(enabled=True)
 
         self.module_manager.tick()
-        print(self.ego.get_velocity())
+        # print(self.ego.get_velocity())
         self.ego.set_simulate_physics(enabled=True)
         return np.zeros_like(self.observation_space.sample()[0, :])
 
@@ -930,7 +963,7 @@ class CarlagymEnv(gym.Env):
 
         self.module_manager.tick()  # Update carla world
         self.init_transform = self.ego.get_transform()
-        print(self.ego.get_velocity())
+        # print(self.ego.get_velocity())
 
     def enable_auto_render(self):
         self.auto_render = True
@@ -939,7 +972,7 @@ class CarlagymEnv(gym.Env):
         self.module_manager.render(self.world_module.display)
 
     def destroy(self):
-        print('Destroying environment...')
+        # print('Destroying environment...')
         if self.world_module is not None:
             self.world_module.destroy()
             self.traffic_module.destroy()
