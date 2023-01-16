@@ -137,33 +137,33 @@ class MPC_controller_lon_lat:
             self.y_max_ext[i * self.Ny: (i + 1) * self.Ny, :] = [[self.y_x_max[i]], [self.y_y_max[i]], [self.y_phi_max[i]]]
             self.y_min_ext[i * self.Ny: (i + 1) * self.Ny, :] = [[self.y_x_min[i]], [self.y_y_min[i]], [self.y_phi_min[i]]]
 
-            # 预测时域和控制时域内的分块权重矩阵
-            # 权重矩阵
-            self.q = q
-            self.ru = 0.1
-            self.rdu = 0.1
-            self.rou = 0.005  # rho的值
-            self.Q = self.q * np.eye(self.Nx)
-            self.Ru = self.ru * np.eye(self.Nu)
-            self.Rdu = self.rdu * np.eye(self.Nu)
+        # 预测时域和控制时域内的分块权重矩阵
+        # 权重矩阵
+        self.q = q
+        self.ru = 0.1
+        self.rdu = 0.1
+        self.rou = 0.005  # rho的值
+        self.Q = self.q * np.eye(self.Nx)
+        self.Ru = self.ru * np.eye(self.Nu)
+        self.Rdu = self.rdu * np.eye(self.Nu)
 
-            self.Cy_ext = np.zeros([self.Np * self.Ny, self.Np * self.Nx])
-            self.Q_cell = np.zeros([self.Np * self.Ny, self.Np * self.Ny])
-            self.Ru_cell = np.zeros([self.Nc * self.Nu, self.Nc * self.Nu])
-            self.Rdu_cell = np.zeros([self.Nc * self.Nu, self.Nc * self.Nu])
+        self.Cy_ext = np.zeros([self.Np * self.Ny, self.Np * self.Nx])
+        self.Q_cell = np.zeros([self.Np * self.Ny, self.Np * self.Ny])
+        self.Ru_cell = np.zeros([self.Nc * self.Nu, self.Nc * self.Nu])
+        self.Rdu_cell = np.zeros([self.Nc * self.Nu, self.Nc * self.Nu])
 
-            for i in range(self.Np):
-                self.Cy_ext[i * self.Ny:(i + 1) * self.Ny, i * self.Ny: (i + 1) * self.Ny] = self.Cy
-            for i in range(self.Np - 2):
-                self.Q_cell[i * self.Ny:(i + 1) * self.Ny, i * self.Ny: (i + 1) * self.Ny] = self.Q
-            for i in range(self.Np - 2, self.Np):
-                self.Q_cell[i * self.Ny:(i + 1) * self.Ny, i * self.Ny: (i + 1) * self.Ny] = self.Q
-            for i in range(self.Nc - 1):
-                self.Ru_cell[i * self.Nu: (i + 1) * self.Nu, i * self.Nu: (i + 1) * self.Nu] = self.Ru
-            for i in range(self.Nc - 1 + 1, self.Nc):
-                self.Ru_cell[i * self.Nu: (i + 1) * self.Nu, i * self.Nu: (i + 1) * self.Nu] = self.Ru
-            for i in range(self.Nc):
-                self.Rdu_cell[i * self.Nu: (i + 1) * self.Nu, i * self.Nu: (i + 1) * self.Nu] = self.Rdu
+        for i in range(self.Np):
+            self.Cy_ext[i * self.Ny:(i + 1) * self.Ny, i * self.Ny: (i + 1) * self.Ny] = self.Cy
+        for i in range(self.Np - 2):
+            self.Q_cell[i * self.Ny:(i + 1) * self.Ny, i * self.Ny: (i + 1) * self.Ny] = self.Q
+        for i in range(self.Np - 2, self.Np):
+            self.Q_cell[i * self.Ny:(i + 1) * self.Ny, i * self.Ny: (i + 1) * self.Ny] = self.Q
+        for i in range(self.Nc - 1):
+            self.Ru_cell[i * self.Nu: (i + 1) * self.Nu, i * self.Nu: (i + 1) * self.Nu] = self.Ru
+        for i in range(self.Nc - 1 + 1, self.Nc):
+            self.Ru_cell[i * self.Nu: (i + 1) * self.Nu, i * self.Nu: (i + 1) * self.Nu] = self.Ru
+        for i in range(self.Nc):
+            self.Rdu_cell[i * self.Nu: (i + 1) * self.Nu, i * self.Nu: (i + 1) * self.Nu] = self.Rdu
 
         # model linearization
         A_cell = np.zeros([self.Nx, self.Nx, self.Np])  # 2 * 2 * Np的矩阵，第三个维度为每个时刻的对应的A矩阵

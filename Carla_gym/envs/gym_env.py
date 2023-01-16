@@ -17,6 +17,7 @@ from MPC.parameter_config_0 import MPC_Config_0
 from MPC.MPC_controller_lon import MPC_controller_lon
 from MPC.MPC_controller_lat import MPC_controller_lat
 from MPC.MPC_controller_lon_lat import MPC_controller_lon_lat
+from MPC.MPC_controller_lon_lat_ipopt import MPC_controller_lon_lat_ipopt
 from MPC.parameter_config import MPC_lon_lat_Config
 from MPC.parameter_config import MPC_lon_Config
 from MPC.parameter_config import MPC_lat_Config
@@ -132,6 +133,7 @@ class CarlagymEnv(gym.Env):
         self.lon_controller = MPC_controller_lon(self.lon_param)
         self.lat_controller = MPC_controller_lat(self.lat_param)
         self.lon_lat_controller = MPC_controller_lon_lat(self.lon_lat_param)
+        self.lon_lat_controller_ipopt = MPC_controller_lon_lat_ipopt(self.lon_lat_param)
         self.mpc_param = MPC_Config
         self.mpc_controller = MPC_controller_yundongxue(self.mpc_param)
 
@@ -616,7 +618,7 @@ class CarlagymEnv(gym.Env):
         # elif 230 <= self.n_step <= 300:
         #     ref_path_y = list(map(lambda x: x - 0, ref_path_y))
 
-        self.Input, MPC_unsolved = self.lon_lat_controller.calc_input(
+        self.Input, MPC_unsolved = self.lon_lat_controller_ipopt.calc_input(
             x_current=np.array([[ego_state[0]], [ego_state[1]], [ego_state[2]]]),
             x_frenet_current=np.array([ego_s,ego_d,v_S,v_D]),
             obj=np.array([obj_x, obj_y, obj_phi, obj_speed, obj_delta_f]),
@@ -625,6 +627,16 @@ class CarlagymEnv(gym.Env):
             ref_left=np.array([ref_path_left_x, ref_path_left_y, ref_path_left_phi]),
             u_last=self.u_last,
             q=action, ru=1, rdu=1)
+
+        # self.Input, MPC_unsolved = self.lon_lat_controller.calc_input(
+        #     x_current=np.array([[ego_state[0]], [ego_state[1]], [ego_state[2]]]),
+        #     x_frenet_current=np.array([ego_s, ego_d, v_S, v_D]),
+        #     obj=np.array([obj_x, obj_y, obj_phi, obj_speed, obj_delta_f]),
+        #     # fpath=np.array([fpath.x[0:40], fpath.y[0:40], fpath.yaw[0:40]]),
+        #     ref=np.array([ref_path_x, ref_path_y, ref_path_phi]),
+        #     ref_left=np.array([ref_path_left_x, ref_path_left_y, ref_path_left_phi]),
+        #     u_last=self.u_last,
+        #     q=action, ru=1, rdu=1)
 
         self.u_last = self.Input
         target_speed = self.Input[0]
