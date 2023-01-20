@@ -601,10 +601,10 @@ class CarlagymEnv(gym.Env):
         ####MPC_lon_lat
         # plt.plot(self.n_step*0.1, speed,'o')
         # plt.plot(fpath.t,fpath.s_d)
-        plt.plot(fpath.x, fpath.y, 'o')
-        plt.plot(ego_state[0], ego_state[1], '*')
-        plt.pause(0.001)
-        plt.cla()
+        # plt.plot(fpath.x, fpath.y, 'o')
+        # plt.plot(ego_state[0], ego_state[1], '*')
+        # plt.pause(0.001)
+        # plt.cla()
 
         obj_x = obj_info['Obj_cartesian'][0][0]
         obj_y = obj_info['Obj_cartesian'][0][1]
@@ -626,7 +626,7 @@ class CarlagymEnv(gym.Env):
             ref=np.array([ref_path_x, ref_path_y, ref_path_phi]),
             ref_left=np.array([ref_path_left_x, ref_path_left_y, ref_path_left_phi]),
             u_last=self.u_last,
-            q=action, ru=1, rdu=1)
+            q=1, ru=1, rdu=1)
 
         # self.Input, MPC_unsolved = self.lon_lat_controller.calc_input(
         #     x_current=np.array([[ego_state[0]], [ego_state[1]], [ego_state[2]]]),
@@ -890,7 +890,7 @@ class CarlagymEnv(gym.Env):
         reward = reward_cl + reward_mpcNoResult + reward_speed + reward_lanechange + reward_offTheRoad
         done = False
 
-        if collision or self.n_step >= 750 or ego_s-obj_s>=10 :
+        if collision or self.n_step >= 750 or ego_s-obj_s>=50 :
             done = True
 
         info = {'reserved': 0}

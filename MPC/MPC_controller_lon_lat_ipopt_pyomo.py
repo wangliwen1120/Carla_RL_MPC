@@ -6,8 +6,6 @@ from MPC.qpoases import PyQProblem as QProblem
 from MPC.qpoases import PyPrintLevel as PrintLevel
 from cvxopt import matrix
 from casadi import *    # 不要用 import casadi.* 的方法
-import casadi as ca
-import casadi.tools as ca_tools
 from pyomo.environ import *
 import pyomo.environ as pyo
 
@@ -292,29 +290,18 @@ class MPC_controller_lon_lat_ipopt:
                                         np.transpose(Cdu1 @ model.x + Cdu2) @ self.Rdu_cell @ (Cdu1 @ model.x + Cdu2))[
             0])
         # 代表模型第二行
-        # model.Constraint1 = pyo.Constraint(
-        # expr =(model.x[i] for i in range(self.Nc*self.Nu) if i%2 == 0>= self.v_min))
-        #
-        #
-        # model.Constraint2 = pyo.Constraint(expr=model.x <= self.u_max_ext)
-        # model.Constraint3 = pyo.Constraint(expr=self.du_min_ext <= Cdu1@model.x+Cdu2)
-        # model.Constraint4 = pyo.Constraint(expr=Cdu1 @ model.x + Cdu2 <= self.du_max_ext)
-
-        # model.pprint()
-        # SolverFactory('ipopt', executable=path).solve(model).write()
-        # print('optimal f: {:.4f}'.format(model.OBJ()))
-        # print('optimal x: [{:.4f}, {:.4f}]'.format(value(model.x[0, 0]), value(model.x[1, 0])))
-        #
-        # MPC_unsolved = False
-        # return np.array([[value(model.x[0, 0])], [value(model.x[1, 0])]]), MPC_unsolved
-
-        opti = ca.Opti()    # 实例化一个 opti
-
-        # 声明变量
-        U = ca.SX.sym('U', self.Nu, self.Nc)
-
-        X = ca.SX.sym('X', self.Nx, self.Np)
-
-        P = ca.SX.sym('P', n_states + n_states)
+        model.Constraint1 = pyo.Constraint(
+        expr =(model.x[i] for i in range(self.Nc*self.Nu) if i%2 == 0>= self.v_min))
 
 
+        model.Constraint2 = pyo.Constraint(expr=model.x <= self.u_max_ext)
+        model.Constraint3 = pyo.Constraint(expr=self.du_min_ext <= Cdu1@model.x+Cdu2)
+        model.Constraint4 = pyo.Constraint(expr=Cdu1 @ model.x + Cdu2 <= self.du_max_ext)
+
+        model.pprint()
+        SolverFactory('ipopt', executable=path).solve(model).write()
+        print('optimal f: {:.4f}'.format(model.OBJ()))
+        print('optimal x: [{:.4f}, {:.4f}]'.format(value(model.x[0, 0]), value(model.x[1, 0])))
+
+        MPC_unsolved = False
+        return np.array([[value(model.x[0, 0])], [value(model.x[1, 0])]]), MPC_unsolved
