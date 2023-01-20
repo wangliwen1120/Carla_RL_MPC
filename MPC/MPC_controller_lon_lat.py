@@ -312,7 +312,7 @@ class MPC_controller_lon_lat:
 
         ubA = ubA_du_eCons[:, 0]
         lbA = -1e8 * np.ones(np.size(ubA))
-        # ubA = 1e8 * np.ones(400)
+        # ubA = 1e8 * np.ones(np.size(ubA))
         # Solve first QP.
         nWSR = np.array([200])
 

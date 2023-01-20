@@ -17,7 +17,7 @@ from MPC.parameter_config_0 import MPC_Config_0
 from MPC.MPC_controller_lon import MPC_controller_lon
 from MPC.MPC_controller_lat import MPC_controller_lat
 from MPC.MPC_controller_lon_lat import MPC_controller_lon_lat
-from MPC.MPC_controller_lon_lat_ipopt import MPC_controller_lon_lat_ipopt
+from MPC.MPC_controller_lon_lat_ipopt_nonlinear import MPC_controller_lon_lat_ipopt_nonlinear
 from MPC.parameter_config import MPC_lon_lat_Config
 from MPC.parameter_config import MPC_lon_Config
 from MPC.parameter_config import MPC_lat_Config
@@ -133,7 +133,7 @@ class CarlagymEnv(gym.Env):
         self.lon_controller = MPC_controller_lon(self.lon_param)
         self.lat_controller = MPC_controller_lat(self.lat_param)
         self.lon_lat_controller = MPC_controller_lon_lat(self.lon_lat_param)
-        self.lon_lat_controller_ipopt = MPC_controller_lon_lat_ipopt(self.lon_lat_param)
+        self.lon_lat_controller_ipopt = MPC_controller_lon_lat_ipopt_nonlinear(self.lon_lat_param)
         self.mpc_param = MPC_Config
         self.mpc_controller = MPC_controller_yundongxue(self.mpc_param)
 
@@ -637,7 +637,7 @@ class CarlagymEnv(gym.Env):
         #     ref_left=np.array([ref_path_left_x, ref_path_left_y, ref_path_left_phi]),
         #     u_last=self.u_last,
         #     q=action, ru=1, rdu=1)
-
+        print(self.Input[0])
         self.u_last = self.Input
         target_speed = self.Input[0]
         cmdSpeed = target_speed * np.cos(psi_Frenet)
