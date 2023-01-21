@@ -1,6 +1,7 @@
 from __future__ import division
 import numpy as np
 import casadi as ca
+import time
 
 
 class MPC_controller_lon_lat_ipopt_nonlinear:
@@ -10,6 +11,9 @@ class MPC_controller_lon_lat_ipopt_nonlinear:
         self.ru = None
         self.rdu = None
         self.q = None
+        self.Q = None
+        self.Ru = None
+        self.Rdu = None
         self.param = param
         self.T = self.param.T
         self.L = self.param.L
@@ -76,6 +80,10 @@ class MPC_controller_lon_lat_ipopt_nonlinear:
         self.Y = np.zeros([self.Np, 1])
         self.Y_left = np.zeros([self.Np, 1])
         self.Y_ext = np.zeros([self.Np * self.Nx, 1])
+        self.Y_ref = None
+        self.Y_ref_left = None
+        self.next_states = np.zeros((self.Nx, self.Np)).copy().T
+        self.u0 = np.array([1, 2] * (self.Np - 1)).reshape(-1, 2).T
 
         self.x_predict = np.zeros((self.Np, 1))
         self.y_predict = np.zeros((self.Np, 1))
@@ -103,25 +111,104 @@ class MPC_controller_lon_lat_ipopt_nonlinear:
         # 权重矩阵
         # y_ref
         for i in range(self.Np):
-            self.x_ref[i] = ref[0][self.Np - 1]
-            self.y_ref[i] = ref[1][self.Np - 1]
-            self.phi_ref[i] = ref[2][self.Np - 1]
-            self.x_ref_left[i] = ref_left[0][self.Np - 1]
-            self.y_ref_left[i] = ref_left[1][self.Np - 1]
-            self.phi_ref_left[i] = ref_left[2][self.Np - 1]
-        for i in range(self.Np):
-            self.y_ref_ext[i * self.Ny: (i + 1) * self.Ny, 0] = [self.x_ref[i], self.y_ref[i], self.phi_ref[i]]
-            self.y_ref_left_ext[i * self.Ny: (i + 1) * self.Ny, 0] = [self.x_ref_left[i], self.y_ref_left[i],
-                                                                      self.phi_ref_left[i]]
+            self.x_ref[i] = ref[0][i]
+            self.y_ref[i] = ref[1][i]
+            self.phi_ref[i] = ref[2][i]
+            self.x_ref_left[i] = ref_left[0][i]
+            self.y_ref_left[i] = ref_left[1][i]
+            self.phi_ref_left[i] = ref_left[2][i]
+
+        self.Y_ref = np.concatenate((self.x_ref.T, self.y_ref.T, self.phi_ref.T))
+        self.Y_ref_left = np.concatenate((self.x_ref_left.T, self.y_ref_left.T, self.phi_ref_left.T))
 
         x = ca.SX.sym('x')
         y = ca.SX.sym('y')
         fai = ca.SX.sym('theta')
-        states = ca.vertcat(x, y)
-        states = ca.vertcat(states, theta)
+        states = ca.vcat([x, y, fai])
+
+        vx = ca.SX.sym('vx')
+        deta_f = ca.SX.sym('deta_f')
+        controls = ca.vertcat(vx, deta_f)
+
+        state_trans = ca.vcat([vx * ca.cos(fai), vx * ca.sin(fai), vx * ca.tan(deta_f) / self.L])
+
+        # function
+        f = ca.Function('f', [states, controls], [state_trans], ['states', 'control_input'], ['state_trans'])
+
+        #       self.Np -1 =self.Nc
+        #         U = ca.SX.sym('U', self.Nu, self.Nc)
+        U = ca.SX.sym('U', self.Nu, self.Np - 1)
+        X = ca.SX.sym('X', self.Nx, self.Np)
+        Ref = ca.SX.sym('Ref', self.Nx, self.Np)
+
+        self.q = 1
+        self.ru = 0.3
+        self.rdu = 0.1
+        self.Q = self.q * np.eye(self.Nx)
+        self.Ru = self.ru * np.eye(self.Nu)
+        self.Rdu = self.rdu * np.eye(self.Nu)
+
+        # cost function
+        obj = 0
+        g = []
+        g.append(X[:, 0] - Ref[:, 0])
+
+        for i in range(self.Np - 1):
+            Ref_cost = ca.mtimes([(X[:, i] - Ref[:, i]).T, self.Q, X[:, i] - Ref[:, i]])
+            U_cost = ca.mtimes([U[:, i].T, self.Ru, U[:, i]])
+            obj = obj + Ref_cost + U_cost
+            x_next_ = f(X[:, i], U[:, i]) * self.T + X[:, i]
+            g.append(X[:, i + 1] - x_next_)
+
+        opt_variables = ca.vertcat(ca.reshape(U, -1, 1), ca.reshape(X, -1, 1))
+
+        nlp_prob = {'f': obj, 'x': opt_variables, 'p': Ref, 'g': ca.vertcat(*g)}
+        opts_setting = {'ipopt.max_iter': 100, 'ipopt.print_level': 5, 'print_time': 0,
+                        'ipopt.acceptable_tol': 1e-8, 'ipopt.acceptable_obj_change_tol': 1e-6}
+
+        solver = ca.nlpsol('solver', 'ipopt', nlp_prob, opts_setting)
+
+        lbg = 0.0
+        ubg = 0.0
+        lbx = []
+        ubx = []
+
+        for _ in range(self.Np - 1):
+            lbx.append(0)
+            lbx.append(-self.delta_f_max)
+            ubx.append(self.v_max)
+            ubx.append(self.delta_f_max)
+
+        for _ in range(self.Np):
+            lbx.append(-np.inf)
+            lbx.append(-np.inf)
+            lbx.append(-np.inf)
+            ubx.append(np.inf)
+            ubx.append(np.inf)
+            ubx.append(np.inf)
+
+        # x0 = np.array([x_current[0], x_current[1], x_current[2]]).reshape(-1, 1)  # initial state
+        # x0_ = x0.copy()
 
 
 
+        start_time = time.time()
+        index_t = []
+        Ref = self.Y_ref
+        Ref[:, 0] = np.array([x_current[0][0], x_current[1][0], x_current[2][0]])
+        init_control = np.concatenate((self.u0.reshape(-1, 1), self.next_states.reshape(-1, 1)))
+        t_ = time.time()
+        res = solver(x0=init_control, p=Ref, lbg=lbg,
+                     lbx=lbx, ubg=ubg, ubx=ubx)
+        index_t.append(time.time() - t_)
+        # the feedback is in the series [u0, x0, u1, x1, ...]
+        estimated_opt = res['x'].full()
+        u0 = estimated_opt[:(self.Np - 1) * self.Nu].reshape(self.Np - 1, self.Nu)
+        x_m = estimated_opt[(self.Np - 1) * self.Nu:].reshape(self.Np, self.Nx)
+        self.next_states = np.concatenate((x_m[1:], x_m[-1:]), axis=0)
+        self.u0 = np.concatenate((u0[1:], u0[-1:]))
+        print(estimated_opt[0])
+        print(estimated_opt[1])
 
         MPC_unsolved = False
-        return np.array([[2], [0]]), MPC_unsolved
+        return np.array([estimated_opt[0], estimated_opt[1]]), MPC_unsolved

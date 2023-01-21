@@ -32,9 +32,9 @@ if __name__ == '__main__':
     x = ca.SX.sym('x')
     y = ca.SX.sym('y')
     theta = ca.SX.sym('theta')
-    states = ca.vertcat(x, y)
-    states = ca.vertcat(states, theta)
-    # states = ca.vcat([x, y, theta])
+    # states = ca.vertcat(x, y)
+    # states = ca.vertcat(states, theta)
+    states = ca.vcat([x, y, theta])
     n_states = states.size()[0]
 
     v = ca.SX.sym('v')
@@ -43,8 +43,10 @@ if __name__ == '__main__':
     n_controls = controls.size()[0]
 
     # rhs
-    rhs = ca.vertcat(v*ca.cos(theta), v*ca.sin(theta))
-    rhs = ca.vertcat(rhs, omega)
+    # rhs = ca.vertcat(v*ca.cos(theta), v*ca.sin(theta))
+    # rhs = ca.vertcat(rhs, omega)
+
+    rhs = ca.vcat([v*ca.cos(theta), v*ca.sin(theta), omega])
 
     # function
     f = ca.Function('f', [states, controls], [rhs], [

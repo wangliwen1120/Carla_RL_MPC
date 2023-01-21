@@ -639,11 +639,11 @@ class CarlagymEnv(gym.Env):
         #     ref_left=np.array([ref_path_left_x, ref_path_left_y, ref_path_left_phi]),
         #     u_last=self.u_last,
         #     q=action, ru=1, rdu=1)
-        print(self.Input[0])
+
         self.u_last = self.Input
         target_speed = self.Input[0]
         cmdSpeed = target_speed * np.cos(psi_Frenet)
-        # steer = self.Input[0][1] * np.pi / 35
+        # steer = self.Input[[0][1]] * np.pi / 35
         steer = self.Input[1] * 180.0 / 70.0 / np.pi
         # steer = self.Input[0][1] * 180.0 / 500.0 / np.pi
         throttle_and_brake = self.PIDLongitudinalController.run_step(cmdSpeed)  # calculate control
@@ -892,7 +892,8 @@ class CarlagymEnv(gym.Env):
         reward = reward_cl + reward_mpcNoResult + reward_speed + reward_lanechange + reward_offTheRoad
         done = False
 
-        if collision or self.n_step >= 750 or ego_s-obj_s>=50 :
+        # if collision or self.n_step >= 1750 or ego_s-obj_s>=50 :
+        if collision or self.n_step >= 1750:
             done = True
 
         info = {'reserved': 0}
