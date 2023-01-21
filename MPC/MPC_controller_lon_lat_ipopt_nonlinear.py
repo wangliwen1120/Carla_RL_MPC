@@ -1,4 +1,3 @@
-
 from __future__ import division
 import numpy as np
 from cvxopt import matrix, solvers
@@ -115,12 +114,12 @@ class MPC_controller_lon_lat_ipopt_nonlinear:
         # 权重矩阵
         # y_ref
         for i in range(self.Np):
-            self.x_ref[i] = ref[0][self.Np-1]
-            self.y_ref[i] = ref[1][self.Np-1]
-            self.phi_ref[i] = ref[2][self.Np-1]
-            self.x_ref_left[i] = ref_left[0][self.Np-1]
-            self.y_ref_left[i] = ref_left[1][self.Np-1]
-            self.phi_ref_left[i] = ref_left[2][self.Np-1]
+            self.x_ref[i] = ref[0][self.Np - 1]
+            self.y_ref[i] = ref[1][self.Np - 1]
+            self.phi_ref[i] = ref[2][self.Np - 1]
+            self.x_ref_left[i] = ref_left[0][self.Np - 1]
+            self.y_ref_left[i] = ref_left[1][self.Np - 1]
+            self.phi_ref_left[i] = ref_left[2][self.Np - 1]
         for i in range(self.Np):
             self.y_ref_ext[i * self.Ny: (i + 1) * self.Ny, 0] = [self.x_ref[i], self.y_ref[i], self.phi_ref[i]]
             self.y_ref_left_ext[i * self.Ny: (i + 1) * self.Ny, 0] = [self.x_ref_left[i], self.y_ref_left[i],
@@ -368,17 +367,35 @@ class MPC_controller_lon_lat_ipopt_nonlinear:
         #     Y_ext[3 * i + 1] = y_predict[i]
         #     Y_ext[3 * i + 2] = phi_predict[i]
 
+        ## init_condition
+        # opti.subject_to(opt_states[0, :] == opt_x0.T)
+        # for i in range(N):
+        #     x_next = opt_states[i, :] + f(opt_states[i, :], opt_controls[i, :]).T * T
+        #     opti.subject_to(opt_states[i + 1, :] == x_next)
+
+
+
         Y_error = Y_ext - self.y_ref_ext
 
         # expr = U.T @ self.Ru_cell @ U
         expr = Y_error.T @ self.Q_cell @ Y_error
 
         opti.minimize(expr)
-        # p_opts = {"expand": True}  # Casadi 配置
-        # s_opts = {"max_iter": 200}  # solver 配置
-        # opti.solver("ipopt", p_opts, s_opts)
-        opti.solver('ipopt')  # 设置求解器
+        opti.subject_to(x_predict[0] == x_current[0])
+        opti.subject_to(y_predict[0] == x_current[1])
+        opti.subject_to(phi_predict[0] == x_current[2])
 
+        for i in range(4 - 1):
+            idx_c = min(i, 4 - 1)
+            opti.subject_to(x_predict[i + 1] == x_predict[i] + U[2 * idx_c] * np.cos(phi_predict[i]) * self.T)
+            opti.subject_to(y_predict[i + 1] == y_predict[i] + U[2 * idx_c] * np.sin(phi_predict[i]) * self.T)
+            opti.subject_to(
+                phi_predict[i + 1] == phi_predict[i] + U[2 * idx_c] * np.tan(U[2 * idx_c + 1]) * self.T / self.L)
+        # opts_setting = {'ipopt.max_iter': 100, 'ipopt.print_level': 0, 'print_time': 0, 'ipopt.acceptable_tol': 1e-8,
+        #                 'ipopt.acceptable_obj_change_tol': 1e-6}
+
+        # opti.solver('ipopt', opts_setting)
+        opti.solver('ipopt')
         sol = opti.solve()  # 求解
 
         print(sol.value(U[0]))
