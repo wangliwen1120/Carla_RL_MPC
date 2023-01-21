@@ -589,6 +589,8 @@ class CarlagymEnv(gym.Env):
         ref_path_left_x = self.ref_path_left_x[self.n_step:self.n_step + 30]
         ref_path_left_y = self.ref_path_left_y[self.n_step:self.n_step + 30]
         ref_path_left_phi = self.ref_path_left_phi[self.n_step:self.n_step + 30]
+
+
         # if self.n_step%30 == 1:
         #     self.fpath = fpath
         # ref_path_x = self.fpath.x

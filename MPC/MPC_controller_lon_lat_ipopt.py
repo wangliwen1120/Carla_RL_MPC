@@ -350,6 +350,6 @@ class MPC_controller_lon_lat_ipopt:
         print(sol.value(U[1]))
 
         MPC_unsolved = False
-        return np.array([[sol.value(U[1])], [sol.value(U[1])]]), MPC_unsolved
+        return np.array([[sol.value(U[0])], [sol.value(U[1])]]), MPC_unsolved
 
 
