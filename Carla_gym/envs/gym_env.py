@@ -87,6 +87,27 @@ def closest_wp_idx_ref(ego_state, fpath, f_idx, w_size=10):
 
     return f_idx + closest_wp_index
 
+def closest_ref_idx(ego_state, ref_x,ref_y, f_idx, w_size=50):
+    """
+    given the ego_state and frenet_path this function returns the closest WP in front of the vehicle that is within the w_size
+    """
+
+    min_dist = 30  # in meters (Max 100km/h /3.6) * 2 sn
+    ego_location = [ego_state[0], ego_state[1]]
+    closest_wp_index = 0  # default WP
+    w_size = w_size if w_size <= len(ref_x) - 2 - f_idx else len(ref_x) - 2 - f_idx
+    for i in range(w_size):
+        temp_wp = [ref_x[f_idx + i], ref_y[f_idx + i]]
+        temp_dist = euclidean_distance(ego_location, temp_wp)
+        if temp_dist <= min_dist \
+                and inertial_to_body_frame(ego_location, temp_wp[0], temp_wp[1], ego_state[2])[0] > 0.0:
+            closest_wp_index = i
+            min_dist = temp_dist
+        if i - closest_wp_index >5:
+            return f_idx + closest_wp_index
+
+    return f_idx + closest_wp_index
+
 
 def lamp(v, x, y):
     return y[0] + (v - x[0]) * (y[1] - y[0]) / (x[1] - x[0] + 1e-10)
@@ -215,6 +236,7 @@ class CarlagymEnv(gym.Env):
         self.u_lat_last = 0.0
         self.u_lat_llast = 0.0
         self.lane_last = 0
+        self.ref_left_idx =0
         self.fig, self.ax = plt.subplots()
         self.x = []
         self.y = []
@@ -576,7 +598,7 @@ class CarlagymEnv(gym.Env):
         obj_info = self.obj_info()
         obj_frenet = obj_info['Obj_frenet']
         obj_cartesian = obj_info['Obj_cartesian']
-        if self.n_step == 104:
+        if self.n_step == 34:
             print("180")
 
         # self.f_ref_idx = closest_wp_idx_ref(ego_state, self.ref_path_x,self.ref_path_y, self.f_idx)
@@ -586,27 +608,13 @@ class CarlagymEnv(gym.Env):
         ref_path_x = self.ref_path_x[self.n_step:self.n_step + 30]
         ref_path_y = self.ref_path_y[self.n_step:self.n_step + 30]
         ref_path_phi = self.ref_path_phi[self.n_step:self.n_step + 30]
-        ref_path_left_x = self.ref_path_left_x[self.n_step:self.n_step + 30]
-        ref_path_left_y = self.ref_path_left_y[self.n_step:self.n_step + 30]
-        ref_path_left_phi = self.ref_path_left_phi[self.n_step:self.n_step + 30]
-
-
-        # if self.n_step%30 == 1:
-        #     self.fpath = fpath
-        # ref_path_x = self.fpath.x
-        # ref_path_y = self.fpath.y
-        # ref_path_phi = self.fpath.yaw
-        # i = self.n_step%30
-        # ref_path_x = ref_path_x[i:i+30]
-        # ref_path_y = ref_path_y[i:i + 30]
-        # ref_path_phi = ref_path_phi[i:i + 30]
-        ####MPC_lon_lat
-        # plt.plot(self.n_step*0.1, speed,'o')
-        # plt.plot(fpath.t,fpath.s_d)
-        # plt.plot(fpath.x, fpath.y, 'o')
-        # plt.plot(ego_state[0], ego_state[1], '*')
-        # plt.pause(0.001)
-        # plt.cla()
+        self.ref_left_idx = closest_ref_idx(ego_state, self.ref_path_left_x,self.ref_path_left_y, self.ref_left_idx)
+        ref_path_left_x = self.ref_path_left_x[self.ref_left_idx:self.ref_left_idx + 30]
+        ref_path_left_y = self.ref_path_left_y[self.ref_left_idx:self.ref_left_idx + 30]
+        ref_path_left_phi = self.ref_path_left_phi[self.ref_left_idx:self.ref_left_idx + 30]
+        # ref_path_left_x = self.ref_path_left_x[self.n_step:self.n_step + 30]
+        # ref_path_left_y = self.ref_path_left_y[self.n_step:self.n_step + 30]
+        # ref_path_left_phi = self.ref_path_left_phi[self.n_step:self.n_step + 30]
 
         obj_x = obj_info['Obj_cartesian'][0][0]
         obj_y = obj_info['Obj_cartesian'][0][1]
@@ -614,11 +622,7 @@ class CarlagymEnv(gym.Env):
         obj_speed = obj_info['Obj_cartesian'][0][5]
         obj_delta_f = obj_info['Obj_cartesian'][0][6]
         obj_s = obj_info['Obj_frenet'][0][0]
-        # if 80 <= self.n_step <= 230:
-        #     ref_path_y = list(map(lambda x: x + 3.5, ref_path_y))
-        #
-        # elif 230 <= self.n_step <= 300:
-        #     ref_path_y = list(map(lambda x: x - 0, ref_path_y))
+
 
         self.Input, MPC_unsolved, x_m = self.lon_lat_controller_ipopt.calc_input(
             x_current=np.array([[ego_state[0]], [ego_state[1]], [ego_state[2]]]),

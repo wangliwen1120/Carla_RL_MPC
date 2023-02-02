@@ -1905,7 +1905,7 @@ class TrafficManager:
             table = data.sheets()[0]
             # velocity_curve = table.row_values(0)
             velocity_curve_0 = table.row_values(0)
-            velocity_curve = ( velocity_curve_0 + np.array(random.random()) ) * 0.0001
+            velocity_curve = velocity_curve_0 + np.array(random.random())
             self.spawn_one_actor(s, lane, targetSpeed, velocity_curve)
 
     def destroy(self):
