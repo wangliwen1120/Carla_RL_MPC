@@ -53,9 +53,9 @@ if __name__ == '__main__':
                     'input_state', 'control_input'], ['rhs'])
 
     # for MPC
-    U = ca.SX.sym('U', n_controls, N)
+    U = ca.SX.sym('U', n_controls, N-20)
 
-    X = ca.SX.sym('X', n_states, N+1)
+    X = ca.SX.sym('X', n_states, N)
 
     P = ca.SX.sym('P', n_states+n_states)
 
@@ -66,10 +66,15 @@ if __name__ == '__main__':
     obj = 0  # cost
     g = []  # equal constrains
     g.append(X[:, 0]-P[:3])
-    for i in range(N):
+    for i in range(N-20):
         obj = obj + ca.mtimes([(X[:, i]-P[3:]).T, Q, X[:, i]-P[3:]]
                               ) + ca.mtimes([U[:, i].T, R, U[:, i]])
         x_next_ = f(X[:, i], U[:, i])*T + X[:, i]
+        g.append(X[:, i+1]-x_next_)
+    for i in range(N-20,N-1):
+        obj = obj + ca.mtimes([(X[:, i]-P[3:]).T, Q, X[:, i]-P[3:]]
+                              )
+        x_next_ = f(X[:, i], U[:, N-21])*T + X[:, i]
         g.append(X[:, i+1]-x_next_)
 
     opt_variables = ca.vertcat(ca.reshape(U, -1, 1), ca.reshape(X, -1, 1))
@@ -85,12 +90,12 @@ if __name__ == '__main__':
     lbx = []
     ubx = []
 
-    for _ in range(N):
+    for _ in range(N-20):
         lbx.append(-v_max)
         lbx.append(-omega_max)
         ubx.append(v_max)
         ubx.append(omega_max)
-    for _ in range(N+1):  # note that this is different with the method using structure
+    for _ in range(N):  # note that this is different with the method using structure
         lbx.append(-2.0)
         lbx.append(-2.0)
         lbx.append(-np.inf)
@@ -102,10 +107,10 @@ if __name__ == '__main__':
     t0 = 0.0
     x0 = np.array([0.0, 0.0, 0.0]).reshape(-1, 1)  # initial state
     x0_ = x0.copy()
-    x_m = np.zeros((n_states, N+1))
+    x_m = np.zeros((n_states, N))
     next_states = x_m.copy().T
     xs = np.array([1.5, 1.5, 0.0]).reshape(-1, 1)  # final state
-    u0 = np.array([1, 2]*N).reshape(-1, 2).T  # np.ones((N, 2)) # controls
+    u0 = np.array([1, 2]*(N-20)).reshape(-1, 2).T  # np.ones((N, 2)) # controls
     x_c = []  # contains for the history of the state
     u_c = []
     t_c = []  # for the time
@@ -127,8 +132,8 @@ if __name__ == '__main__':
         index_t.append(time.time() - t_)
         # the feedback is in the series [u0, x0, u1, x1, ...]
         estimated_opt = res['x'].full()
-        u0 = estimated_opt[:200].reshape(N, n_controls)  # (N, n_controls)
-        x_m = estimated_opt[200:].reshape(N+1, n_states)  # (N+1, n_states)
+        u0 = estimated_opt[:n_controls*(N-20)].reshape(N-20, n_controls)  # (N, n_controls)
+        x_m = estimated_opt[n_controls*(N-20):].reshape(N, n_states)  # (N+1, n_states)
         x_c.append(x_m.T)
         u_c.append(u0[0, :])
         t_c.append(t0)
