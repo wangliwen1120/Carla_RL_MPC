@@ -80,7 +80,7 @@ class MPC_controller_lon_lat_ipopt_nonlinear:
             self.du_max_ext[i * self.Nu:(i + 1) * self.Nu] = np.array([[self.d_v_max], [self.d_delta_f_max]])
             self.du_min_ext[i * self.Nu:(i + 1) * self.Nu] = np.array([[self.d_v_min], [self.d_delta_f_min]])
 
-    def calc_input(self, x_current, x_frenet_current, obj, ref, ref_left, u_last, q, ru, rdu):
+    def calc_input(self, x_current, x_frenet_current, obj_info, ref, ref_left, u_last, q, ru, rdu):
         # 预测时域和控制时域内的分块权重矩阵
         # 权重矩阵
         # y_ref
@@ -97,9 +97,9 @@ class MPC_controller_lon_lat_ipopt_nonlinear:
 
         for i in range(self.Np):
             # 前车状态预测
-            self.obj_x_ref[i] = obj[0] + obj[3] * np.cos(obj[2]) * self.T * i
-            self.obj_y_ref[i] = obj[1] + obj[3] * np.sin(obj[2]) * self.T * i
-            self.obj_phi_ref[i] = obj[2] + obj[4] * self.T * i
+            self.obj_x_ref[i] = obj_info[0] + obj_info[3] * np.cos(obj_info[2]) * self.T * i
+            self.obj_y_ref[i] = obj_info[1] + obj_info[3] * np.sin(obj_info[2]) * self.T * i
+            self.obj_phi_ref[i] = obj_info[2] + obj_info[4] * self.T * i
 
         self.Y_ref = np.concatenate((self.x_ref.T, self.y_ref.T, self.phi_ref.T))
         self.Y_ref_left = np.concatenate((self.x_ref_left.T, self.y_ref_left.T, self.phi_ref_left.T))
@@ -123,10 +123,10 @@ class MPC_controller_lon_lat_ipopt_nonlinear:
         #         U = ca.SX.sym('U', self.Nu, self.Nc)
         U = ca.SX.sym('U', self.Nu, self.Nc)
         X = ca.SX.sym('X', self.Nx, self.Np)
-        C_R = ca.SX.sym('C_R', self.Nx + self.Nx + self.Nx)
+        C_R = ca.SX.sym('C_R', self.Nx + self.Nx + self.Nx + self.Nx)
         Ref = ca.SX.sym('Ref', self.Nx + self.Nx + self.Nx, self.Np)  #ego_lane,left_lane,obs_info
 
-        self.q = 0.5
+        self.q = 1.0
         self.ru = 0.3
         self.rdu = 0.1
         self.Q1 = self.q * np.eye(self.Nx)
@@ -137,13 +137,14 @@ class MPC_controller_lon_lat_ipopt_nonlinear:
         # cost function
         obj = 0
         g = []
-        S = 0
+        S = 10
         # g.append(X[:, 0] - C_R[:3])
         g.append(X[:, 0] - Ref[:self.Nx, 0])
 
         for i in range(self.Nc):
             # Ref_1_cost = ca.mtimes([(X[:, i] - C_R[3:6]).T, self.Q1, X[:, i] - C_R[3:6]])
-            # Ref_2_cost = ca.mtimes([(X[:, i] - C_R[6:]).T, self.Q2, X[:, i] - C_R[6:]])
+            # Ref_2_cost = ca.mtimes([(X[:, i] - C_R[6:9]).T, self.Q2, X[:, i] - C_R[6:9]])
+            # Obj_cost = S / (((X[0, i] - C_R[9]) ** 2) + ((X[1, i] - C_R[10]) ** 2))
             Obj_cost = S / (((X[0, i] - Ref[self.Nx*2,i]) ** 2) + ((X[1, i] - Ref[self.Nx*2+1,i]) ** 2))
             Ref_1_cost = ca.mtimes([(X[:, i] - Ref[:self.Nx, i]).T, self.Q1, X[:, i] - Ref[:self.Nx, i]])
             Ref_2_cost = ca.mtimes([(X[:, i] - Ref[self.Nx:self.Nx*2, i]).T, self.Q2, X[:, i] - Ref[self.Nx:self.Nx*2, i]])
@@ -154,7 +155,8 @@ class MPC_controller_lon_lat_ipopt_nonlinear:
             g.append(X[:, i + 1] - x_next_)
         for i in range(self.Nc, self.Np - 1):
             # Ref_1_cost = ca.mtimes([(X[:, i] - C_R[3:6]).T, self.Q1, X[:, i] - C_R[3:6]])
-            # Ref_2_cost = ca.mtimes([(X[:, i] - C_R[6:]).T, self.Q2, X[:, i] - C_R[6:]])
+            # Ref_2_cost = ca.mtimes([(X[:, i] - C_R[6:9]).T, self.Q2, X[:, i] - C_R[6:9]])
+            # Obj_cost = S / (((X[0, i] - C_R[9]) ** 2) + ((X[1, i] - C_R[10]) ** 2))
             Obj_cost = S / (((X[0, i] - Ref[self.Nx*2,i]) ** 2) + ((X[1, i] - Ref[self.Nx*2+1,i]) ** 2))
             Ref_1_cost = ca.mtimes([(X[:, i] - Ref[:self.Nx, i]).T, self.Q1, X[:, i] - Ref[:self.Nx, i]])
             Ref_2_cost = ca.mtimes([(X[:, i] - Ref[self.Nx:self.Nx*2, i]).T, self.Q2, X[:, i] - Ref[self.Nx:self.Nx*2, i]])
@@ -195,9 +197,11 @@ class MPC_controller_lon_lat_ipopt_nonlinear:
         # x0_ = x0.copy()
 
         index_t = []
-        Ref_1 = self.Y_ref[:, -1]
-        Ref_2 = self.Y_ref_left[:, -1]
-        C_R = np.array([x_current[0][0], x_current[1][0], x_current[2][0], Ref_1[0], Ref_1[1], Ref_1[2], Ref_2[0], Ref_2[1], Ref_2[2]])
+        Ref_1 = self.Y_ref[:, -10]
+        Ref_2 = self.Y_ref_left[:, -10]
+        Ref_3 = self.Obj_pred[:,-10]
+        C_R = np.array([x_current[0][0], x_current[1][0], x_current[2][0], Ref_1[0], Ref_1[1], Ref_1[2],
+                        Ref_2[0], Ref_2[1], Ref_2[2], Ref_3[0], Ref_3[1], Ref_3[2]])
         Ref = np.concatenate((self.Y_ref, self.Y_ref_left,self.Obj_pred), axis=0)
         Ref[:self.Nx, 0] = np.array([x_current[0][0], x_current[1][0], x_current[2][0]])
 
@@ -210,10 +214,10 @@ class MPC_controller_lon_lat_ipopt_nonlinear:
         estimated_opt = res['x'].full()
         u0 = estimated_opt[:(self.Nc) * self.Nu].reshape(self.Nc, self.Nu)
         x_m = estimated_opt[(self.Nc) * self.Nu:].reshape(self.Np, self.Nx)
-        # self.next_states = np.concatenate((x_m[1:], x_m[-1:]), axis=0)
-        # self.u0 = np.concatenate((u0[1:], u0[-1:]))
-        self.next_states = x_m
-        self.u0 = u0
+        self.next_states = np.concatenate((x_m[1:], x_m[-1:]), axis=0)
+        self.u0 = np.concatenate((u0[1:], u0[-1:]))
+        # self.next_states = x_m
+        # self.u0 = u0
         print(estimated_opt[0])
         print(estimated_opt[1])
 
