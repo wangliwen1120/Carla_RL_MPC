@@ -17,7 +17,8 @@ from MPC.parameter_config_0 import MPC_Config_0
 from MPC.MPC_controller_lon import MPC_controller_lon
 from MPC.MPC_controller_lat import MPC_controller_lat
 from MPC.MPC_controller_lon_lat import MPC_controller_lon_lat
-from MPC.MPC_controller_lon_lat_ipopt_nonlinear import MPC_controller_lon_lat_ipopt_nonlinear
+from MPC.MPC_controller_lon_lat_ipopt_nonlinear_terminal import MPC_controller_lon_lat_ipopt_nonlinear_terminal
+from MPC.MPC_controller_lon_lat_ipopt_nonlinear_sequence import MPC_controller_lon_lat_ipopt_nonlinear_sequence
 from MPC.MPC_controller_lon_lat_ipopt_nonlinear_opt import MPC_controller_lon_lat_ipopt_nonlinear_opt
 from MPC.parameter_config import MPC_lon_lat_Config
 from MPC.parameter_config import MPC_lon_Config
@@ -155,7 +156,8 @@ class CarlagymEnv(gym.Env):
         self.lon_controller = MPC_controller_lon(self.lon_param)
         self.lat_controller = MPC_controller_lat(self.lat_param)
         self.lon_lat_controller = MPC_controller_lon_lat(self.lon_lat_param)
-        self.lon_lat_controller_ipopt = MPC_controller_lon_lat_ipopt_nonlinear(self.lon_lat_param)
+        self.lon_lat_controller_ipopt = MPC_controller_lon_lat_ipopt_nonlinear_terminal(self.lon_lat_param)
+        # self.lon_lat_controller_ipopt = MPC_controller_lon_lat_ipopt_nonlinear_sequence(self.lon_lat_param)
         # self.lon_lat_controller_ipopt = MPC_controller_lon_lat_ipopt_nonlinear_opt(self.lon_lat_param)
         self.mpc_param = MPC_Config
         self.mpc_controller = MPC_controller_yundongxue(self.mpc_param)
@@ -600,7 +602,7 @@ class CarlagymEnv(gym.Env):
         obj_info = self.obj_info()
         obj_frenet = obj_info['Obj_frenet']
         obj_cartesian = obj_info['Obj_cartesian']
-        if self.n_step == 34:
+        if self.n_step == 30:
             print("180")
 
         # self.f_ref_idx = closest_wp_idx_ref(ego_state, self.ref_path_x,self.ref_path_y, self.f_idx)
@@ -630,7 +632,7 @@ class CarlagymEnv(gym.Env):
             x_current=np.array([[ego_state[0]], [ego_state[1]], [ego_state[2]]]),
             x_frenet_current=np.array([ego_s,ego_d,v_S,v_D]),
             obj_info=np.array([obj_x, obj_y, obj_phi, obj_speed, obj_delta_f]),
-            ref=np.array([fpath.x[0:40], fpath.y[0:40], fpath.yaw[0:40]]),
+            ref=np.array([fpath.x[0:30], fpath.y[0:30], fpath.yaw[0:30]]),
             # ref=np.array([ref_path_x, ref_path_y, ref_path_phi]),
             ref_left=np.array([ref_path_left_x, ref_path_left_y, ref_path_left_phi]),
             u_last=self.u_last,
@@ -650,7 +652,7 @@ class CarlagymEnv(gym.Env):
         target_speed = self.Input[0]
         cmdSpeed = target_speed * np.cos(psi_Frenet)
         # steer = self.Input[[0][1]] * np.pi / 35
-        steer = self.Input[1] * 180.0 / 70.0 / np.pi
+        steer = self.Input[1] * 180.0 / 100.0 / np.pi  ##origin:70
         # steer = self.Input[0][1] * 180.0 / 500.0 / np.pi
         throttle_and_brake = self.PIDLongitudinalController.run_step(cmdSpeed)  # calculate control
         throttle_and_brake = throttle_and_brake[0]

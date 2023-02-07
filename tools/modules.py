@@ -1891,7 +1891,7 @@ class TrafficManager:
         # grid_choices = np.arange(21, 38, 4)
         # grid_choices = [33]  ## 40:25  50:29  60:33
         grid_choices = [53]  ## 40:25  50:29  60:33
-        # grid_choices = [59]
+        # grid_choices = [40,53,60]
         # 通过设置grid_choices可以设置其可能出现的初始位置，可以看上面的Grid world indices示意图。
         # 设置self.N_SPAWN_CARS为需要的障碍车个数
         rnd_indices = np.random.choice(grid_choices, self.N_SPAWN_CARS, replace=False)
