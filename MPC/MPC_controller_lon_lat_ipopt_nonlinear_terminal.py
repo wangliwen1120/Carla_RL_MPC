@@ -3,6 +3,19 @@ import numpy as np
 import casadi as ca
 import time
 
+# def frenet_to_inertial(s, d, csp):
+#     """
+#     transform a point from frenet frame to inertial frame
+#     input: frenet s and d variable and the instance of global cubic spline class
+#     output: x and y in global frame
+#     """
+#     ix, iy, iz = csp.calc_position(s)
+#
+#     iyaw = csp.calc_yaw(s)
+#     x = ix + d * math.cos(iyaw + math.pi / 2.0)
+#     y = iy + d * math.sin(iyaw + math.pi / 2.0)
+
+    # return x, y, iz, iyaw
 
 class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
 

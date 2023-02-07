@@ -605,6 +605,7 @@ class CarlagymEnv(gym.Env):
         if self.n_step == 30:
             print("180")
 
+        # global path
         # self.f_ref_idx = closest_wp_idx_ref(ego_state, self.ref_path_x,self.ref_path_y, self.f_idx)
         # ref_path_x = self.ref_path_x[self.n_step:self.n_step + 30]
         # ref_path_y = self.ref_path_y[self.n_step:self.n_step + 30]
@@ -627,7 +628,7 @@ class CarlagymEnv(gym.Env):
         obj_delta_f = obj_info['Obj_cartesian'][0][6]
         obj_s = obj_info['Obj_frenet'][0][0]
 
-
+        # # sequence
         self.Input, MPC_unsolved, x_m = self.lon_lat_controller_ipopt.calc_input(
             x_current=np.array([[ego_state[0]], [ego_state[1]], [ego_state[2]]]),
             x_frenet_current=np.array([ego_s,ego_d,v_S,v_D]),
@@ -637,6 +638,8 @@ class CarlagymEnv(gym.Env):
             ref_left=np.array([ref_path_left_x, ref_path_left_y, ref_path_left_phi]),
             u_last=self.u_last,
             q=1, ru=1, rdu=1)
+
+
 
         # self.Input, MPC_unsolved = self.lon_lat_controller.calc_input(
         #     x_current=np.array([[ego_state[0]], [ego_state[1]], [ego_state[2]]]),
