@@ -1814,7 +1814,7 @@ class TrafficManager:
             return
 
         d = lane * self.LANE_WIDTH
-        x, y, z, yaw = frenet_to_inertial(s-20, d, self.global_csp)
+        x, y, z, yaw = frenet_to_inertial(s, d, self.global_csp)
 
         blueprint = random.choice(self.blueprints)
         if blueprint.has_attribute('color'):
@@ -1889,8 +1889,8 @@ class TrafficManager:
         ego_grid_n = ego_lane + 9  # in Grid world (see notes above), ego is in column 2 so its grid number will be based on its lane number
         # grid_choices = np.arange(16, 60)
         # grid_choices = np.arange(21, 38, 4)
-        # grid_choices = [33]  ## 40:25  50:29  60:33
-        grid_choices = [53]  ## 40:25  50:29  60:33
+        grid_choices = [25,33,18]  ## 40:25  50:29  60:33
+        # grid_choices = [53]  ## 40:25  50:29  60:33
         # grid_choices = [40,53,60]
         # 通过设置grid_choices可以设置其可能出现的初始位置，可以看上面的Grid world indices示意图。
         # 设置self.N_SPAWN_CARS为需要的障碍车个数
@@ -1901,7 +1901,7 @@ class TrafficManager:
             lane = idx - col * 4 - 1  # lane number [-1, 2]
             s = ego_s + col * 10 - 20  # -20 bc ego is on second column
             targetSpeed = random.uniform(self.min_speed, self.max_speed)  # m/s
-            data = xlrd.open_workbook(os.path.abspath('.')+ '/tools/ob_v_data_0.xlsx')
+            data = xlrd.open_workbook(os.path.abspath('.')+ '/tools/ob_v_data.xlsx')
             table = data.sheets()[0]
             # velocity_curve = table.row_values(0)
             velocity_curve_0 = table.row_values(0)
@@ -1914,36 +1914,6 @@ class TrafficManager:
             actor_dic['Actor'].destroy()
             actor_dic['Sensor'].destroy()
 
-    # def tick(self):
-    #
-    #     for actor_dic in self.actors_batch:
-    #         control = actor_dic['Cruise Control']
-    #
-    #         state = control.tick()
-    #         s = self.estimate_s(control.s, state[0], state[1], state[-2])
-    #
-    #         d = update_d(s, state[0], state[1], self.global_csp)
-    #
-    #         v_S, v_D = velocity_inertial_to_frenet(s, state[-2].x, state[-2].y, self.global_csp)
-    #         psi_Frenet = get_obj_S_yaw(state[-3], s, self.global_csp)
-    #
-    #         actor_dic['Frenet State'][0].append(s)
-    #         actor_dic['Obj_Frenet_state'][0] = s
-    #         actor_dic['Obj_Frenet_state'][1] = d
-    #         actor_dic['Obj_Frenet_state'][2] = v_S
-    #         actor_dic['Obj_Frenet_state'][3] = v_D
-    #         actor_dic['Obj_Frenet_state'][4] = psi_Frenet
-    #         actor_dic['Obj_Frenet_state'][5] = state[0]
-    #         actor_dic['Obj_Frenet_state'][6] = state[1]
-    #         actor_dic['Obj_Frenet_state'][7] = state[2]
-    #         actor_dic['Obj_Frenet_state'][8] = math.radians(state[5])
-    #         actor_dic['Obj_Frenet_state'][9] = state[-1] * 35 / np.pi
-    #         actor_dic['Obj_Frenet_state'][10] = state[3]
-    #
-    #         # append current actor s value
-    #         # actor_dic['Frenet State'][0] = s
-    #         # IMPORTANT actor d is NOT updated
-    #         control.update_s(s)
     def tick(self):
 
         for actor_dic in self.actors_batch:
@@ -1955,7 +1925,7 @@ class TrafficManager:
             v_S, v_D = velocity_inertial_to_frenet(s, state[6].x, state[6].y, self.global_csp)
             psi_Frenet = get_obj_S_yaw(state[5], s, self.global_csp)
             K_Frenet = get_calc_curvature(s, self.global_csp)
-            x, y, z, yaw = frenet_to_inertial(s - 20, d, self.global_csp)
+            x, y, z, yaw = frenet_to_inertial(s, d, self.global_csp)
             v_x = state[6].x
             v_y = state[6].y
             speed = state[3]
@@ -2105,8 +2075,8 @@ class CruiseControl:
         timesteps = self.steps
         targetSpeed = self.velocity_curve[timesteps - 1] + 1e-6
         # targetSpeed = self.targetSpeed
-        cmdSpeed = targetSpeed
-        # cmdSpeed = self.IDM.run_step(vd=targetSpeed, vehicle_ahead=vehicle_ahead)
+        # cmdSpeed = targetSpeed
+        cmdSpeed = self.IDM.run_step(vd=targetSpeed, vehicle_ahead=vehicle_ahead)
         self.velocity = self.vehicle.get_velocity()
 
         control = self.vehicleController.run_step(cmdSpeed, targetWP)

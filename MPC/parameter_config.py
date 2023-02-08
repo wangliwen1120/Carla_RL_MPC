@@ -25,16 +25,19 @@ class Config:
         self.v_y_0 = 0.0 / 3.6
         self.Pos_x_0 = 1010.0
 
-        self.a = 1.400
-        self.b = 1.650
-        self.L = self.a + self.b
+        self.a = 1.450
+        self.b = 1.450
+        self.L = self.a + self.b    # 轴距
+        self.Length = 4.800  # vehicle_length
+        self.Width = 1.850   # vehicle_width
+        self.Height = 1.450  #vehicle_height
         self.M = 1650
         self.Iz = 3234
         self.Caf = -50531 * 2
         self.Car = -43121 * 2
         self.R = 0.353  # 轮胎半径
         self.steeringratio = 16  # 方向盘转16度，前轮转1度
-        self.lanewidth = 1.75  # 车道宽
+        self.lanewidth = 3.5  # 车道宽
         '''
         Display Config
         '''

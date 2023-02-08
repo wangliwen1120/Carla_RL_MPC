@@ -39,6 +39,19 @@ MODULE_TRAFFIC = 'TRAFFIC'
 TENSOR_ROW_NAMES = ['EGO', 'LEADING', 'FOLLOWING', 'LEFT', 'LEFT_UP', 'LEFT_DOWN',
                     'RIGHT', 'RIGHT_UP', 'RIGHT_DOWN']
 
+def frenet_to_inertial(s, d, csp):
+    """
+    transform a point from frenet frame to inertial frame
+    input: frenet s and d variable and the instance of global cubic spline class
+    output: x and y in global frame
+    """
+    ix, iy, iz = csp.calc_position(s)
+
+    iyaw = csp.calc_yaw(s)
+    x = ix + d * math.cos(iyaw + math.pi / 2.0)
+    y = iy + d * math.sin(iyaw + math.pi / 2.0)
+
+    return x, y, iz, iyaw
 
 def inertial_to_body_frame(ego_location, xi, yi, psi):
     Xi = np.array([xi, yi])  # inertial frame
@@ -89,26 +102,26 @@ def closest_wp_idx_ref(ego_state, fpath, f_idx, w_size=10):
 
     return f_idx + closest_wp_index
 
-def closest_ref_idx(ego_state, ref_x,ref_y, f_idx, w_size=50):
-    """
-    given the ego_state and frenet_path this function returns the closest WP in front of the vehicle that is within the w_size
-    """
-
-    min_dist = 30  # in meters (Max 100km/h /3.6) * 2 sn
-    ego_location = [ego_state[0], ego_state[1]]
-    closest_wp_index = 0  # default WP
-    w_size = w_size if w_size <= len(ref_x) - 2 - f_idx else len(ref_x) - 2 - f_idx
-    for i in range(w_size):
-        temp_wp = [ref_x[f_idx + i], ref_y[f_idx + i]]
-        temp_dist = euclidean_distance(ego_location, temp_wp)
-        if temp_dist <= min_dist \
-                and inertial_to_body_frame(ego_location, temp_wp[0], temp_wp[1], ego_state[2])[0] > 0.0:
-            closest_wp_index = i
-            min_dist = temp_dist
-        if i - closest_wp_index >5:
-            return f_idx + closest_wp_index
-
-    return f_idx + closest_wp_index
+# def closest_ref_idx(ego_state, ref_x,ref_y, f_idx, w_size=50):
+#     """
+#     given the ego_state and frenet_path this function returns the closest WP in front of the vehicle that is within the w_size
+#     """
+#
+#     min_dist = 30  # in meters (Max 100km/h /3.6) * 2 sn
+#     ego_location = [ego_state[0], ego_state[1]]
+#     closest_wp_index = 0  # default WP
+#     w_size = w_size if w_size <= len(ref_x) - 2 - f_idx else len(ref_x) - 2 - f_idx
+#     for i in range(w_size):
+#         temp_wp = [ref_x[f_idx + i], ref_y[f_idx + i]]
+#         temp_dist = euclidean_distance(ego_location, temp_wp)
+#         if temp_dist <= min_dist \
+#                 and inertial_to_body_frame(ego_location, temp_wp[0], temp_wp[1], ego_state[2])[0] > 0.0:
+#             closest_wp_index = i
+#             min_dist = temp_dist
+#         if i - closest_wp_index >5:
+#             return f_idx + closest_wp_index
+#
+#     return f_idx + closest_wp_index
 
 
 def lamp(v, x, y):
@@ -143,6 +156,7 @@ class CarlagymEnv(gym.Env):
 
     # metadata = {'render.modes': ['human']}
     def __init__(self):
+
 
         self.Input = None
         self.du_lon_last = None
@@ -246,6 +260,10 @@ class CarlagymEnv(gym.Env):
         self.y = []
         self.obj_frenet_history = np.zeros([1, 6])
         self.obj_cartesian_history = np.zeros([1, 8])
+        self.actor_enumerated_dict = {}
+        self.actor_enumeration = []
+        self.side_window = 5
+        self.look_back = int(cfg.GYM_ENV.LOOK_BACK)
 
         self.motionPlanner = None
         self.vehicleController = None
@@ -321,71 +339,8 @@ class CarlagymEnv(gym.Env):
 
             return self.traffic_module.actors_batch[vehicle_ahead_idx]
 
-    # def obj_info(self):
-    #     """
-    #     Frenet:  [s,d,v_s, v_d, phi_Frenet]
-    #     """
-    #     # others_s = np.zeros(self.N_SPAWN_CARS)
-    #     # others_d = np.zeros(self.N_SPAWN_CARS)
-    #     # others_v_S = np.zeros(self.N_SPAWN_CARS)
-    #     # others_v_D = np.zeros(self.N_SPAWN_CARS)
-    #     # others_phi_Frenet = np.zeros(self.N_SPAWN_CARS)
-    #     #
-    #     # for i, actor in enumerate(self.traffic_module.actors_batch):
-    #     #     act_s, act_d, act_v_S, act_v_D, act_psi_Frenet = actor['Obj_Frenet_state']
-    #     #     others_s[i] = act_s
-    #     #     others_d[i] = act_d
-    #     #     others_v_S[i] = act_v_S
-    #     #     others_v_D[i] = act_v_D
-    #     #     others_phi_Frenet[i] = act_psi_Frenet
-    #     # obj_info_Mux = np.vstack((others_s, others_d, others_v_S, others_v_D, others_phi_Frenet))
-    #     others_s = np.zeros(self.N_SPAWN_CARS)
-    #     others_d = np.zeros(self.N_SPAWN_CARS)
-    #     others_v_S = np.zeros(self.N_SPAWN_CARS)
-    #     others_v_D = np.zeros(self.N_SPAWN_CARS)
-    #     others_phi_Frenet = np.zeros(self.N_SPAWN_CARS)
-    #     others_x = np.zeros(self.N_SPAWN_CARS)
-    #     others_y = np.zeros(self.N_SPAWN_CARS)
-    #     others_z = np.zeros(self.N_SPAWN_CARS)
-    #     others_psi = np.zeros(self.N_SPAWN_CARS)
-    #     others_delta_f = np.zeros(self.N_SPAWN_CARS)
-    #     others_speed = np.zeros(self.N_SPAWN_CARS)
-    #     for i, actor in enumerate(self.traffic_module.actors_batch):
-    #         act_s, act_d, act_v_S, act_v_D, act_psi_Frenet, x, y, z, psi, delta_f, speed = actor['Obj_Frenet_state']
-    #         others_s[i] = act_s
-    #         others_d[i] = act_d
-    #         others_v_S[i] = act_v_S
-    #         others_v_D[i] = act_v_D
-    #         others_phi_Frenet[i] = act_psi_Frenet
-    #         others_x[i] = x
-    #         others_y[i] = y
-    #         others_z[i] = z
-    #         others_psi[i] = psi
-    #         others_delta_f[i] = delta_f
-    #         others_speed[i] = speed
-    #     obj_info_Mux = np.vstack((others_s, others_d, others_v_S, others_v_D, others_phi_Frenet, others_x, others_y,
-    #                               others_z, others_psi, others_delta_f, others_speed))
 
-    # return obj_info_Mux
-
-    def state_input_vector(self, v_S, ego_s):
-        # Paper: Automated Speed and Lane Change Decision Making using Deep Reinforcement Learning
-        obj_mat = self.obj_info()
-        state_vector = np.zeros(3)
-
-        # No normalized
-        state_vector[0] = obj_mat[0] - ego_s
-        state_vector[1] = obj_mat[2] - v_S
-        state_vector[2] = v_S
-
-        # #Normalized
-        # state_vector[0] = (obj_mat[0] - ego_s) / 100
-        # state_vector[1] = np.clip(lamp(obj_mat[2] - v_S, [-20, 10], [0, 1]), 0, 1)
-        # state_vector[2] = np.clip(v_S / 20, 0, 1)
-
-        return state_vector
-
-    def obj_info(self):
+    def obj_info_1(self):
         """
         Actor:  [actor_id]
         Frenet:  [s,d,v_s, v_d, phi_Frenet, K_Frenet]
@@ -401,19 +356,362 @@ class CarlagymEnv(gym.Env):
             obj_actor[obj_idx] = actor['Actor']
             obj_frenet[obj_idx] = actor['Obj_Frenet_state']
             obj_cartesian[obj_idx] = actor['Obj_Cartesian_state']
-        # if self.n_step <= 30:
-        #     self.obj_frenet_history.append(obj_frenet)
-        #     self.obj_cartesian_history.append(obj_cartesian)
-        # else:
-        #     j = self.n_step % 30 - 1
-        #     self.obj_frenet_history[j] = obj_frenet
-        #     self.obj_cartesian_history[j] = obj_cartesian
 
         obj_dict = ({'Obj_actor': obj_actor, 'Obj_frenet': obj_frenet, 'Obj_cartesian': obj_cartesian,
-                     # 'Obj_frenet_hist': self.obj_frenet_history, 'Obj_cartesian_hist': self.obj_cartesian_history
-                     })
+                    })
 
         return obj_dict
+
+    def obj_info(self):
+        """
+        Actor:  [actor_id]
+        Frenet:  [s,d,v_s, v_d, phi_Frenet, K_Frenet]
+        Cartesian:  [x, y, v_x, v_y, phi, speed, delta_f]
+        """
+        obj_info = {}
+        obj_actor = [0 for _ in range(self.N_SPAWN_CARS)]
+        obj_frenet = [0 for _ in range(self.N_SPAWN_CARS)]
+        obj_cartesian = [0 for _ in range(self.N_SPAWN_CARS)]
+        obj_targetSpeed = [0 for _ in range(self.N_SPAWN_CARS)]
+
+        for i, actor in enumerate(self.traffic_module.actors_batch):
+            obj_idx = i
+            obj_actor[obj_idx] = actor['Actor']
+            obj_frenet[obj_idx] = actor['Obj_Frenet_state']
+            obj_cartesian[obj_idx] = actor['Obj_Cartesian_state']
+            obj_targetSpeed[obj_idx] = actor['Obj_Cartesian_state'][7]
+
+
+
+        self.enumerate_actors()
+
+        self.ego_lane_preceding_idx = 0
+        self.ego_lane_following_idx = 0
+        self.left_lane_idx = 0
+        self.left_lane_preceding_idx = 0
+        self.left_lane_following_idx = 0
+        self.right_lane_idx = 0
+        self.right_lane_preceding_idx = 0
+        self.right_lane_following_idx = 0
+
+        others_id = [0 for _ in range(self.N_SPAWN_CARS)]
+        for i in range(self.N_SPAWN_CARS):
+            others_id[i] = obj_actor[i].id
+            if others_id[i] == self.actor_enumeration[0]:
+                self.ego_lane_preceding_idx = i+1
+            elif others_id[i] == self.actor_enumeration[1]:
+                self.ego_lane_following_idx = i+1
+            elif others_id[i] == self.actor_enumeration[2]:
+                self.left_lane_idx = i+1
+            elif others_id[i] == self.actor_enumeration[3]:
+                self.left_lane_preceding_idx = i+1
+            elif others_id[i] == self.actor_enumeration[4]:
+                self.left_lane_following_idx = i+1
+            elif others_id[i] == self.actor_enumeration[8]:
+                self.right_lane_idx = i+1
+            elif others_id[i] == self.actor_enumeration[9]:
+                self.right_lane_preceding_idx = i+1
+            elif others_id[i] == self.actor_enumeration[10]:
+                self.right_lane_following_idx = i+1
+            else:
+                pass
+
+        if self.ego_lane_preceding_idx != 0:
+            ego_preceding_actor = obj_actor[self.ego_lane_preceding_idx-1]
+            ego_preceding_actor_frenet = obj_frenet[self.ego_lane_preceding_idx-1]
+            ego_preceding_actor_cartesian = obj_cartesian[self.ego_lane_preceding_idx - 1]
+        else:
+            ego_preceding_actor = None
+            ego_preceding_actor_frenet = None
+            ego_preceding_actor_cartesian = None
+
+        if self.ego_lane_following_idx != 0:
+            ego_following_actor = obj_actor[self.ego_lane_following_idx-1]
+            ego_following_actor_frenet = obj_frenet[self.ego_lane_following_idx-1]
+            ego_following_actor_cartesian = obj_cartesian[self.ego_lane_following_idx-1]
+
+        else:
+            ego_following_actor = None
+            ego_following_actor_frenet = None
+            ego_following_actor_cartesian = None
+
+        if self.left_lane_preceding_idx != 0:
+            left_preceding_actor = obj_actor[self.left_lane_preceding_idx-1]
+            left_preceding_actor_frenet = obj_frenet[self.left_lane_preceding_idx-1]
+            left_preceding_actor_cartesian = obj_cartesian[self.left_lane_preceding_idx-1]
+        else:
+            left_preceding_actor = None
+            left_preceding_actor_frenet = None
+            left_preceding_actor_cartesian = None
+
+        if self.left_lane_following_idx != 0:
+            left_following_actor = obj_actor[self.left_lane_following_idx-1]
+            left_following_actor_frenet = obj_frenet[self.left_lane_following_idx-1]
+            left_following_actor_cartesian = obj_cartesian[self.left_lane_following_idx-1]
+        else:
+            left_following_actor = None
+            left_following_actor_frenet = None
+            left_following_actor_cartesian = None
+
+        if self.right_lane_preceding_idx != 0:
+            right_preceding_actor = obj_actor[self.right_lane_preceding_idx-1]
+            right_preceding_actor_frenet = obj_frenet[self.right_lane_preceding_idx-1]
+            right_preceding_actor_cartesian = obj_cartesian[self.right_lane_preceding_idx-1]
+        else:
+            right_preceding_actor = None
+            right_preceding_actor_frenet = None
+            right_preceding_actor_cartesian = None
+
+        if self.right_lane_following_idx != 0:
+            right_following_actor = obj_actor[self.right_lane_following_idx-1]
+            right_following_actor_frenet = obj_frenet[self.right_lane_following_idx-1]
+            right_following_actor_cartesian = obj_cartesian[self.right_lane_following_idx-1]
+        else:
+            right_following_actor = None
+            right_following_actor_frenet = None
+            right_following_actor_cartesian = None
+
+        if self.left_lane_idx != 0:
+            left_actor = obj_actor[self.left_lane_idx-1]
+            left_actor_frenet = obj_frenet[self.left_lane_idx-1]
+            left_actor_cartesian = obj_cartesian[self.left_lane_idx-1]
+        else:
+            left_actor = None
+            left_actor_frenet = None
+            left_actor_cartesian = None
+
+        if self.right_lane_idx != 0:
+            right_actor = obj_actor[self.right_lane_idx-1]
+            right_actor_frenet = obj_frenet[self.right_lane_idx-1]
+            right_actor_cartesian = obj_cartesian[self.right_lane_idx-1]
+        else:
+            right_actor = None
+            right_actor_frenet = None
+            right_actor_cartesian = None
+
+        obj_info = ({'Obj_actor': obj_actor, 'Obj_frenet': obj_frenet, 'Obj_cartesian': obj_cartesian,
+                     'Ego_preceding': [ego_preceding_actor, ego_preceding_actor_frenet,
+                                       ego_preceding_actor_cartesian],
+                     'Ego_following': [ego_following_actor, ego_following_actor_frenet,
+                                       ego_following_actor_cartesian],
+                     'Left_preceding': [left_preceding_actor, left_preceding_actor_frenet,
+                                        left_preceding_actor_cartesian],
+                     'Left_following': [left_following_actor, left_following_actor_frenet,
+                                        left_following_actor_cartesian],
+                     'Right_preceding': [right_preceding_actor, right_preceding_actor_frenet,
+                                         right_preceding_actor_cartesian],
+                     'Right_following': [right_following_actor, right_following_actor_frenet,
+                                         right_following_actor_cartesian],
+                     'Left': [left_actor, left_actor_frenet, left_actor_cartesian],
+                     'Right': [right_actor, right_actor_frenet, right_actor_cartesian]
+                     })
+
+
+        return obj_info
+    
+    def enumerate_actors(self):
+        """
+        Given the traffic actors and ego_state this fucntion enumerate actors, calculates their relative positions with
+        to ego and assign them to actor_enumerated_dict.
+        Keys to be updated: ['LEADING', 'FOLLOWING', 'LEFT', 'LEFT_UP', 'LEFT_DOWN', 'LLEFT', 'LLEFT_UP',
+        'LLEFT_DOWN', 'RIGHT', 'RIGHT_UP', 'RIGHT_DOWN', 'RRIGHT', 'RRIGHT_UP', 'RRIGHT_DOWN']
+        """
+
+        self.actor_enumeration = []
+        ego_s = self.actor_enumerated_dict['EGO']['S'][-1]
+        ego_d = self.actor_enumerated_dict['EGO']['D'][-1]
+
+        others_s = [0 for _ in range(self.N_SPAWN_CARS)]
+        others_d = [0 for _ in range(self.N_SPAWN_CARS)]
+        others_id = [0 for _ in range(self.N_SPAWN_CARS)]
+        for i, actor in enumerate(self.traffic_module.actors_batch):
+            act_s, act_d = actor['Frenet State']
+            others_s[i] = act_s[-1]
+            others_d[i] = act_d
+            others_id[i] = actor['Actor'].id
+
+        def append_actor(x_lane_d_idx, actor_names=None):
+            # actor names example: ['left', 'leftUp', 'leftDown']
+            x_lane_s = np.array(others_s)[x_lane_d_idx]
+            x_lane_id = np.array(others_id)[x_lane_d_idx]
+            s_idx = np.concatenate(
+                (np.array(x_lane_d_idx).reshape(-1, 1), (x_lane_s - ego_s).reshape(-1, 1), x_lane_id.reshape(-1, 1)),
+                axis=1)
+            sorted_s_idx = s_idx[s_idx[:, 1].argsort()]
+
+            self.actor_enumeration.append(
+                others_id[int(sorted_s_idx[:, 0][abs(sorted_s_idx[:, 1]) < self.side_window][0])] if (
+                    any(abs(
+                        sorted_s_idx[:, 1][abs(sorted_s_idx[:, 1]) <= self.side_window]) >= -self.side_window)) else -1)
+
+            self.actor_enumeration.append(
+                others_id[int(sorted_s_idx[:, 0][sorted_s_idx[:, 1] > self.side_window][0])] if (
+                    any(sorted_s_idx[:, 1][sorted_s_idx[:, 1] > 0] > self.side_window)) else -1)
+
+            self.actor_enumeration.append(
+                others_id[int(sorted_s_idx[:, 0][sorted_s_idx[:, 1] < -self.side_window][-1])] if (
+                    any(sorted_s_idx[:, 1][sorted_s_idx[:, 1] < 0] < -self.side_window)) else -1)
+
+        # --------------------------------------------- ego lane -------------------------------------------------
+        same_lane_d_idx = np.where(abs(np.array(others_d) - ego_d) < 1)[0]
+        if len(same_lane_d_idx) == 0:
+            self.actor_enumeration.append(-2)
+            self.actor_enumeration.append(-2)
+
+        else:
+            same_lane_s = np.array(others_s)[same_lane_d_idx]
+            same_lane_id = np.array(others_id)[same_lane_d_idx]
+            same_s_idx = np.concatenate((np.array(same_lane_d_idx).reshape(-1, 1), (same_lane_s - ego_s).reshape(-1, 1),
+                                         same_lane_id.reshape(-1, 1)), axis=1)
+            sorted_same_s_idx = same_s_idx[same_s_idx[:, 1].argsort()]
+            self.actor_enumeration.append(others_id[int(sorted_same_s_idx[:, 0][sorted_same_s_idx[:, 1] > 0][0])]
+                                          if (any(sorted_same_s_idx[:, 1] > 0)) else -1)
+            self.actor_enumeration.append(others_id[int(sorted_same_s_idx[:, 0][sorted_same_s_idx[:, 1] < 0][-1])]
+                                          if (any(sorted_same_s_idx[:, 1] < 0)) else -1)
+
+        # --------------------------------------------- left lane -------------------------------------------------
+        left_lane_d_idx = np.where(((np.array(others_d) - ego_d) < -3) * ((np.array(others_d) - ego_d) > -4))[0]
+        if ego_d < -1.75:
+            self.actor_enumeration += [-2, -2, -2]
+
+        elif len(left_lane_d_idx) == 0:
+            self.actor_enumeration += [-1, -1, -1]
+
+        else:
+            append_actor(left_lane_d_idx)
+
+        # ------------------------------------------- two left lane -----------------------------------------------
+        lleft_lane_d_idx = np.where(((np.array(others_d) - ego_d) < -6.5) * ((np.array(others_d) - ego_d) > -7.5))[0]
+
+        if ego_d < 1.75:
+            self.actor_enumeration += [-2, -2, -2]
+
+        elif len(lleft_lane_d_idx) == 0:
+            self.actor_enumeration += [-1, -1, -1]
+
+        else:
+            append_actor(lleft_lane_d_idx)
+
+            # ---------------------------------------------- rigth lane --------------------------------------------------
+        right_lane_d_idx = np.where(((np.array(others_d) - ego_d) > 3) * ((np.array(others_d) - ego_d) < 4))[0]
+        if ego_d > 5.25:
+            self.actor_enumeration += [-2, -2, -2]
+
+        elif len(right_lane_d_idx) == 0:
+            self.actor_enumeration += [-1, -1, -1]
+
+        else:
+            append_actor(right_lane_d_idx)
+
+        # ------------------------------------------- two rigth lane --------------------------------------------------
+        rright_lane_d_idx = np.where(((np.array(others_d) - ego_d) > 6.5) * ((np.array(others_d) - ego_d) < 7.5))[0]
+        if ego_d > 1.75:
+            self.actor_enumeration += [-2, -2, -2]
+
+        elif len(rright_lane_d_idx) == 0:
+            self.actor_enumeration += [-1, -1, -1]
+
+        else:
+            append_actor(rright_lane_d_idx)
+
+        # Fill enumerated actor values
+
+        actor_id_s_d = {}  # all actor_sd
+        norm_s = []
+        # norm_d = []
+        for actor in self.traffic_module.actors_batch:
+            actor_id_s_d[actor['Actor'].id] = actor['Frenet State']
+
+        for i, actor_id in enumerate(self.actor_enumeration):
+            if actor_id >= 0:
+                actor_norm_s = []
+                act_s_hist = actor_id_s_d[actor_id][0]
+                act_d = actor_id_s_d[actor_id][1]  # act_s_hist:list act_d:float
+                for act_s, ego_s in zip(list(act_s_hist)[-self.look_back:],
+                                        self.actor_enumerated_dict['EGO']['S'][-self.look_back:]):
+                    actor_norm_s.append((act_s - ego_s) / self.max_s)
+                norm_s.append(actor_norm_s)
+            #    norm_d[i] = (act_d - ego_d) / (3 * self.LANE_WIDTH)
+            # -1:empty lane, -2:no lane
+            else:
+                norm_s.append(actor_id)
+
+        # How to fill actor_s when there is no lane or lane is empty. relative_norm_s to ego vehicle
+        emp_ln_max = 0.03
+        emp_ln_min = -0.03
+        no_ln_down = -0.03
+        no_ln_up = 0.004
+        no_ln = 0.001
+
+        if norm_s[0] not in (-1, -2):
+            self.actor_enumerated_dict['LEADING'] = {'S': norm_s[0]}
+        else:
+            self.actor_enumerated_dict['LEADING'] = {'S': [emp_ln_max]}
+
+        if norm_s[1] not in (-1, -2):
+            self.actor_enumerated_dict['FOLLOWING'] = {'S': norm_s[1]}
+        else:
+            self.actor_enumerated_dict['FOLLOWING'] = {'S': [emp_ln_min]}
+
+        if norm_s[2] not in (-1, -2):
+            self.actor_enumerated_dict['LEFT'] = {'S': norm_s[2]}
+        else:
+            self.actor_enumerated_dict['LEFT'] = {'S': [emp_ln_min] if norm_s[2] == -1 else [no_ln]}
+
+        if norm_s[3] not in (-1, -2):
+            self.actor_enumerated_dict['LEFT_UP'] = {'S': norm_s[3]}
+        else:
+            self.actor_enumerated_dict['LEFT_UP'] = {'S': [emp_ln_max] if norm_s[3] == -1 else [no_ln_up]}
+
+        if norm_s[4] not in (-1, -2):
+            self.actor_enumerated_dict['LEFT_DOWN'] = {'S': norm_s[4]}
+        else:
+            self.actor_enumerated_dict['LEFT_DOWN'] = {'S': [emp_ln_min] if norm_s[4] == -1 else [no_ln_down]}
+
+        if norm_s[5] not in (-1, -2):
+            self.actor_enumerated_dict['LLEFT'] = {'S': norm_s[5]}
+        else:
+            self.actor_enumerated_dict['LLEFT'] = {'S': [emp_ln_min] if norm_s[5] == -1 else [no_ln]}
+
+        if norm_s[6] not in (-1, -2):
+            self.actor_enumerated_dict['LLEFT_UP'] = {'S': norm_s[6]}
+        else:
+            self.actor_enumerated_dict['LLEFT_UP'] = {'S': [emp_ln_max] if norm_s[6] == -1 else [no_ln_up]}
+
+        if norm_s[7] not in (-1, -2):
+            self.actor_enumerated_dict['LLEFT_DOWN'] = {'S': norm_s[7]}
+        else:
+            self.actor_enumerated_dict['LLEFT_DOWN'] = {'S': [emp_ln_min] if norm_s[7] == -1 else [no_ln_down]}
+
+        if norm_s[8] not in (-1, -2):
+            self.actor_enumerated_dict['RIGHT'] = {'S': norm_s[8]}
+        else:
+            self.actor_enumerated_dict['RIGHT'] = {'S': [emp_ln_min] if norm_s[8] == -1 else [no_ln]}
+
+        if norm_s[9] not in (-1, -2):
+            self.actor_enumerated_dict['RIGHT_UP'] = {'S': norm_s[9]}
+        else:
+            self.actor_enumerated_dict['RIGHT_UP'] = {'S': [emp_ln_max] if norm_s[9] == -1 else [no_ln_up]}
+
+        if norm_s[10] not in (-1, -2):
+            self.actor_enumerated_dict['RIGHT_DOWN'] = {'S': norm_s[10]}
+        else:
+            self.actor_enumerated_dict['RIGHT_DOWN'] = {'S': [emp_ln_min] if norm_s[10] == -1 else [no_ln_down]}
+
+        if norm_s[11] not in (-1, -2):
+            self.actor_enumerated_dict['RRIGHT'] = {'S': norm_s[11]}
+        else:
+            self.actor_enumerated_dict['RRIGHT'] = {'S': [emp_ln_min] if norm_s[11] == -1 else [no_ln]}
+
+        if norm_s[12] not in (-1, -2):
+            self.actor_enumerated_dict['RRIGHT_UP'] = {'S': norm_s[12]}
+        else:
+            self.actor_enumerated_dict['RRIGHT_UP'] = {'S': [emp_ln_max] if norm_s[12] == -1 else [no_ln_up]}
+
+        if norm_s[13] not in (-1, -2):
+            self.actor_enumerated_dict['RRIGHT_DOWN'] = {'S': norm_s[13]}
+        else:
+            self.actor_enumerated_dict['RRIGHT_DOWN'] = {'S': [emp_ln_min] if norm_s[13] == -1 else [no_ln_down]}
 
     def not_zero(self, x, eps: float = 1e-2) -> float:
         if abs(x) > eps:
@@ -427,6 +725,7 @@ class CarlagymEnv(gym.Env):
         self.n_step += 1
         self.u_lon_llast = self.u_lon_last
         self.u_lat_llast = self.u_lat_last
+        self.actor_enumerated_dict['EGO'] = {'NORM_S': [], 'NORM_D': [], 'S': [], 'D': [], 'SPEED': []}
         # birds-eye view
         spectator = self.world_module.world.get_spectator()
         transform = self.ego.get_transform()
@@ -450,18 +749,10 @@ class CarlagymEnv(gym.Env):
         acc_angular = math.sqrt(angular_velocity.x ** 2 + angular_velocity.y ** 2 + angular_velocity.z ** 2)
         ego_state = [self.ego.get_location().x, self.ego.get_location().y, speed, acc, psi, temp, self.max_s]
 
-        if 80 <= self.n_step <= 230:
-            df_n = 3.5
-        elif 230 <= self.n_step <= 300:
-            df_n = 0
-        else:
-            df_n = 0
 
-        df_n = 0
         if self.n_step == 1:
             fpath, self.lanechange, off_the_road = self.motionPlanner.run_step_single_path(ego_state, self.f_idx,
-                                                                                           # df_n=0,
-                                                                                           df_n=df_n,
+                                                                                           df_n=0,
                                                                                            Tf=3,
                                                                                            Vf_n=0)
         else:
@@ -469,8 +760,7 @@ class CarlagymEnv(gym.Env):
             ego_state_ref = [self.fpath.x[self.ref_idx], self.fpath.y[self.ref_idx], speed, acc,
                              self.fpath.yaw[self.ref_idx], temp, self.max_s]
             fpath, self.lanechange, off_the_road = self.motionPlanner.run_step_single_path(ego_state_ref, self.f_idx,
-                                                                                           # df_n=0,
-                                                                                           df_n=df_n,
+                                                                                           df_n=0,
                                                                                            Tf=3, Vf_n=0)
 
         self.fpath = fpath
@@ -479,23 +769,47 @@ class CarlagymEnv(gym.Env):
                 ************************************************* Controller *********************************************************
                 **********************************************************************************************************************
         """
-        self.f_idx = 1
+        # self.f_idx = 1
         collision = False
         vx_ego = self.ego.get_velocity().x
         vy_ego = self.ego.get_velocity().y
         ego_s = self.motionPlanner.estimate_frenet_state(ego_state, self.f_idx)[0]
-        ego_d = fpath.d[self.f_idx]
+        # ego_d = fpath.d[self.f_idx]
+        ego_d = self.motionPlanner.estimate_frenet_state(ego_state, self.f_idx)[3]
         v_S, v_D = velocity_inertial_to_frenet(ego_s, vx_ego, vy_ego, self.motionPlanner.csp)
         psi_Frenet = get_obj_S_yaw(psi, ego_s, self.motionPlanner.csp)
         K_Frenet = get_calc_curvature(ego_s, self.motionPlanner.csp)
         ego_state = [self.ego.get_location().x, self.ego.get_location().y,
                      math.radians(self.ego.get_transform().rotation.yaw), 0, 0, temp, self.max_s]
         self.f_idx = closest_wp_idx(ego_state, fpath, self.f_idx)
-        cmdWP = [fpath.x[self.f_idx], fpath.y[self.f_idx]]
-        cmdWP2 = [fpath.x[self.f_idx + 1], fpath.y[self.f_idx + 1]]
-        obj_info_Mux = self.obj_info()
-        ego_init_d, ego_target_d = fpath.d[0], fpath.d[-1]
-        vehicle_ahead = self.get_vehicle_ahead(ego_s, ego_d, ego_init_d, ego_target_d)
+        # if self.n_step == 1:
+        #     ego_d = self.init_d
+        # else:
+        #     ego_d = self.fpath.d[self.f_idx]
+        norm_d = round((ego_d + self.LANE_WIDTH) / (3 * self.LANE_WIDTH), 2)
+        ego_s_list = [ego_s for _ in range(self.look_back)]
+        ego_d_list = [ego_d for _ in range(self.look_back)]
+
+        self.actor_enumerated_dict['EGO'] = {'NORM_S': [0], 'NORM_D': [norm_d],
+                                             'S': ego_s_list, 'D': ego_d_list, 'SPEED': [speed]}
+        obj_info = self.obj_info()
+
+        if self.n_step == 60:
+            print("180")
+
+
+        ref_left = frenet_to_inertial(self.fpath.s[29],self.fpath.d[29]-3.5,self.motionPlanner.csp)
+
+        # terminal
+        self.Input, MPC_unsolved, x_m = self.lon_lat_controller_ipopt.calc_input(
+            x_current=np.array([[ego_state[0]], [ego_state[1]], [ego_state[2]]]),
+            x_frenet_current=np.array([ego_s, ego_d, v_S, v_D]),
+            # obj_info=np.array([obj_x, obj_y, obj_phi, obj_speed, obj_delta_f]),
+            obj_info = obj_info,
+            ref=np.array([self.fpath.x[29], self.fpath.y[29], self.fpath.yaw[29], self.fpath.s[29], self.fpath.d[29]]),
+            ref_left=np.array([ref_left[0], ref_left[1], ref_left[3]]),
+            u_last=self.u_last,fpath = self.fpath,csp=self.motionPlanner.csp,
+            q=1, ru=1, rdu=1)
 
         # print(self.n_step)
 
@@ -599,45 +913,36 @@ class CarlagymEnv(gym.Env):
         # obj_phi_Frenet = obj_info_Mux['Obj_frenet'][0][4]
         # obj_speed = obj_info_Mux['Obj_cartesian'][0][5]
         # obj_delta_f = obj_info_Mux['Obj_cartesian'][0][6]
-        obj_info = self.obj_info()
-        obj_frenet = obj_info['Obj_frenet']
-        obj_cartesian = obj_info['Obj_cartesian']
-        if self.n_step == 30:
-            print("180")
+
 
         # global path
         # self.f_ref_idx = closest_wp_idx_ref(ego_state, self.ref_path_x,self.ref_path_y, self.f_idx)
         # ref_path_x = self.ref_path_x[self.n_step:self.n_step + 30]
         # ref_path_y = self.ref_path_y[self.n_step:self.n_step + 30]
         # ref_path_phi = self.ref_path_phi[self.n_step:self.n_step + 30]
-        ref_path_x = self.ref_path_x[self.n_step:self.n_step + 30]
-        ref_path_y = self.ref_path_y[self.n_step:self.n_step + 30]
-        ref_path_phi = self.ref_path_phi[self.n_step:self.n_step + 30]
-        self.ref_left_idx = closest_ref_idx(ego_state, self.ref_path_left_x,self.ref_path_left_y, self.ref_left_idx)
-        ref_path_left_x = self.ref_path_left_x[self.ref_left_idx:self.ref_left_idx + 30]
-        ref_path_left_y = self.ref_path_left_y[self.ref_left_idx:self.ref_left_idx + 30]
-        ref_path_left_phi = self.ref_path_left_phi[self.ref_left_idx:self.ref_left_idx + 30]
+        # ref_path_x = self.ref_path_x[self.n_step:self.n_step + 30]
+        # ref_path_y = self.ref_path_y[self.n_step:self.n_step + 30]
+        # ref_path_phi = self.ref_path_phi[self.n_step:self.n_step + 30]
+        # self.ref_left_idx = closest_ref_idx(ego_state, self.ref_path_left_x,self.ref_path_left_y, self.ref_left_idx)
+        # ref_path_left_x = self.ref_path_left_x[self.ref_left_idx:self.ref_left_idx + 30]
+        # ref_path_left_y = self.ref_path_left_y[self.ref_left_idx:self.ref_left_idx + 30]
+        # ref_path_left_phi = self.ref_path_left_phi[self.ref_left_idx:self.ref_left_idx + 30]
         # ref_path_left_x = self.ref_path_left_x[self.n_step:self.n_step + 30]
         # ref_path_left_y = self.ref_path_left_y[self.n_step:self.n_step + 30]
         # ref_path_left_phi = self.ref_path_left_phi[self.n_step:self.n_step + 30]
 
-        obj_x = obj_info['Obj_cartesian'][0][0]
-        obj_y = obj_info['Obj_cartesian'][0][1]
-        obj_phi = obj_info['Obj_cartesian'][0][4]
-        obj_speed = obj_info['Obj_cartesian'][0][5]
-        obj_delta_f = obj_info['Obj_cartesian'][0][6]
-        obj_s = obj_info['Obj_frenet'][0][0]
 
-        # # sequence
-        self.Input, MPC_unsolved, x_m = self.lon_lat_controller_ipopt.calc_input(
-            x_current=np.array([[ego_state[0]], [ego_state[1]], [ego_state[2]]]),
-            x_frenet_current=np.array([ego_s,ego_d,v_S,v_D]),
-            obj_info=np.array([obj_x, obj_y, obj_phi, obj_speed, obj_delta_f]),
-            ref=np.array([fpath.x[0:30], fpath.y[0:30], fpath.yaw[0:30]]),
-            # ref=np.array([ref_path_x, ref_path_y, ref_path_phi]),
-            ref_left=np.array([ref_path_left_x, ref_path_left_y, ref_path_left_phi]),
-            u_last=self.u_last,
-            q=1, ru=1, rdu=1)
+
+        # # # sequence
+        # self.Input, MPC_unsolved, x_m = self.lon_lat_controller_ipopt.calc_input(
+        #     x_current=np.array([[ego_state[0]], [ego_state[1]], [ego_state[2]]]),
+        #     x_frenet_current=np.array([ego_s,ego_d,v_S,v_D]),
+        #     obj_info=np.array([obj_x, obj_y, obj_phi, obj_speed, obj_delta_f]),
+        #     ref=np.array([fpath.x[0:30], fpath.y[0:30], fpath.yaw[0:30]]),
+        #     # ref=np.array([ref_path_x, ref_path_y, ref_path_phi]),
+        #     ref_left=np.array([ref_path_left_x, ref_path_left_y, ref_path_left_phi]),
+        #     u_last=self.u_last,
+        #     q=1, ru=1, rdu=1)
 
 
 
@@ -706,18 +1011,13 @@ class CarlagymEnv(gym.Env):
                 **********************************************************************************************************************
         """
 
-        if self.world_module.args.play_mode != 0:
-            for i in range(len(fpath.x)):
-                self.world_module.points_to_draw['path wp {}'.format(i)] = [
-                    carla.Location(x=fpath.x[i], y=fpath.y[i]),
-                    'COLOR_ALUMINIUM_0']
-
         # if self.world_module.args.play_mode != 0:
-        #     for i in range(len(ref_path_x)):
+        #     for i in range(len(fpath.x)):
         #         self.world_module.points_to_draw['path wp {}'.format(i)] = [
-        #             carla.Location(x=ref_path_x[i], y=ref_path_y[i]),
+        #             carla.Location(x=fpath.x[i], y=fpath.y[i]),
         #             'COLOR_ALUMINIUM_0']
-            self.world_module.points_to_draw['ego'] = [self.ego.get_location(), 'COLOR_SCARLET_RED_0']
+
+            # self.world_module.points_to_draw['ego'] = [self.ego.get_location(), 'COLOR_SCARLET_RED_0']
         #     self.world_module.points_to_draw['waypoint ahead'] = carla.Location(x=cmdWP[0], y=cmdWP[1])
         #     self.world_module.points_to_draw['waypoint ahead 2'] = carla.Location(x=cmdWP2[0], y=cmdWP2[1])
 
@@ -727,7 +1027,7 @@ class CarlagymEnv(gym.Env):
                     carla.Location(x=x_m[i, 0], y=x_m[i, 1]),
                     'COLOR_ALUMINIUM_0']
 
-        # self.world_module.points_to_draw['ego'] = [self.ego.get_location(), 'COLOR_SCARLET_RED_0']
+        self.world_module.points_to_draw['ego'] = [self.ego.get_location(), 'COLOR_SCARLET_RED_0']
         # self.world_module.points_to_draw['waypoint ahead'] = carla.Location(x=cmdWP[0], y=cmdWP[1])
         # self.world_module.points_to_draw['waypoint ahead 2'] = carla.Location(x=cmdWP2[0], y=cmdWP2[1])
 
@@ -757,11 +1057,8 @@ class CarlagymEnv(gym.Env):
         """
 
         '''******   State Design    ******'''
-        # state_vector = self.state_input_vector(v_S, ego_s)
         state_vector = np.zeros(3)
-        # state_vector[0] = obj_info_Mux[0] - ego_s
-        # state_vector[1] = obj_info_Mux[2] - v_S
-        # state_vector[2] = v_S
+
 
         '''******   Reward Design   ******'''
         # # 碰撞惩罚

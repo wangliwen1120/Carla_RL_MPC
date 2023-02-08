@@ -117,8 +117,6 @@ def update_frenet_coordinate(fpath, loc):
     d, d_d, d_dd = fpath.d[min_idx], fpath.d_d[min_idx], fpath.d_dd[min_idx]
 
     return s, s_d, s_dd, d, d_d, d_dd
-    # return [s, s_d, s_dd, d, d_d, d_dd]
-
 
 class quintic_polynomial:
 
@@ -385,6 +383,8 @@ class FrenetPlanner:
         output: single frenet path
         """
         s, s_d, s_dd, d, d_d, d_dd = f_state
+
+        d = 0.0   #### only for keeping lane_two, notice! other condition should not do this!
 
         fp = Frenet_path()
         lat_qp = quintic_polynomial(d, d_d, d_dd, df, 0.0, 0.0, Tf)
