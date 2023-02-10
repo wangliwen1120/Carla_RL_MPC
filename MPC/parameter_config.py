@@ -25,11 +25,11 @@ class Config:
         self.v_y_0 = 0.0 / 3.6
         self.Pos_x_0 = 1010.0
 
-        self.a = 1.450
-        self.b = 1.450
+        self.a = 1.50
+        self.b = 1.50
         self.L = self.a + self.b    # 轴距
-        self.Length = 4.800  # vehicle_length
-        self.Width = 1.850   # vehicle_width
+        self.Length = 5.000  # vehicle_length
+        self.Width = 2.000   # vehicle_width
         self.Height = 1.450  #vehicle_height
         self.M = 1650
         self.Iz = 3234

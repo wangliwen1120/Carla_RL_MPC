@@ -11,7 +11,9 @@ def magnitude(vector):
 
 
 def euclidean_distance(v1, v2):
-    return math.sqrt(sum([(a - b) ** 2 for a, b in zip(v1, v2)]))
+    return ca.SX.ones(1, 1) * math.sqrt(sum([(a - b) ** 2 for a, b in zip(v1, v2)]))
+    # return ca.SX.ones(1, 1) * ((sum([(a - b) ** 2 for a, b in zip(v1, v2)]))**0.5)
+    # # return 0 if math.sqrt(sum([(a - b) ** 2 for a, b in zip(v1, v2)]))==None else math.sqrt(sum([(a - b) ** 2 for a, b in zip(v1, v2)]))
 
 
 @numba.jit()
@@ -19,13 +21,15 @@ def update_frenet_coordinate(fpath, loc):
     """
     Finds best Frenet coordinates (s, d) in the path based on current position
     """
-    min_e = float('inf')
+    # min_e = float('inf')
+    min_e = ca.SX.ones(1, 1)*np.inf
 
-    min_idx = -1
+    min_idx = 1
     for i in range(len(fpath.t)):
+        # e = magnitude((fpath.x[i]-loc[0], fpath.y[i]-loc[1]))
         e = euclidean_distance([fpath.x[i], fpath.y[i]], loc)
         if e < min_e:
-            min_e = e
+            min_e = e * ca.SX.ones(1, 1)
             min_idx = i
 
     if min_idx <= len(fpath.t) - 2:
@@ -150,7 +154,7 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
     def calc_input(self, x_current, x_frenet_current, obj_info, ref, ref_left, u_last, fpath, csp, q, ru, rdu):
         start_time = time.time()
         vehicle_num = 0
-        # 预测时域内的ref矩阵
+        # 预测时域内的obj矩阵
         # obj_preceding
         if obj_info['Ego_preceding'][0] != None:
             vehicle_num += 1
@@ -315,7 +319,7 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
         U = ca.SX.sym('U', self.Nu, self.Nc)  # 控制输出
         X = ca.SX.sym('X', self.Nx, self.Np)  # 系统状态
         C_R = ca.SX.sym('C_R', self.Nx + self.Nx + self.Nx)  # 构建问题的相关参数
-        # 这里给定当前/初始位置，目标终点(本车道/左车道)位置，障碍物信息
+        # 这里给定当前/初始位置，目标终点(本车道/左车道)位置
 
         # 权重矩阵
         self.q = 1.0
@@ -400,7 +404,7 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
             else:
                 g2.append((U[:, i] - U[:, i - 1]) / self.T)
 
-        # # constraint 3: Boundary constraint
+        # constraint 3: Boundary constraint
         # for i in range(self.Np):
         #     X_ref_frenet = update_frenet_coordinate(fpath, [X[0, i], X[1, i]])  # s, s_d, s_dd, d, d_d, d_dd
         #     s1 = X_ref_frenet[0]
@@ -605,8 +609,8 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
 
         # # g3
         # for i in range(self.Np):
-        #     lbg.append(-5.25)
-        #     ubg.append(1.75)
+        #     lbg.append(0)
+        #     ubg.append(30)
 
         # g4
         for i in range(self.Np):
@@ -627,15 +631,16 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
 
         for i in range(self.Np):
             lbx.append(-np.inf)
-            lbx.append(-np.inf)
-            # lbx.append(27)
+            # lbx.append(-np.inf)  #y
+            lbx.append(24)
             lbx.append(-np.inf)
             if obj_info['Ego_preceding'][0] != None:  # if no vehicle_ahead
-                ubx.append(self.obj_ego_preceding[0, i])
+                # ubx.append(self.obj_ego_preceding[0, i])
+                ubx.append(self.obj_ego_preceding[0, i] - self.stop_line)
             else:
                 ubx.append(np.inf)
-            # ubx.append(32)
-            ubx.append(np.inf)
+            ubx.append(31)
+            # ubx.append(np.inf)   #y
             ubx.append(np.inf)
 
         # index_t = []

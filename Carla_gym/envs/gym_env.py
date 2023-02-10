@@ -553,7 +553,7 @@ class CarlagymEnv(gym.Env):
                     any(sorted_s_idx[:, 1][sorted_s_idx[:, 1] < 0] < -self.side_window)) else -1)
 
         # --------------------------------------------- ego lane -------------------------------------------------
-        same_lane_d_idx = np.where(abs(np.array(others_d) - ego_d) < 1)[0]
+        same_lane_d_idx = np.where(abs(np.array(others_d) - ego_d) < 1.5)[0]
         if len(same_lane_d_idx) == 0:
             self.actor_enumeration.append(-2)
             self.actor_enumeration.append(-2)
@@ -570,7 +570,7 @@ class CarlagymEnv(gym.Env):
                                           if (any(sorted_same_s_idx[:, 1] < 0)) else -1)
 
         # --------------------------------------------- left lane -------------------------------------------------
-        left_lane_d_idx = np.where(((np.array(others_d) - ego_d) < -3) * ((np.array(others_d) - ego_d) > -4))[0]
+        left_lane_d_idx = np.where(((np.array(others_d) - ego_d) < -2.5) * ((np.array(others_d) - ego_d) > -4))[0]
         if ego_d < -1.75:
             self.actor_enumeration += [-2, -2, -2]
 
@@ -593,7 +593,7 @@ class CarlagymEnv(gym.Env):
             append_actor(lleft_lane_d_idx)
 
             # ---------------------------------------------- rigth lane --------------------------------------------------
-        right_lane_d_idx = np.where(((np.array(others_d) - ego_d) > 3) * ((np.array(others_d) - ego_d) < 4))[0]
+        right_lane_d_idx = np.where(((np.array(others_d) - ego_d) > 2.5) * ((np.array(others_d) - ego_d) < 4))[0]
         if ego_d > 5.25:
             self.actor_enumeration += [-2, -2, -2]
 

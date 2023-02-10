@@ -192,7 +192,7 @@ if __name__ == '__main__':
     plot_data(rec_num, 'mpc', 'q')
 
 # t = np.arange(0, 1000)
-# ob = xlrd.open_workbook('/home/wangliwen/Carla_RL_MPC/tools/ob_v_data.xlsx')
+# ob = xlrd.open_workbook('/home/wangliwen/Carla_RL_MPC/tools/ob_v_data.xlsx_1')
 # ob = ob.sheets()[0]#第几个sheet
 # plt.plot(t,np.array(ob.row_values(0)),'g',label='ob_v_data')
 # plt.show()
