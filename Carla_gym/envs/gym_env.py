@@ -782,6 +782,8 @@ class CarlagymEnv(gym.Env):
         ego_state = [self.ego.get_location().x, self.ego.get_location().y,
                      math.radians(self.ego.get_transform().rotation.yaw), 0, 0, temp, self.max_s]
         self.f_idx = closest_wp_idx(ego_state, fpath, self.f_idx)
+        ego_init_d, ego_target_d = fpath.d[0], fpath.d[-1]
+        vehicle_ahead = self.get_vehicle_ahead(ego_s, ego_d, ego_init_d, ego_target_d)
         # if self.n_step == 1:
         #     ego_d = self.init_d
         # else:
@@ -792,9 +794,18 @@ class CarlagymEnv(gym.Env):
 
         self.actor_enumerated_dict['EGO'] = {'NORM_S': [0], 'NORM_D': [norm_d],
                                              'S': ego_s_list, 'D': ego_d_list, 'SPEED': [speed]}
-        obj_info = self.obj_info()
+        obj_info = self.obj_info_1()
 
-        if self.n_step == 60:
+        delta_s_0 = np.inf
+        vehicle_ahead_idx = None
+        for i in range(np.size(obj_info['Obj_actor'])):
+            delta_s = obj_info['Obj_frenet'][i][0] - ego_s
+            delta_d = obj_info['Obj_frenet'][i][1] - ego_d
+            if delta_s>0 and abs(delta_d)<=1.0 and delta_s<delta_s_0:
+                vehicle_ahead_idx = i
+                delta_s_0 = delta_s
+
+        if self.n_step == 140:
             print("180")
 
 
@@ -803,158 +814,11 @@ class CarlagymEnv(gym.Env):
         # terminal
         self.Input, MPC_unsolved, x_m = self.lon_lat_controller_ipopt.calc_input(
             x_current=np.array([[ego_state[0]], [ego_state[1]], [ego_state[2]]]),
-            x_frenet_current=np.array([ego_s, ego_d, v_S, v_D]),
-            # obj_info=np.array([obj_x, obj_y, obj_phi, obj_speed, obj_delta_f]),
             obj_info = obj_info,
             ref=np.array([self.fpath.x[29], self.fpath.y[29], self.fpath.yaw[29], self.fpath.s[29], self.fpath.d[29]]),
             ref_left=np.array([ref_left[0], ref_left[1], ref_left[3]]),
-            u_last=self.u_last,fpath = self.fpath,csp=self.motionPlanner.csp,
+            u_last=self.u_last,vehicle_ahead=vehicle_ahead_idx,
             q=1, ru=1, rdu=1)
-
-        # print(self.n_step)
-
-        ##MPC_LAT+PID
-        # q = action[0] / 10
-        # ru = 1
-        # rdu = 1
-        # self.lat_error = cal_lat_error(cmdWP, cmdWP2, transform)
-        # self.Input_lon = self.lon_controller.calc_input(S_obj=obj_info_Mux['Obj_frenet'][0][0], v_obj=obj_info_Mux['Obj_frenet'][0][2],
-        #                                                 x_current_lon=np.array([[ego_s], [v_S]]),
-        # #                                                 u_lon_last=self.u_lon_last, q=q, ru=ru, rdu=rdu)
-        # self.Input_lat = self.lat_controller.calc_input(D_ref=obj_info_Mux['Obj_frenet'][0][1],
-        #                                                 vx=v_S,
-        #                                                 vy=v_D,
-        #                                                 x_current_lat=np.array([[psi], [ego_d]]),
-        #                                                 u_lat_last=self.u_lat_last,
-        #                                                 cur=K_Frenet)
-        #
-        # self.u_lat_last = self.Input_lat
-        # vehicle_ahead = obj_info_Mux['Obj_actor'][0]
-        # cmdSpeed = self.IDM.run_step(vd=self.targetSpeed, vehicle_ahead=vehicle_ahead)
-        #
-        # control = self.vehicleController.run_step_2_wp(cmdSpeed, cmdWP, cmdWP2)  # calculate control
-        # throttle = control.throttle
-        # brake = control.brake
-        # steer = self.Input_lat * np.pi / 35
-        # if self.n_step == 30:
-        #     print('2202020')
-        # vehicle_control = carla.VehicleControl(
-        #     throttle=float(throttle),
-        #     steer=float(steer),
-        #     brake=float(brake),
-        #     hand_brake=False,
-        #     reverse=False,
-        #     manual_gear_shift=False
-        # )
-        #
-        # self.ego.apply_control(vehicle_control)
-
-        # direct_x = self.ego.get_transform().get_forward_vector().x
-        # direct_y = self.ego.get_transform().get_forward_vector().y
-        #
-        # normal_dir_x = direct_x / math.sqrt(direct_x ** 2 + direct_y ** 2)
-        # normal_dir_y = direct_y / math.sqrt(direct_x ** 2 + direct_y ** 2)
-        #
-        # current_acc = acc_vec.x * normal_dir_x + acc_vec.y * normal_dir_y
-        #
-        # target_acc = self.Input_lon[0]
-        # cmdSpeed = get_speed(self.ego) + float(target_acc) * self.dt
-        #
-        # self.u_lon_last = target_acc
-        # self.u_lat_last = self.Input_lat[0]
-        #
-        # self.du_lon_last = (self.u_lon_last - self.u_lon_llast) / self.dt
-        # MPC_no_answer = self.Input_lon[1]
-        #
-        # control = self.vehicleController.run_step_acc_2_wp(self.Input_lon[0], current_acc, cmdWP,
-        #                                                    cmdWP2)  # calculate control
-        # # control = self.vehicleController.run_step_2_wp(cmdSpeed, cmdWP, cmdWP2)  # calculate control
-        #
-        # self.ego.apply_control(control)  # apply control
-
-        # ##MPC_LON+PID
-        # q = action[0] / 10
-        # ru = 1
-        # rdu = 1
-        # self.lat_error = cal_lat_error(cmdWP, cmdWP2, transform)
-        # self.Input_lon = self.lon_controller.calc_input(S_obj=obj_info_Mux['Obj_frenet'][0][0], v_obj=obj_info_Mux['Obj_frenet'][0][2],
-        #                                                 x_current_lon=np.array([[ego_s], [v_S]]),
-        #                                                 u_lon_last=self.u_lon_last, q=q, ru=ru, rdu=rdu)
-        #
-        # direct_x = self.ego.get_transform().get_forward_vector().x
-        # direct_y = self.ego.get_transform().get_forward_vector().y
-        #
-        # normal_dir_x = direct_x / math.sqrt(direct_x ** 2 + direct_y ** 2)
-        # normal_dir_y = direct_y / math.sqrt(direct_x ** 2 + direct_y ** 2)
-        #
-        # current_acc = acc_vec.x * normal_dir_x + acc_vec.y * normal_dir_y
-        #
-        # target_acc = self.Input_lon[0]
-        # cmdSpeed = get_speed(self.ego) + float(target_acc) * self.dt
-        #
-        # self.u_lon_last = target_acc
-        #
-        # self.du_lon_last = (self.u_lon_last - self.u_lon_llast) / self.dt
-        # MPC_no_answer = self.Input_lon[1]
-        #
-        # control = self.vehicleController.run_step_acc_2_wp(self.Input_lon[0], current_acc, cmdWP,
-        #                                                    cmdWP2)  # calculate control
-        # # control = self.vehicleController.run_step_2_wp(cmdSpeed, cmdWP, cmdWP2)  # calculate control
-        #
-        # self.ego.apply_control(control)  # apply control
-
-        ##MPCALL
-
-        # obj_x = obj_info_Mux['Obj_cartesian'][0][0]
-        # obj_y = obj_info_Mux['Obj_cartesian'][0][1]
-        # obj_phi = obj_info_Mux['Obj_cartesian'][0][4]
-        # obj_s = obj_info_Mux['Obj_frenet'][0][0]
-        # obj_d = obj_info_Mux['Obj_frenet'][0][1]
-        # obj_phi_Frenet = obj_info_Mux['Obj_frenet'][0][4]
-        # obj_speed = obj_info_Mux['Obj_cartesian'][0][5]
-        # obj_delta_f = obj_info_Mux['Obj_cartesian'][0][6]
-
-
-        # global path
-        # self.f_ref_idx = closest_wp_idx_ref(ego_state, self.ref_path_x,self.ref_path_y, self.f_idx)
-        # ref_path_x = self.ref_path_x[self.n_step:self.n_step + 30]
-        # ref_path_y = self.ref_path_y[self.n_step:self.n_step + 30]
-        # ref_path_phi = self.ref_path_phi[self.n_step:self.n_step + 30]
-        # ref_path_x = self.ref_path_x[self.n_step:self.n_step + 30]
-        # ref_path_y = self.ref_path_y[self.n_step:self.n_step + 30]
-        # ref_path_phi = self.ref_path_phi[self.n_step:self.n_step + 30]
-        # self.ref_left_idx = closest_ref_idx(ego_state, self.ref_path_left_x,self.ref_path_left_y, self.ref_left_idx)
-        # ref_path_left_x = self.ref_path_left_x[self.ref_left_idx:self.ref_left_idx + 30]
-        # ref_path_left_y = self.ref_path_left_y[self.ref_left_idx:self.ref_left_idx + 30]
-        # ref_path_left_phi = self.ref_path_left_phi[self.ref_left_idx:self.ref_left_idx + 30]
-        # ref_path_left_x = self.ref_path_left_x[self.n_step:self.n_step + 30]
-        # ref_path_left_y = self.ref_path_left_y[self.n_step:self.n_step + 30]
-        # ref_path_left_phi = self.ref_path_left_phi[self.n_step:self.n_step + 30]
-
-
-
-        # # # sequence
-        # self.Input, MPC_unsolved, x_m = self.lon_lat_controller_ipopt.calc_input(
-        #     x_current=np.array([[ego_state[0]], [ego_state[1]], [ego_state[2]]]),
-        #     x_frenet_current=np.array([ego_s,ego_d,v_S,v_D]),
-        #     obj_info=np.array([obj_x, obj_y, obj_phi, obj_speed, obj_delta_f]),
-        #     ref=np.array([fpath.x[0:30], fpath.y[0:30], fpath.yaw[0:30]]),
-        #     # ref=np.array([ref_path_x, ref_path_y, ref_path_phi]),
-        #     ref_left=np.array([ref_path_left_x, ref_path_left_y, ref_path_left_phi]),
-        #     u_last=self.u_last,
-        #     q=1, ru=1, rdu=1)
-
-
-
-        # self.Input, MPC_unsolved = self.lon_lat_controller.calc_input(
-        #     x_current=np.array([[ego_state[0]], [ego_state[1]], [ego_state[2]]]),
-        #     x_frenet_current=np.array([ego_s, ego_d, v_S, v_D]),
-        #     obj=np.array([obj_x, obj_y, obj_phi, obj_speed, obj_delta_f]),
-        #     # fpath=np.array([fpath.x[0:40], fpath.y[0:40], fpath.yaw[0:40]]),
-        #     ref=np.array([ref_path_x, ref_path_y, ref_path_phi]),
-        #     ref_left=np.array([ref_path_left_x, ref_path_left_y, ref_path_left_phi]),
-        #     u_last=self.u_last,
-        #     q=action, ru=1, rdu=1)
 
         self.u_last = self.Input
         target_speed = self.Input[0]
@@ -1016,8 +880,8 @@ class CarlagymEnv(gym.Env):
         #         self.world_module.points_to_draw['path wp {}'.format(i)] = [
         #             carla.Location(x=fpath.x[i], y=fpath.y[i]),
         #             'COLOR_ALUMINIUM_0']
-
-            # self.world_module.points_to_draw['ego'] = [self.ego.get_location(), 'COLOR_SCARLET_RED_0']
+        #
+        #     self.world_module.points_to_draw['ego'] = [self.ego.get_location(), 'COLOR_SCARLET_RED_0']
         #     self.world_module.points_to_draw['waypoint ahead'] = carla.Location(x=cmdWP[0], y=cmdWP[1])
         #     self.world_module.points_to_draw['waypoint ahead 2'] = carla.Location(x=cmdWP2[0], y=cmdWP2[1])
 
@@ -1084,119 +948,7 @@ class CarlagymEnv(gym.Env):
             reward_mpcNoResult = 0
 
         reward_speed = v_S * 2
-            # 速度优先在某范围
-        # scaled_speed_l = lamp(state_vector[2], [0, self.minSpeed], [0, 1])  # 0-13.5
-        # scaled_speed_m = lamp(state_vector[2], [self.minSpeed, 0.75 * self.maxSpeed], [0, 1])  # 13.5-14.5
-        # scaled_speed_h = lamp(state_vector[2], [0.75 * self.maxSpeed, self.maxSpeed], [0, 1])  # 14.5-19.5
-        # reward_hs_l = self.low_speed_reward  # 0.3
-        # reward_hs_m = self.middle_speed_reward  # 4
-        # reward_hs_h = self.high_speed_reward  # 0.3
 
-        # 加速度
-        # if state_vector[0] > 30 or state_vector[1] > 0:
-        #     reward_acc = 1 * 1 / (abs(self.u_lon_last) + 0.1)
-        # elif state_vector[0] <= 30 and state_vector[1] < 0:
-        #     reward_acc = 2 * 1 * (-self.u_lon_last + 0.1)
-        # else:
-        #     reward_acc = 0
-
-        # if state_vector[0] > 30
-        #     reward_acc = 1 * 1 / (abs(self.u_lon_last)*0.05 + 0.1)
-        # elif state_vector[0] <= 30 and state_vector[1] < 0:
-        #     reward_acc = 2 * 1 * (-self.u_lon_last + 0.1)
-        # else:
-        #     reward_acc = 0
-        # grid search
-
-        # if state_vector[0] > 20 + 5:
-        #     if abs(self.u_lon_last) <= 2:
-        #         reward_acc = 10 * 1 / (abs(self.u_lon_last) + 0.1)
-        #     elif abs(self.u_lon_last) <= 3:
-        #         reward_acc = 1
-        #     else:
-        #         reward_acc = -50
-        # elif state_vector[0] <= 20 + 5:
-        #     reward_acc = 30 * (-(self.u_lon_last))
-        # else:
-        #     reward_acc = 0
-
-        # if self.u_lon_last <= 0:
-        #     reward_acc = 5
-        # else:
-        #     reward_acc = -2.0
-
-        # if -4 <= self.u_lon_last <= 3:
-        #     if state_vector[0] > 20 + 2 or state_vector[1] >= 0:
-        #         reward_acc = 30 - 10 * abs(self.u_lon_last)
-        #     elif state_vector[0] < 20 - 2 and state_vector[1] <= -1:
-        #         reward_acc = -10 * self.u_lon_last
-        #     else:
-        #         reward_acc = 0
-        # else:
-        #     reward_acc = -100
-
-        # # 加加速度
-        # if abs(self.du_lon_last) <= 3:
-        #     reward_d_acc = 0
-        # else:
-        #     reward_d_acc = -30.0
-
-        # # 加加速度
-        # if abs(self.du_lon_last) <= 1:
-        #     reward_d_acc = 10 - 10 * abs(self.du_lon_last)
-        # elif abs(self.du_lon_last) <= 3:
-        #     reward_d_acc = 0
-        # else:
-        #     reward_d_acc = -100.0
-
-        # if -3 <= self.du_lon_last <= 3:
-        #     if state_vector[0] > 20 + 2 or state_vector[1] >= 0:
-        #         reward_d_acc = 30 - 10 * abs(self.du_lon_last)
-        #     elif state_vector[0] < 20 - 2 and state_vector[1] <= -1:
-        #         reward_d_acc = -10 * self.du_lon_last
-        #     else:
-        #         reward_d_acc = 0
-        # else:
-        #     reward_d_acc = -100
-        # if -3 <= self.du_lon_last <= 3:
-        #     if state_vector[0] > 20 + 2:
-        #         reward_d_acc = 150 - 50 * abs(self.du_lon_last)
-        #     elif state_vector[0] < 20 - 2:
-        #         reward_d_acc = -10 * self.du_lon_last
-        #     else:
-        #         reward_d_acc = 0
-        # else:
-        #     reward_d_acc = -500
-
-        # if abs(self.du_lon_last) <= 1:
-        #     reward_d_acc = 1.6666
-        # elif abs(self.du_lon_last) <= 3:
-        #     reward_d_acc = 0
-        # else:
-        #     reward_d_acc = -20.0
-
-        # if abs(self.du_lon_last) <= 3:
-        #     reward_d_acc = 0
-        # else:
-        #     reward_d_acc = -20.0
-
-        # 跟车 ++++
-        # s_d = 60
-        # if abs(state_vector[0]) > s_d:
-        #     reward_dis = -41.0
-        # else:
-        #     reward_dis = 0.0
-
-        # s_d = 20
-        # if abs(state_vector[0]) < s_d:
-        #     reward_dis = 8.0 * (float((state_vector[0] - s_d) / s_d))
-        # elif abs(state_vector[0]) < (2 * s_d):
-        #     reward_dis = 3.0 / (float((state_vector[0] - s_d) / s_d) + 1)
-        # else:
-        #     reward_dis = 0.0
-
-        # reward = reward_cl + reward_hs_l * np.clip(scaled_speed_l, 0, 1) + reward_hs_h * np.clip(scaled_speed_h, 0, 1) \
-        #          + reward_hs_m * np.clip(scaled_speed_m, 0, 1) + reward_dis + reward_d_acc + reward_acc
         reward = reward_cl + reward_mpcNoResult + reward_speed + reward_lanechange + reward_offTheRoad
         done = False
 
