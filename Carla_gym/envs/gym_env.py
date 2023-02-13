@@ -553,7 +553,7 @@ class CarlagymEnv(gym.Env):
                     any(sorted_s_idx[:, 1][sorted_s_idx[:, 1] < 0] < -self.side_window)) else -1)
 
         # --------------------------------------------- ego lane -------------------------------------------------
-        same_lane_d_idx = np.where(abs(np.array(others_d) - ego_d) < 1.5)[0]
+        same_lane_d_idx = np.where(abs(np.array(others_d) - ego_d) < 0.9)[0]
         if len(same_lane_d_idx) == 0:
             self.actor_enumeration.append(-2)
             self.actor_enumeration.append(-2)
@@ -570,7 +570,7 @@ class CarlagymEnv(gym.Env):
                                           if (any(sorted_same_s_idx[:, 1] < 0)) else -1)
 
         # --------------------------------------------- left lane -------------------------------------------------
-        left_lane_d_idx = np.where(((np.array(others_d) - ego_d) < -2.5) * ((np.array(others_d) - ego_d) > -4))[0]
+        left_lane_d_idx = np.where(((np.array(others_d) - ego_d) < -1.2) * ((np.array(others_d) - ego_d) > -4))[0]
         if ego_d < -1.75:
             self.actor_enumeration += [-2, -2, -2]
 
@@ -593,7 +593,7 @@ class CarlagymEnv(gym.Env):
             append_actor(lleft_lane_d_idx)
 
             # ---------------------------------------------- rigth lane --------------------------------------------------
-        right_lane_d_idx = np.where(((np.array(others_d) - ego_d) > 2.5) * ((np.array(others_d) - ego_d) < 4))[0]
+        right_lane_d_idx = np.where(((np.array(others_d) - ego_d) > 1.0) * ((np.array(others_d) - ego_d) < 4))[0]
         if ego_d > 5.25:
             self.actor_enumeration += [-2, -2, -2]
 
@@ -796,18 +796,8 @@ class CarlagymEnv(gym.Env):
                                              'S': ego_s_list, 'D': ego_d_list, 'SPEED': [speed]}
         obj_info = self.obj_info()
 
-        delta_s_0 = np.inf
-        vehicle_ahead_idx = None
-        for i in range(np.size(obj_info['Obj_actor'])):
-            delta_s = obj_info['Obj_frenet'][i][0] - ego_s
-            delta_d = obj_info['Obj_frenet'][i][1] - ego_d
-            if delta_s>0 and abs(delta_d)<=1.0 and delta_s<delta_s_0:
-                vehicle_ahead_idx = i
-                delta_s_0 = delta_s
-
         if self.n_step == 120:
             print("180")
-
 
         ref_left = frenet_to_inertial(self.fpath.s[29],self.fpath.d[29]-3.5,self.motionPlanner.csp)
 
@@ -817,7 +807,7 @@ class CarlagymEnv(gym.Env):
             obj_info=obj_info,
             ref=np.array([self.fpath.x[29], self.fpath.y[29], self.fpath.yaw[29], self.fpath.s[29], self.fpath.d[29]]),
             ref_left=np.array([ref_left[0], ref_left[1], ref_left[3]]),
-            u_last=self.u_last,vehicle_ahead=vehicle_ahead_idx,csp=self.motionPlanner.csp,fpath = fpath,
+            u_last=self.u_last,csp=self.motionPlanner.csp,fpath = fpath,
             q=1, ru=1, rdu=1)
 
         self.u_last = self.Input

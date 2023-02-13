@@ -5,6 +5,7 @@ import time
 import math
 import numba
 
+
 def frenet_to_inertial(s, d, csp):
     """
     transform a point from frenet frame to inertial frame
@@ -16,6 +17,7 @@ def frenet_to_inertial(s, d, csp):
     x = ix + d * math.cos(iyaw + math.pi / 2.0)
     y = iy + d * math.sin(iyaw + math.pi / 2.0)
     return x, y, iz, iyaw
+
 
 class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
 
@@ -64,45 +66,6 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
         self.e_max = 2
 
         # ref矩阵
-        self.obj_ego_preceding = None
-        self.obj_preceding_x_ref = np.zeros((self.Np, 1))
-        self.obj_preceding_y_ref = np.zeros((self.Np, 1))
-        self.obj_preceding_phi_ref = np.zeros((self.Np, 1))
-        self.obj_ego_following = None
-        self.obj_following_x_ref = np.zeros((self.Np, 1))
-        self.obj_following_y_ref = np.zeros((self.Np, 1))
-        self.obj_following_phi_ref = np.zeros((self.Np, 1))
-        self.obj_left_preceding = None
-        self.obj_left_preceding_x_ref = np.zeros((self.Np, 1))
-        self.obj_left_preceding_y_ref = np.zeros((self.Np, 1))
-        self.obj_left_preceding_phi_ref = np.zeros((self.Np, 1))
-        self.obj_left_following = None
-        self.obj_left_following_x_ref = np.zeros((self.Np, 1))
-        self.obj_left_following_y_ref = np.zeros((self.Np, 1))
-        self.obj_left_following_phi_ref = np.zeros((self.Np, 1))
-        self.obj_right_preceding = None
-        self.obj_right_preceding_x_ref = np.zeros((self.Np, 1))
-        self.obj_right_preceding_y_ref = np.zeros((self.Np, 1))
-        self.obj_right_preceding_phi_ref = np.zeros((self.Np, 1))
-        self.obj_right_following = None
-        self.obj_right_following_x_ref = np.zeros((self.Np, 1))
-        self.obj_right_following_y_ref = np.zeros((self.Np, 1))
-        self.obj_right_following_phi_ref = np.zeros((self.Np, 1))
-        self.obj_left = None
-        self.obj_left_x_ref = np.zeros((self.Np, 1))
-        self.obj_left_y_ref = np.zeros((self.Np, 1))
-        self.obj_left_phi_ref = np.zeros((self.Np, 1))
-        self.obj_right = None
-        self.obj_right_x_ref = np.zeros((self.Np, 1))
-        self.obj_right_y_ref = np.zeros((self.Np, 1))
-        self.obj_right_phi_ref = np.zeros((self.Np, 1))
-
-        self.obj_ego_preceding = None
-        self.obj_preceding_x_ref = np.zeros((self.Np, 1))
-        self.obj_preceding_y_ref = np.zeros((self.Np, 1))
-        self.obj_preceding_phi_ref = np.zeros((self.Np, 1))
-
-
         self.obj_x_ref = np.zeros((self.Np, 1))
         self.obj_y_ref = np.zeros((self.Np, 1))
         self.obj_phi_ref = np.zeros((self.Np, 1))
@@ -112,153 +75,13 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
         self.next_states = np.zeros((self.Nx, self.Np)).copy().T
         self.u0 = np.array([0, 0] * self.Nc).reshape(-1, 2).T
 
-    def calc_input(self, x_current, obj_info, ref, ref_left, u_last, vehicle_ahead,csp,fpath, q, ru, rdu):
+    def calc_input(self, x_current, obj_info, ref, ref_left, u_last, csp, fpath, q, ru, rdu):
         start_time = time.time()
         obj_Mux = []
         vehicle_num = 0
         # # 预测时域内的ref矩阵
         # # 预测时域内的obj矩阵
-        # obj_preceding
-        if obj_info['Ego_preceding'][0] != None:
-            obj_preceding_x = obj_info['Ego_preceding'][2][0]
-            obj_preceding_y = obj_info['Ego_preceding'][2][1]
-            obj_preceding_phi = obj_info['Ego_preceding'][2][4]
-            obj_preceding_speed = obj_info['Ego_preceding'][2][5]
-            obj_preceding_delta_f = obj_info['Ego_preceding'][2][6]
-            for i in range(self.Np):
-                # 前车状态预测
-                self.obj_preceding_x_ref[i] = obj_preceding_x + obj_preceding_speed * np.cos(
-                    obj_preceding_phi) * self.T * i
-                self.obj_preceding_y_ref[i] = obj_preceding_y + obj_preceding_speed * np.sin(
-                    obj_preceding_phi) * self.T * i
-                self.obj_preceding_phi_ref[i] = obj_preceding_phi + obj_preceding_delta_f * self.T * i
-            self.obj_ego_preceding = np.concatenate(
-                (self.obj_preceding_x_ref.T, self.obj_preceding_y_ref.T, self.obj_preceding_phi_ref.T))
-        # # obj_following
-        # if obj_info['Ego_following'][0] != None:
-        #     vehicle_num += 1
-        #     obj_following_x = obj_info['Ego_following'][2][0]
-        #     obj_following_y = obj_info['Ego_following'][2][1]
-        #     obj_following_phi = obj_info['Ego_following'][2][4]
-        #     obj_following_speed = obj_info['Ego_following'][2][5]
-        #     obj_following_delta_f = obj_info['Ego_following'][2][6]
-        #     for i in range(self.Np):
-        #         # 前车状态预测
-        #         self.obj_following_x_ref[i] = obj_following_x + obj_following_speed * np.cos(
-        #             obj_following_phi) * self.T * i
-        #         self.obj_following_y_ref[i] = obj_following_y + obj_following_speed * np.sin(
-        #             obj_following_phi) * self.T * i
-        #         self.obj_following_phi_ref[i] = obj_following_phi + obj_following_delta_f * self.T * i
-        #     self.obj_ego_following = np.concatenate(
-        #         (self.obj_following_x_ref.T, self.obj_following_y_ref.T, self.obj_following_phi_ref.T))
-        #
-        # # obj_Left_preceding
-        # if obj_info['Left_preceding'][0] != None:
-        #     vehicle_num += 1
-        #     obj_left_preceding_x = obj_info['Left_preceding'][2][0]
-        #     obj_left_preceding_y = obj_info['Left_preceding'][2][1]
-        #     obj_left_preceding_phi = obj_info['Left_preceding'][2][4]
-        #     obj_left_preceding_speed = obj_info['Left_preceding'][2][5]
-        #     obj_left_preceding_delta_f = obj_info['Left_preceding'][2][6]
-        #     for i in range(self.Np):
-        #         # 前车状态预测
-        #         self.obj_left_preceding_x_ref[i] = obj_left_preceding_x + obj_left_preceding_speed * np.cos(
-        #             obj_left_preceding_phi) * self.T * i
-        #         self.obj_left_preceding_y_ref[i] = obj_left_preceding_y + obj_left_preceding_speed * np.sin(
-        #             obj_left_preceding_phi) * self.T * i
-        #         self.obj_left_preceding_phi_ref[
-        #             i] = obj_left_preceding_phi + obj_left_preceding_delta_f * self.T * i
-        #     self.obj_left_preceding = np.concatenate(
-        #         (self.obj_left_preceding_x_ref.T, self.obj_left_preceding_y_ref.T,
-        #          self.obj_left_preceding_phi_ref.T))
-        # # obj_Left_following
-        # if obj_info['Left_following'][0] != None:
-        #     vehicle_num += 1
-        #     obj_left_following_x = obj_info['Left_following'][2][0]
-        #     obj_left_following_y = obj_info['Left_following'][2][1]
-        #     obj_left_following_phi = obj_info['Left_following'][2][4]
-        #     obj_left_following_speed = obj_info['Left_following'][2][5]
-        #     obj_left_following_delta_f = obj_info['Left_following'][2][6]
-        #     for i in range(self.Np):
-        #         # 前车状态预测
-        #         self.obj_left_following_x_ref[i] = obj_left_following_x + obj_left_following_speed * np.cos(
-        #             obj_left_following_phi) * self.T * i
-        #         self.obj_left_following_y_ref[i] = obj_left_following_y + obj_left_following_speed * np.sin(
-        #             obj_left_following_phi) * self.T * i
-        #         self.obj_left_following_phi_ref[
-        #             i] = obj_left_following_phi + obj_left_following_delta_f * self.T * i
-        #     self.obj_left_following = np.concatenate(
-        #         (self.obj_left_following_x_ref.T, self.obj_left_following_y_ref.T,
-        #          self.obj_left_following_phi_ref.T))
-        # # obj_Right_preceding
-        # if obj_info['Right_preceding'][0] != None:
-        #     vehicle_num += 1
-        #     obj_right_preceding_x = obj_info['Right_preceding'][2][0]
-        #     obj_right_preceding_y = obj_info['Right_preceding'][2][1]
-        #     obj_right_preceding_phi = obj_info['Right_preceding'][2][4]
-        #     obj_right_preceding_speed = obj_info['Right_preceding'][2][5]
-        #     obj_right_preceding_delta_f = obj_info['Right_preceding'][2][6]
-        #     for i in range(self.Np):
-        #         # 前车状态预测
-        #         self.obj_right_preceding_x_ref[i] = obj_right_preceding_x + obj_right_preceding_speed * np.cos(
-        #             obj_right_preceding_phi) * self.T * i
-        #         self.obj_right_preceding_y_ref[i] = obj_right_preceding_y + obj_right_preceding_speed * np.sin(
-        #             obj_right_preceding_phi) * self.T * i
-        #         self.obj_right_preceding_phi_ref[
-        #             i] = obj_right_preceding_phi + obj_right_preceding_delta_f * self.T * i
-        #     self.obj_right_preceding = np.concatenate(
-        #         (
-        #             self.obj_right_preceding_x_ref.T, self.obj_right_preceding_y_ref.T,
-        #             self.obj_right_preceding_phi_ref.T))
-        # # obj_Right_following
-        # if obj_info['Right_following'][0] != None:
-        #     vehicle_num += 1
-        #     obj_right_following_x = obj_info['Right_following'][2][0]
-        #     obj_right_following_y = obj_info['Right_following'][2][1]
-        #     obj_right_following_phi = obj_info['Right_following'][2][4]
-        #     obj_right_following_speed = obj_info['Right_following'][2][5]
-        #     obj_right_following_delta_f = obj_info['Right_following'][2][6]
-        #     for i in range(self.Np):
-        #         # 前车状态预测
-        #         self.obj_right_following_x_ref[i] = obj_right_following_x + obj_right_following_speed * np.cos(
-        #             obj_right_following_phi) * self.T * i
-        #         self.obj_right_following_y_ref[i] = obj_right_following_y + obj_right_following_speed * np.sin(
-        #             obj_right_following_phi) * self.T * i
-        #         self.obj_right_following_phi_ref[
-        #             i] = obj_right_following_phi + obj_right_following_delta_f * self.T * i
-        #     self.obj_right_following = np.concatenate(
-        #         (
-        #             self.obj_right_following_x_ref.T, self.obj_right_following_y_ref.T,
-        #             self.obj_right_following_phi_ref.T))
-        # # obj_Left
-        # if obj_info['Left'][0] != None:
-        #     vehicle_num += 1
-        #     obj_left_x = obj_info['Left'][2][0]
-        #     obj_left_y = obj_info['Left'][2][1]
-        #     obj_left_phi = obj_info['Left'][2][4]
-        #     obj_left_speed = obj_info['Left'][2][5]
-        #     obj_left_delta_f = obj_info['Left'][2][6]
-        #     for i in range(self.Np):
-        #         # 前车状态预测
-        #         self.obj_left_x_ref[i] = obj_left_x + obj_left_speed * np.cos(obj_left_phi) * self.T * i
-        #         self.obj_left_y_ref[i] = obj_left_y + obj_left_speed * np.sin(obj_left_phi) * self.T * i
-        #         self.obj_left_phi_ref[i] = obj_left_phi + obj_left_delta_f * self.T * i
-        #     self.obj_left = np.concatenate((self.obj_left_x_ref.T, self.obj_left_y_ref.T, self.obj_left_phi_ref.T))
-        #     # obj_Right
-        # if obj_info['Right'][0] != None:
-        #     vehicle_num += 1
-        #     obj_right_x = obj_info['Right'][2][0]
-        #     obj_right_y = obj_info['Right'][2][1]
-        #     obj_right_phi = obj_info['Right'][2][4]
-        #     obj_right_speed = obj_info['Right'][2][5]
-        #     obj_right_delta_f = obj_info['Right'][2][6]
-        #     for i in range(self.Np):
-        #         # 前车状态预测
-        #         self.obj_right_x_ref[i] = obj_right_x + obj_right_speed * np.cos(obj_right_phi) * self.T * i
-        #         self.obj_right_y_ref[i] = obj_right_y + obj_right_speed * np.sin(obj_right_phi) * self.T * i
-        #         self.obj_right_phi_ref[i] = obj_right_phi + obj_right_delta_f * self.T * i
-        #     self.obj_right = np.concatenate(
-        #         (self.obj_right_x_ref.T, self.obj_right_y_ref.T, self.obj_right_phi_ref.T))
+
         # 预测时域内的obj矩阵
         for j in range(np.size(obj_info['Obj_actor'])):
             obj_x = obj_info['Obj_cartesian'][j][0]
@@ -274,39 +97,39 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
                 self.obj_pos[i] = 0  # 'not vehicle_around'
                 if obj_info['Ego_preceding'][0] != None:
                     if self.obj_actor_id[i] == obj_info['Ego_preceding'][0].id:
-                        self.obj_pos[i] = 1  #'Ego_preceding'
+                        self.obj_pos[i] = 1  # 'Ego_preceding'
                         vehicle_num += 1
                 if obj_info['Ego_following'][0] != None:
                     if self.obj_actor_id[i] == obj_info['Ego_following'][0].id:
-                        self.obj_pos[i] = 2   #'Ego_following'
+                        self.obj_pos[i] = 2  # 'Ego_following'
                         vehicle_num += 1
                 if obj_info['Left_preceding'][0] != None:
                     if self.obj_actor_id[i] == obj_info['Left_preceding'][0].id:
-                        self.obj_pos[i] = 3   #'Ego_preceding'
+                        self.obj_pos[i] = 3  # 'Ego_preceding'
                         vehicle_num += 1
                 if obj_info['Left_following'][0] != None:
                     if self.obj_actor_id[i] == obj_info['Left_following'][0].id:
-                        self.obj_pos[i] = 4  #'Left_following'
+                        self.obj_pos[i] = 4  # 'Left_following'
                         vehicle_num += 1
                 if obj_info['Right_preceding'][0] != None:
                     if self.obj_actor_id[i] == obj_info['Right_preceding'][0].id:
-                        self.obj_pos[i] = 5  #'Right_preceding'
+                        self.obj_pos[i] = 5  # 'Right_preceding'
                         vehicle_num += 1
                 if obj_info['Right_following'][0] != None:
                     if self.obj_actor_id[i] == obj_info['Right_following'][0].id:
-                        self.obj_pos[i] = 6  #'Right_following'
+                        self.obj_pos[i] = 6  # 'Right_following'
                         vehicle_num += 1
                 if obj_info['Left'][0] != None:
                     if self.obj_actor_id[i] == obj_info['Left'][0].id:
-                        self.obj_pos[i] = 7  #'Left'
+                        self.obj_pos[i] = 7  # 'Left'
                         vehicle_num += 1
                 if obj_info['Right'][0] != None:
                     if self.obj_actor_id[i] == obj_info['Right'][0].id:
-                        self.obj_pos[i] = 8  #'Right'
+                        self.obj_pos[i] = 8  # 'Right'
                         vehicle_num += 1
             obj_Mux.append(np.concatenate(
-                (self.obj_x_ref.T, self.obj_y_ref.T, self.obj_phi_ref.T, self.obj_actor_id.T,self.obj_pos.T)))
-        vehicle_num = int(vehicle_num/self.Np)
+                (self.obj_x_ref.T, self.obj_y_ref.T, self.obj_phi_ref.T, self.obj_actor_id.T, self.obj_pos.T)))
+        vehicle_num = int(vehicle_num / self.Np)
 
         # 根据数学模型建模
         # 系统状态
@@ -345,10 +168,6 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
 
         # cost function
         obj = 0  # 初始化优化目标值
-        g1 = []  # 用list来存储优化目标的向量
-        g2 = []
-        g3 = []
-        g1.append(X[:, 0] - C_R[:3])
 
         # U dU cost function
         for i in range(self.Nc):
@@ -361,95 +180,21 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
 
         # Obstacle avoidance cost function
         for j in range(np.size(obj_info['Obj_actor'])):
-            if obj_Mux[j][4, 0] != 0:  #'not vehicle_around'
+            if obj_Mux[j][4, 0] != 0:  # 'not vehicle_around'
                 for i in range(self.Np):
                     Obj_cost = self.S / (((X[0, i] - obj_Mux[j][0, i]) ** 2) + ((X[1, i] - obj_Mux[j][1, i]) ** 2))
                     obj = obj + Obj_cost
-        # for j in range(np.size(obj_info['Obj_actor'])):
-        #     if obj_info['Ego_preceding'][0] != None:
-        #         if obj_Mux[j][3, 0] == obj_info['Ego_preceding'][0].id:
-        #             for i in range(self.Np):
-        #                 Obj_cost = self.S / (((X[0, i] - obj_Mux[j][0, i]) ** 2) + ((X[1, i] - obj_Mux[j][1, i]) ** 2))
-        #                 obj = obj + Obj_cost
-        #     if obj_info['Ego_following'][0] != None:
-        #         if obj_Mux[j][3, 0] == obj_info['Ego_following'][0].id:
-        #             for i in range(self.Np):
-        #                 Obj_cost = self.S / (((X[0, i] - obj_Mux[j][0, i]) ** 2) + ((X[1, i] - obj_Mux[j][1, i]) ** 2))
-        #                 obj = obj + Obj_cost
-        #     if obj_info['Left_preceding'][0] != None:
-        #         if obj_Mux[j][3, 0] == obj_info['Left_preceding'][0].id:
-        #             for i in range(self.Np):
-        #                 Obj_cost = self.S / (((X[0, i] - obj_Mux[j][0, i]) ** 2) + ((X[1, i] - obj_Mux[j][1, i]) ** 2))
-        #                 obj = obj + Obj_cost
-        #     if obj_info['Left_following'][0] != None:
-        #         if obj_Mux[j][3, 0] == obj_info['Left_following'][0].id:
-        #             for i in range(self.Np):
-        #                 Obj_cost = self.S / (((X[0, i] - obj_Mux[j][0, i]) ** 2) + ((X[1, i] - obj_Mux[j][1, i]) ** 2))
-        #                 obj = obj + Obj_cost
-        #     if obj_info['Right_preceding'][0] != None:
-        #         if obj_Mux[j][3, 0] == obj_info['Right_preceding'][0].id:
-        #             for i in range(self.Np):
-        #                 Obj_cost = self.S / (((X[0, i] - obj_Mux[j][0, i]) ** 2) + ((X[1, i] - obj_Mux[j][1, i]) ** 2))
-        #                 obj = obj + Obj_cost
-        #     if obj_info['Right_following'][0] != None:
-        #         if obj_Mux[j][3, 0] == obj_info['Right_following'][0].id:
-        #             for i in range(self.Np):
-        #                 Obj_cost = self.S / (((X[0, i] - obj_Mux[j][0, i]) ** 2) + ((X[1, i] - obj_Mux[j][1, i]) ** 2))
-        #                 obj = obj + Obj_cost
-        #     if obj_info['Left'][0] != None:
-        #         if obj_Mux[j][3, 0] == obj_info['Left'][0].id:
-        #             for i in range(self.Np):
-        #                 Obj_cost = self.S / (((X[0, i] - obj_Mux[j][0, i]) ** 2) + ((X[1, i] - obj_Mux[j][1, i]) ** 2))
-        #                 obj = obj + Obj_cost
-        #     if obj_info['Right'][0] != None:
-        #         if obj_Mux[j][3, 0] == obj_info['Right'][0].id:
-        #             for i in range(self.Np):
-        #                 Obj_cost = self.S / (((X[0, i] - obj_Mux[j][0, i]) ** 2) + ((X[1, i] - obj_Mux[j][1, i]) ** 2))
-        #                 obj = obj + Obj_cost
-        #     else:
-        #         obj = obj
-
-        # Obstacle avoidance cost function
-        # for i in range(self.Np):
-        #     if obj_info['Ego_preceding'][0] != None:
-        #         Obj_cost = self.S / (((X[0, i] - self.obj_ego_preceding[0, i]) ** 2) + (
-        #                     (X[1, i] - self.obj_ego_preceding[0, i]) ** 2))
-        #         obj = obj + Obj_cost
-        #     if obj_info['Ego_following'][0] != None:
-        #         Obj_cost = self.S / (((X[0, i] - self.obj_ego_following[0, i]) ** 2) + (
-        #                     (X[1, i] - self.obj_ego_following[0, i]) ** 2))
-        #         obj = obj + Obj_cost
-        #     if obj_info['Left_preceding'][0] != None:
-        #         Obj_cost = self.S / (((X[0, i] - self.obj_left_preceding[0, i]) ** 2) + (
-        #                     (X[1, i] - self.obj_left_preceding[0, i]) ** 2))
-        #         obj = obj + Obj_cost
-        #     if obj_info['Left_following'][0] != None:
-        #         Obj_cost = self.S / (((X[0, i] - self.obj_left_following[0, i]) ** 2) + (
-        #                     (X[1, i] - self.obj_left_following[0, i]) ** 2))
-        #         obj = obj + Obj_cost
-        #     if obj_info['Right_preceding'][0] != None:
-        #         Obj_cost = self.S / (((X[0, i] - self.obj_right_preceding[0, i]) ** 2) + (
-        #                     (X[1, i] - self.obj_right_preceding[0, i]) ** 2))
-        #         obj = obj + Obj_cost
-        #     if obj_info['Right_following'][0] != None:
-        #         Obj_cost = self.S / (((X[0, i] - self.obj_right_following[0, i]) ** 2) + (
-        #                     (X[1, i] - self.obj_right_following[0, i]) ** 2))
-        #         obj = obj + Obj_cost
-        #     if obj_info['Left'][0] != None:
-        #         Obj_cost = self.S / (((X[0, i] - self.obj_left[0, i]) ** 2) + ((X[1, i] - self.obj_left[0, i]) ** 2))
-        #         obj = obj + Obj_cost
-        #     if obj_info['Right'][0] != None:
-        #         Obj_cost = self.S / (((X[0, i] - self.obj_right[0, i]) ** 2) + ((X[1, i] - self.obj_right[0, i]) ** 2))
-        #         obj = obj + Obj_cost
-        #     else:
-        #         obj = obj
 
         # Terminal cost function
         Ref_ter_1 = ca.mtimes([(X[:, -1] - C_R[3:6]).T, self.Q1, X[:, -1] - C_R[3:6]])
         Ref_ter_2 = ca.mtimes([(X[:, -1] - C_R[6:9]).T, self.Q2, X[:, -1] - C_R[6:9]])
         obj = obj + Ref_ter_1 + Ref_ter_2
 
+        g1 = []  # 用list来存储优化目标的向量
+        g2 = []
+        g3 = []
         # constraint 1: dynamic constraint
+        g1.append(X[:, 0] - C_R[:3])
         for i in range(self.Np - 1):
             if i in range(self.Nc):
                 x_next_ = f(X[:, i], U[:, i]) * self.T + X[:, i]
@@ -473,7 +218,7 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
             vehicle_ego_center2_y = X[1, i] + self.Length / 4 * np.sin(X[2, i])
 
             for j in range(np.size(obj_info['Obj_actor'])):
-                if obj_Mux[j][4, 0] != 0:    #'not vehicle_around'
+                if obj_Mux[j][4, 0] != 0:  # 'not vehicle_around'
                     vehicle_obs_center1_x = obj_Mux[j][0, i] - self.Length / 4 * np.cos(obj_Mux[j][2, i])
                     vehicle_obs_center1_y = obj_Mux[j][1, i] - self.Length / 4 * np.sin(obj_Mux[j][2, i])
                     vehicle_obs_center2_x = obj_Mux[j][0, i] + self.Length / 4 * np.cos(obj_Mux[j][2, i])
@@ -486,150 +231,6 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
                             vehicle_ego_center2_y - vehicle_obs_center1_y) ** 2)
                     g3.append((vehicle_ego_center2_x - vehicle_obs_center2_x) ** 2 + (
                             vehicle_ego_center2_y - vehicle_obs_center2_y) ** 2)
-
-        # for i in range(self.Np):
-        #     vehicle_ego_center1_x = X[0, i] - self.Length / 4 * np.cos(X[2, i])
-        #     vehicle_ego_center1_y = X[1, i] - self.Length / 4 * np.sin(X[2, i])
-        #     vehicle_ego_center2_x = X[0, i] + self.Length / 4 * np.cos(X[2, i])
-        #     vehicle_ego_center2_y = X[1, i] + self.Length / 4 * np.sin(X[2, i])
-        #     if obj_info['Ego_preceding'][0] != None:
-        #         vehicle_ego_preceding_obs_center1_x = self.obj_ego_preceding[0, i] - self.Length / 4 * np.cos(
-        #             self.obj_ego_preceding[2, i])
-        #         vehicle_ego_preceding_obs_center1_y = self.obj_ego_preceding[1, i] - self.Length / 4 * np.sin(
-        #             self.obj_ego_preceding[2, i])
-        #         vehicle_ego_preceding_obs_center2_x = self.obj_ego_preceding[0, i] + self.Length / 4 * np.cos(
-        #             self.obj_ego_preceding[2, i])
-        #         vehicle_ego_preceding_obs_center2_y = self.obj_ego_preceding[1, i] + self.Length / 4 * np.sin(
-        #             self.obj_ego_preceding[2, i])
-        #         g3.append((vehicle_ego_center1_x - vehicle_ego_preceding_obs_center1_x) ** 2 + (
-        #                 vehicle_ego_center1_y - vehicle_ego_preceding_obs_center1_y) ** 2)
-        #         g3.append((vehicle_ego_center1_x - vehicle_ego_preceding_obs_center2_x) ** 2 + (
-        #                 vehicle_ego_center1_y - vehicle_ego_preceding_obs_center2_y) ** 2)
-        #         g3.append((vehicle_ego_center2_x - vehicle_ego_preceding_obs_center1_x) ** 2 + (
-        #                 vehicle_ego_center2_y - vehicle_ego_preceding_obs_center1_y) ** 2)
-        #         g3.append((vehicle_ego_center2_x - vehicle_ego_preceding_obs_center2_x) ** 2 + (
-        #                 vehicle_ego_center2_y - vehicle_ego_preceding_obs_center2_y) ** 2)
-        #     if obj_info['Ego_following'][0] != None:
-        #         vehicle_ego_following_obs_center1_x = self.obj_ego_following[0, i] - self.Length / 4 * np.cos(
-        #             self.obj_ego_following[2, i])
-        #         vehicle_ego_following_obs_center1_y = self.obj_ego_following[1, i] - self.Length / 4 * np.sin(
-        #             self.obj_ego_following[2, i])
-        #         vehicle_ego_following_obs_center2_x = self.obj_ego_following[0, i] + self.Length / 4 * np.cos(
-        #             self.obj_ego_following[2, i])
-        #         vehicle_ego_following_obs_center2_y = self.obj_ego_following[1, i] + self.Length / 4 * np.sin(
-        #             self.obj_ego_following[2, i])
-        #         g3.append((vehicle_ego_center1_x - vehicle_ego_following_obs_center1_x) ** 2 + (
-        #                 vehicle_ego_center1_y - vehicle_ego_following_obs_center1_y) ** 2)
-        #         g3.append((vehicle_ego_center1_x - vehicle_ego_following_obs_center2_x) ** 2 + (
-        #                 vehicle_ego_center1_y - vehicle_ego_following_obs_center2_y) ** 2)
-        #         g3.append((vehicle_ego_center2_x - vehicle_ego_following_obs_center1_x) ** 2 + (
-        #                 vehicle_ego_center2_y - vehicle_ego_following_obs_center1_y) ** 2)
-        #         g3.append((vehicle_ego_center2_x - vehicle_ego_following_obs_center2_x) ** 2 + (
-        #                 vehicle_ego_center2_y - vehicle_ego_following_obs_center2_y) ** 2)
-        #     if obj_info['Left_preceding'][0] != None:
-        #         vehicle_left_preceding_obs_center1_x = self.obj_left_preceding[0, i] - self.Length / 4 * np.cos(
-        #             self.obj_left_preceding[2, i])
-        #         vehicle_left_preceding_obs_center1_y = self.obj_left_preceding[1, i] - self.Length / 4 * np.sin(
-        #             self.obj_left_preceding[2, i])
-        #         vehicle_left_preceding_obs_center2_x = self.obj_left_preceding[0, i] + self.Length / 4 * np.cos(
-        #             self.obj_left_preceding[2, i])
-        #         vehicle_left_preceding_obs_center2_y = self.obj_left_preceding[1, i] + self.Length / 4 * np.sin(
-        #             self.obj_left_preceding[2, i])
-        #         g3.append((vehicle_ego_center1_x - vehicle_left_preceding_obs_center1_x) ** 2 + (
-        #                 vehicle_ego_center1_y - vehicle_left_preceding_obs_center1_y) ** 2)
-        #         g3.append((vehicle_ego_center1_x - vehicle_left_preceding_obs_center2_x) ** 2 + (
-        #                 vehicle_ego_center1_y - vehicle_left_preceding_obs_center2_y) ** 2)
-        #         g3.append((vehicle_ego_center2_x - vehicle_left_preceding_obs_center1_x) ** 2 + (
-        #                 vehicle_ego_center2_y - vehicle_left_preceding_obs_center1_y) ** 2)
-        #         g3.append((vehicle_ego_center2_x - vehicle_left_preceding_obs_center2_x) ** 2 + (
-        #                 vehicle_ego_center2_y - vehicle_left_preceding_obs_center2_y) ** 2)
-        #     if obj_info['Left_following'][0] != None:
-        #         vehicle_left_following_obs_center1_x = self.obj_left_following[0, i] - self.Length / 4 * np.cos(
-        #             self.obj_left_following[2, i])
-        #         vehicle_left_following_obs_center1_y = self.obj_left_following[1, i] - self.Length / 4 * np.sin(
-        #             self.obj_left_following[2, i])
-        #         vehicle_left_following_obs_center2_x = self.obj_left_following[0, i] + self.Length / 4 * np.cos(
-        #             self.obj_left_following[2, i])
-        #         vehicle_left_following_obs_center2_y = self.obj_left_following[1, i] + self.Length / 4 * np.sin(
-        #             self.obj_left_following[2, i])
-        #         g3.append((vehicle_ego_center1_x - vehicle_left_following_obs_center1_x) ** 2 + (
-        #                 vehicle_ego_center1_y - vehicle_left_following_obs_center1_y) ** 2)
-        #         g3.append((vehicle_ego_center1_x - vehicle_left_following_obs_center2_x) ** 2 + (
-        #                 vehicle_ego_center1_y - vehicle_left_following_obs_center2_y) ** 2)
-        #         g3.append((vehicle_ego_center2_x - vehicle_left_following_obs_center1_x) ** 2 + (
-        #                 vehicle_ego_center2_y - vehicle_left_following_obs_center1_y) ** 2)
-        #         g3.append((vehicle_ego_center2_x - vehicle_left_following_obs_center2_x) ** 2 + (
-        #                 vehicle_ego_center2_y - vehicle_left_following_obs_center2_y) ** 2)
-        #     if obj_info['Right_preceding'][0] != None:
-        #         vehicle_right_preceding_obs_center1_x = self.obj_right_preceding[0, i] - self.Length / 4 * np.cos(
-        #             self.obj_right_preceding[2, i])
-        #         vehicle_right_preceding_obs_center1_y = self.obj_right_preceding[1, i] - self.Length / 4 * np.sin(
-        #             self.obj_right_preceding[2, i])
-        #         vehicle_right_preceding_obs_center2_x = self.obj_right_preceding[0, i] + self.Length / 4 * np.cos(
-        #             self.obj_right_preceding[2, i])
-        #         vehicle_right_preceding_obs_center2_y = self.obj_right_preceding[1, i] + self.Length / 4 * np.sin(
-        #             self.obj_right_preceding[2, i])
-        #         g3.append((vehicle_ego_center1_x - vehicle_right_preceding_obs_center1_x) ** 2 + (
-        #                 vehicle_ego_center1_y - vehicle_right_preceding_obs_center1_y) ** 2)
-        #         g3.append((vehicle_ego_center1_x - vehicle_right_preceding_obs_center2_x) ** 2 + (
-        #                 vehicle_ego_center1_y - vehicle_right_preceding_obs_center2_y) ** 2)
-        #         g3.append((vehicle_ego_center2_x - vehicle_right_preceding_obs_center1_x) ** 2 + (
-        #                 vehicle_ego_center2_y - vehicle_right_preceding_obs_center1_y) ** 2)
-        #         g3.append((vehicle_ego_center2_x - vehicle_right_preceding_obs_center2_x) ** 2 + (
-        #                 vehicle_ego_center2_y - vehicle_right_preceding_obs_center2_y) ** 2)
-        #     if obj_info['Right_following'][0] != None:
-        #         vehicle_right_following_obs_center1_x = self.obj_right_following[0, i] - self.Length / 4 * np.cos(
-        #             self.obj_right_following[2, i])
-        #         vehicle_right_following_obs_center1_y = self.obj_right_following[1, i] - self.Length / 4 * np.sin(
-        #             self.obj_right_following[2, i])
-        #         vehicle_right_following_obs_center2_x = self.obj_right_following[0, i] + self.Length / 4 * np.cos(
-        #             self.obj_right_following[2, i])
-        #         vehicle_right_following_obs_center2_y = self.obj_right_following[1, i] + self.Length / 4 * np.sin(
-        #             self.obj_right_following[2, i])
-        #         g3.append((vehicle_ego_center1_x - vehicle_right_following_obs_center1_x) ** 2 + (
-        #                 vehicle_ego_center1_y - vehicle_right_following_obs_center1_y) ** 2)
-        #         g3.append((vehicle_ego_center1_x - vehicle_right_following_obs_center2_x) ** 2 + (
-        #                 vehicle_ego_center1_y - vehicle_right_following_obs_center2_y) ** 2)
-        #         g3.append((vehicle_ego_center2_x - vehicle_right_following_obs_center1_x) ** 2 + (
-        #                 vehicle_ego_center2_y - vehicle_right_following_obs_center1_y) ** 2)
-        #         g3.append((vehicle_ego_center2_x - vehicle_right_following_obs_center2_x) ** 2 + (
-        #                 vehicle_ego_center2_y - vehicle_right_following_obs_center2_y) ** 2)
-        #
-        #     if obj_info['Left'][0] != None:
-        #         vehicle_left_obs_center1_x = self.obj_left[0, i] - self.Length / 4 * np.cos(
-        #             self.obj_left[2, i])
-        #         vehicle_left_obs_center1_y = self.obj_left[1, i] - self.Length / 4 * np.sin(
-        #             self.obj_left[2, i])
-        #         vehicle_left_obs_center2_x = self.obj_left[0, i] + self.Length / 4 * np.cos(
-        #             self.obj_left[2, i])
-        #         vehicle_left_obs_center2_y = self.obj_left[1, i] + self.Length / 4 * np.sin(
-        #             self.obj_left[2, i])
-        #         g3.append((vehicle_ego_center1_x - vehicle_left_obs_center1_x) ** 2 + (
-        #                 vehicle_ego_center1_y - vehicle_left_obs_center1_y) ** 2)
-        #         g3.append((vehicle_ego_center1_x - vehicle_left_obs_center2_x) ** 2 + (
-        #                 vehicle_ego_center1_y - vehicle_left_obs_center2_y) ** 2)
-        #         g3.append((vehicle_ego_center2_x - vehicle_left_obs_center1_x) ** 2 + (
-        #                 vehicle_ego_center2_y - vehicle_left_obs_center1_y) ** 2)
-        #         g3.append((vehicle_ego_center2_x - vehicle_left_obs_center2_x) ** 2 + (
-        #                 vehicle_ego_center2_y - vehicle_left_obs_center2_y) ** 2)
-        #     if obj_info['Right'][0] != None:
-        #         vehicle_right_obs_center1_x = self.obj_right[0, i] - self.Length / 4 * np.cos(
-        #             self.obj_right[2, i])
-        #         vehicle_right_obs_center1_y = self.obj_right[1, i] - self.Length / 4 * np.sin(
-        #             self.obj_right[2, i])
-        #         vehicle_right_obs_center2_x = self.obj_right[0, i] + self.Length / 4 * np.cos(
-        #             self.obj_right[2, i])
-        #         vehicle_right_obs_center2_y = self.obj_right[1, i] + self.Length / 4 * np.sin(
-        #             self.obj_right[2, i])
-        #         g3.append((vehicle_ego_center1_x - vehicle_right_obs_center1_x) ** 2 + (
-        #                 vehicle_ego_center1_y - vehicle_right_obs_center1_y) ** 2)
-        #         g3.append((vehicle_ego_center1_x - vehicle_right_obs_center2_x) ** 2 + (
-        #                 vehicle_ego_center1_y - vehicle_right_obs_center2_y) ** 2)
-        #         g3.append((vehicle_ego_center2_x - vehicle_right_obs_center1_x) ** 2 + (
-        #                 vehicle_ego_center2_y - vehicle_right_obs_center1_y) ** 2)
-        #         g3.append((vehicle_ego_center2_x - vehicle_right_obs_center2_x) ** 2 + (
-        #                 vehicle_ego_center2_y - vehicle_right_obs_center2_y) ** 2)
-
 
         # 定义优化问题
         # 输入变量，这里需要同时将系统状态X也作为优化变量输入，
@@ -669,11 +270,9 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
 
         # g3
         for i in range(self.Np):
-            # for _ in range(np.size(obj_info['Obj_actor'])*4):
             for _ in range(vehicle_num * 4):
                 lbg.append(4 * ((self.Length / 4) ** 2 + (self.Width / 2) ** 2))
                 ubg.append(np.inf)
-
 
         # 控制约束
         lbx = []
@@ -687,26 +286,24 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
             ubx.append(self.delta_f_max)
 
         for i in range(self.Np):
-            y_min = frenet_to_inertial(fpath.s[i], fpath.d[i] - 4.5, csp)[1]
-            y_max = frenet_to_inertial(fpath.s[i], fpath.d[i] + 1.5, csp)[1]
+            y_min = frenet_to_inertial(fpath.s[i], - 4.3, csp)[1]
+            y_max = frenet_to_inertial(fpath.s[i], + 0.3, csp)[1]
             lbx.append(-np.inf)
-            # lbx.append(-np.inf)  #y
-            lbx.append(25.5)
-            # lbx.append(y_min)
+            lbx.append(y_min)
             lbx.append(-np.inf)
             if obj_info['Ego_preceding'][0] != None:  # if no vehicle_ahead
-                # ubx.append(self.obj_ego_preceding[0, i])
-                ubx.append(self.obj_ego_preceding[0, i] - self.stop_line)
-            # if vehicle_ahead != None:  # if no vehicle_ahead
-            #     ubx.append(obj_Mux[vehicle_ahead][0, i] - self.stop_line)
+                obj_preceding_x = obj_info['Ego_preceding'][2][0]
+                obj_preceding_y = obj_info['Ego_preceding'][2][1]
+                obj_preceding_phi = obj_info['Ego_preceding'][2][4]
+                obj_preceding_speed = obj_info['Ego_preceding'][2][5]
+                obj_preceding_delta_f = obj_info['Ego_preceding'][2][6]
+                obj_preceding_x_ref = obj_preceding_x + obj_preceding_speed * np.cos(obj_preceding_phi) * self.T * i
+                ubx.append(obj_preceding_x_ref - self.stop_line)
             else:
                 ubx.append(np.inf)
-            # ubx.append(y_max)
-            ubx.append(31)
-            # ubx.append(np.inf)   #y
+            ubx.append(y_max)
             ubx.append(np.inf)
 
-        # index_t = []
         # 初始化优化参数
         C_R = np.array([x_current[0], x_current[1], x_current[2], ref[0], ref[1], ref[2],
                         ref_left[0], ref_left[1], ref_left[2]])
@@ -716,7 +313,6 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
         t_ = time.time()
         res = solver(x0=init_control, p=C_R, lbg=lbg,
                      lbx=lbx, ubg=ubg, ubx=ubx)
-        # index_t.append(time.time() - t_)
         # the feedback is in the series [u0, x0, u1, x1, ...]
         # 获得最优控制结果estimated_opt，u0，x_m
         estimated_opt = res['x'].full()
