@@ -794,7 +794,7 @@ class CarlagymEnv(gym.Env):
 
         self.actor_enumerated_dict['EGO'] = {'NORM_S': [0], 'NORM_D': [norm_d],
                                              'S': ego_s_list, 'D': ego_d_list, 'SPEED': [speed]}
-        obj_info = self.obj_info_1()
+        obj_info = self.obj_info()
 
         delta_s_0 = np.inf
         vehicle_ahead_idx = None
@@ -805,7 +805,7 @@ class CarlagymEnv(gym.Env):
                 vehicle_ahead_idx = i
                 delta_s_0 = delta_s
 
-        if self.n_step == 140:
+        if self.n_step == 120:
             print("180")
 
 
@@ -814,10 +814,10 @@ class CarlagymEnv(gym.Env):
         # terminal
         self.Input, MPC_unsolved, x_m = self.lon_lat_controller_ipopt.calc_input(
             x_current=np.array([[ego_state[0]], [ego_state[1]], [ego_state[2]]]),
-            obj_info = obj_info,
+            obj_info=obj_info,
             ref=np.array([self.fpath.x[29], self.fpath.y[29], self.fpath.yaw[29], self.fpath.s[29], self.fpath.d[29]]),
             ref_left=np.array([ref_left[0], ref_left[1], ref_left[3]]),
-            u_last=self.u_last,vehicle_ahead=vehicle_ahead_idx,
+            u_last=self.u_last,vehicle_ahead=vehicle_ahead_idx,csp=self.motionPlanner.csp,fpath = fpath,
             q=1, ru=1, rdu=1)
 
         self.u_last = self.Input
