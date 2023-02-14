@@ -286,7 +286,7 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
             ubx.append(self.delta_f_max)
 
         for i in range(self.Np):
-            y_min = frenet_to_inertial(fpath.s[i], - 4.3, csp)[1]
+            y_min = frenet_to_inertial(fpath.s[i], - 4.2, csp)[1]
             y_max = frenet_to_inertial(fpath.s[i], + 0.3, csp)[1]
             lbx.append(-np.inf)
             lbx.append(y_min)

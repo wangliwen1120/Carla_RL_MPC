@@ -39,6 +39,7 @@ MODULE_TRAFFIC = 'TRAFFIC'
 TENSOR_ROW_NAMES = ['EGO', 'LEADING', 'FOLLOWING', 'LEFT', 'LEFT_UP', 'LEFT_DOWN',
                     'RIGHT', 'RIGHT_UP', 'RIGHT_DOWN']
 
+
 def frenet_to_inertial(s, d, csp):
     """
     transform a point from frenet frame to inertial frame
@@ -52,6 +53,7 @@ def frenet_to_inertial(s, d, csp):
     y = iy + d * math.sin(iyaw + math.pi / 2.0)
 
     return x, y, iz, iyaw
+
 
 def inertial_to_body_frame(ego_location, xi, yi, psi):
     Xi = np.array([xi, yi])  # inertial frame
@@ -102,79 +104,16 @@ def closest_wp_idx_ref(ego_state, fpath, f_idx, w_size=10):
 
     return f_idx + closest_wp_index
 
-# def closest_ref_idx(ego_state, ref_x,ref_y, f_idx, w_size=50):
-#     """
-#     given the ego_state and frenet_path this function returns the closest WP in front of the vehicle that is within the w_size
-#     """
-#
-#     min_dist = 30  # in meters (Max 100km/h /3.6) * 2 sn
-#     ego_location = [ego_state[0], ego_state[1]]
-#     closest_wp_index = 0  # default WP
-#     w_size = w_size if w_size <= len(ref_x) - 2 - f_idx else len(ref_x) - 2 - f_idx
-#     for i in range(w_size):
-#         temp_wp = [ref_x[f_idx + i], ref_y[f_idx + i]]
-#         temp_dist = euclidean_distance(ego_location, temp_wp)
-#         if temp_dist <= min_dist \
-#                 and inertial_to_body_frame(ego_location, temp_wp[0], temp_wp[1], ego_state[2])[0] > 0.0:
-#             closest_wp_index = i
-#             min_dist = temp_dist
-#         if i - closest_wp_index >5:
-#             return f_idx + closest_wp_index
-#
-#     return f_idx + closest_wp_index
-
-
-def lamp(v, x, y):
-    return y[0] + (v - x[0]) * (y[1] - y[0]) / (x[1] - x[0] + 1e-10)
-
-
-def cal_lat_error(waypoint1, waypoint2, vehicle_transform):
-    """
-    Estimate the steering angle of the vehicle based on the PID equations
-
-    :param waypoint: target waypoint [x, y]
-    :param vehicle_transform: current transform of the vehicle
-    :return: lat_error
-    """
-    v_begin = vehicle_transform.location
-    v_end = v_begin + carla.Location(x=math.cos(math.radians(vehicle_transform.rotation.yaw)),
-                                     y=math.sin(math.radians(vehicle_transform.rotation.yaw)))
-    v_vec_0 = np.array(
-        [math.cos(math.radians(vehicle_transform.rotation.yaw)), math.sin(math.radians(vehicle_transform.rotation.yaw)),
-         0.0])
-    v_vec = np.array([v_end.x - v_begin.x, v_end.y - v_begin.y, 0.0])
-    w_vec = np.array([waypoint2[0] -
-                      waypoint1[0], waypoint2[1] -
-                      waypoint1[1], 0.0])
-    lat_error = math.acos(np.clip(np.dot(w_vec, v_vec) /
-                                  (np.linalg.norm(w_vec) * np.linalg.norm(v_vec)), -1.0, 1.0))
-
-    return lat_error
-
 
 class CarlagymEnv(gym.Env):
 
     # metadata = {'render.modes': ['human']}
     def __init__(self):
-
-
-        self.Input = None
-        self.du_lon_last = None
-        self.Input_lon = None
-        self.Input_lt = None
-        self.lat_error = None
         self.__version__ = "9.9.2"
-        self.lon_param = MPC_lon_Config
-        self.lat_param = MPC_lat_Config
         self.lon_lat_param = MPC_lon_lat_Config
-        self.lon_controller = MPC_controller_lon(self.lon_param)
-        self.lat_controller = MPC_controller_lat(self.lat_param)
-        self.lon_lat_controller = MPC_controller_lon_lat(self.lon_lat_param)
         self.lon_lat_controller_ipopt = MPC_controller_lon_lat_ipopt_nonlinear_terminal(self.lon_lat_param)
         # self.lon_lat_controller_ipopt = MPC_controller_lon_lat_ipopt_nonlinear_sequence(self.lon_lat_param)
         # self.lon_lat_controller_ipopt = MPC_controller_lon_lat_ipopt_nonlinear_opt(self.lon_lat_param)
-        self.mpc_param = MPC_Config
-        self.mpc_controller = MPC_controller_yundongxue(self.mpc_param)
 
         # simulation
         self.verbosity = 0
@@ -246,20 +185,15 @@ class CarlagymEnv(gym.Env):
         self.input_module = None
         self.control_module = None
         self.init_transform = None  # ego initial transform to recover at each episode
-        self.acceleration_ = 0
+        self.Input = None
+        self.fpath = None
         self.eps_rew = 0
         self.u_last = np.array([[0.0], [0.0]])
-        self.u_lon_last = 0.0
-        self.u_lon_llast = 0.0
-        self.u_lat_last = 0.0
-        self.u_lat_llast = 0.0
         self.lane_last = 0
-        self.ref_left_idx =0
+        self.ref_left_idx = 0
         self.fig, self.ax = plt.subplots()
         self.x = []
         self.y = []
-        self.obj_frenet_history = np.zeros([1, 6])
-        self.obj_cartesian_history = np.zeros([1, 8])
         self.actor_enumerated_dict = {}
         self.actor_enumeration = []
         self.side_window = 5
@@ -339,8 +273,7 @@ class CarlagymEnv(gym.Env):
 
             return self.traffic_module.actors_batch[vehicle_ahead_idx]
 
-
-    def obj_info_1(self):
+    def obj_info_simple(self):
         """
         Actor:  [actor_id]
         Frenet:  [s,d,v_s, v_d, phi_Frenet, K_Frenet]
@@ -357,8 +290,7 @@ class CarlagymEnv(gym.Env):
             obj_frenet[obj_idx] = actor['Obj_Frenet_state']
             obj_cartesian[obj_idx] = actor['Obj_Cartesian_state']
 
-        obj_dict = ({'Obj_actor': obj_actor, 'Obj_frenet': obj_frenet, 'Obj_cartesian': obj_cartesian,
-                    })
+        obj_dict = ({'Obj_actor': obj_actor, 'Obj_frenet': obj_frenet, 'Obj_cartesian': obj_cartesian})
 
         return obj_dict
 
@@ -381,8 +313,6 @@ class CarlagymEnv(gym.Env):
             obj_cartesian[obj_idx] = actor['Obj_Cartesian_state']
             obj_targetSpeed[obj_idx] = actor['Obj_Cartesian_state'][7]
 
-
-
         self.enumerate_actors()
 
         self.ego_lane_preceding_idx = 0
@@ -398,27 +328,27 @@ class CarlagymEnv(gym.Env):
         for i in range(self.N_SPAWN_CARS):
             others_id[i] = obj_actor[i].id
             if others_id[i] == self.actor_enumeration[0]:
-                self.ego_lane_preceding_idx = i+1
+                self.ego_lane_preceding_idx = i + 1
             elif others_id[i] == self.actor_enumeration[1]:
-                self.ego_lane_following_idx = i+1
+                self.ego_lane_following_idx = i + 1
             elif others_id[i] == self.actor_enumeration[2]:
-                self.left_lane_idx = i+1
+                self.left_lane_idx = i + 1
             elif others_id[i] == self.actor_enumeration[3]:
-                self.left_lane_preceding_idx = i+1
+                self.left_lane_preceding_idx = i + 1
             elif others_id[i] == self.actor_enumeration[4]:
-                self.left_lane_following_idx = i+1
+                self.left_lane_following_idx = i + 1
             elif others_id[i] == self.actor_enumeration[8]:
-                self.right_lane_idx = i+1
+                self.right_lane_idx = i + 1
             elif others_id[i] == self.actor_enumeration[9]:
-                self.right_lane_preceding_idx = i+1
+                self.right_lane_preceding_idx = i + 1
             elif others_id[i] == self.actor_enumeration[10]:
-                self.right_lane_following_idx = i+1
+                self.right_lane_following_idx = i + 1
             else:
                 pass
 
         if self.ego_lane_preceding_idx != 0:
-            ego_preceding_actor = obj_actor[self.ego_lane_preceding_idx-1]
-            ego_preceding_actor_frenet = obj_frenet[self.ego_lane_preceding_idx-1]
+            ego_preceding_actor = obj_actor[self.ego_lane_preceding_idx - 1]
+            ego_preceding_actor_frenet = obj_frenet[self.ego_lane_preceding_idx - 1]
             ego_preceding_actor_cartesian = obj_cartesian[self.ego_lane_preceding_idx - 1]
         else:
             ego_preceding_actor = None
@@ -426,9 +356,9 @@ class CarlagymEnv(gym.Env):
             ego_preceding_actor_cartesian = None
 
         if self.ego_lane_following_idx != 0:
-            ego_following_actor = obj_actor[self.ego_lane_following_idx-1]
-            ego_following_actor_frenet = obj_frenet[self.ego_lane_following_idx-1]
-            ego_following_actor_cartesian = obj_cartesian[self.ego_lane_following_idx-1]
+            ego_following_actor = obj_actor[self.ego_lane_following_idx - 1]
+            ego_following_actor_frenet = obj_frenet[self.ego_lane_following_idx - 1]
+            ego_following_actor_cartesian = obj_cartesian[self.ego_lane_following_idx - 1]
 
         else:
             ego_following_actor = None
@@ -436,54 +366,54 @@ class CarlagymEnv(gym.Env):
             ego_following_actor_cartesian = None
 
         if self.left_lane_preceding_idx != 0:
-            left_preceding_actor = obj_actor[self.left_lane_preceding_idx-1]
-            left_preceding_actor_frenet = obj_frenet[self.left_lane_preceding_idx-1]
-            left_preceding_actor_cartesian = obj_cartesian[self.left_lane_preceding_idx-1]
+            left_preceding_actor = obj_actor[self.left_lane_preceding_idx - 1]
+            left_preceding_actor_frenet = obj_frenet[self.left_lane_preceding_idx - 1]
+            left_preceding_actor_cartesian = obj_cartesian[self.left_lane_preceding_idx - 1]
         else:
             left_preceding_actor = None
             left_preceding_actor_frenet = None
             left_preceding_actor_cartesian = None
 
         if self.left_lane_following_idx != 0:
-            left_following_actor = obj_actor[self.left_lane_following_idx-1]
-            left_following_actor_frenet = obj_frenet[self.left_lane_following_idx-1]
-            left_following_actor_cartesian = obj_cartesian[self.left_lane_following_idx-1]
+            left_following_actor = obj_actor[self.left_lane_following_idx - 1]
+            left_following_actor_frenet = obj_frenet[self.left_lane_following_idx - 1]
+            left_following_actor_cartesian = obj_cartesian[self.left_lane_following_idx - 1]
         else:
             left_following_actor = None
             left_following_actor_frenet = None
             left_following_actor_cartesian = None
 
         if self.right_lane_preceding_idx != 0:
-            right_preceding_actor = obj_actor[self.right_lane_preceding_idx-1]
-            right_preceding_actor_frenet = obj_frenet[self.right_lane_preceding_idx-1]
-            right_preceding_actor_cartesian = obj_cartesian[self.right_lane_preceding_idx-1]
+            right_preceding_actor = obj_actor[self.right_lane_preceding_idx - 1]
+            right_preceding_actor_frenet = obj_frenet[self.right_lane_preceding_idx - 1]
+            right_preceding_actor_cartesian = obj_cartesian[self.right_lane_preceding_idx - 1]
         else:
             right_preceding_actor = None
             right_preceding_actor_frenet = None
             right_preceding_actor_cartesian = None
 
         if self.right_lane_following_idx != 0:
-            right_following_actor = obj_actor[self.right_lane_following_idx-1]
-            right_following_actor_frenet = obj_frenet[self.right_lane_following_idx-1]
-            right_following_actor_cartesian = obj_cartesian[self.right_lane_following_idx-1]
+            right_following_actor = obj_actor[self.right_lane_following_idx - 1]
+            right_following_actor_frenet = obj_frenet[self.right_lane_following_idx - 1]
+            right_following_actor_cartesian = obj_cartesian[self.right_lane_following_idx - 1]
         else:
             right_following_actor = None
             right_following_actor_frenet = None
             right_following_actor_cartesian = None
 
         if self.left_lane_idx != 0:
-            left_actor = obj_actor[self.left_lane_idx-1]
-            left_actor_frenet = obj_frenet[self.left_lane_idx-1]
-            left_actor_cartesian = obj_cartesian[self.left_lane_idx-1]
+            left_actor = obj_actor[self.left_lane_idx - 1]
+            left_actor_frenet = obj_frenet[self.left_lane_idx - 1]
+            left_actor_cartesian = obj_cartesian[self.left_lane_idx - 1]
         else:
             left_actor = None
             left_actor_frenet = None
             left_actor_cartesian = None
 
         if self.right_lane_idx != 0:
-            right_actor = obj_actor[self.right_lane_idx-1]
-            right_actor_frenet = obj_frenet[self.right_lane_idx-1]
-            right_actor_cartesian = obj_cartesian[self.right_lane_idx-1]
+            right_actor = obj_actor[self.right_lane_idx - 1]
+            right_actor_frenet = obj_frenet[self.right_lane_idx - 1]
+            right_actor_cartesian = obj_cartesian[self.right_lane_idx - 1]
         else:
             right_actor = None
             right_actor_frenet = None
@@ -506,9 +436,8 @@ class CarlagymEnv(gym.Env):
                      'Right': [right_actor, right_actor_frenet, right_actor_cartesian]
                      })
 
-
         return obj_info
-    
+
     def enumerate_actors(self):
         """
         Given the traffic actors and ego_state this fucntion enumerate actors, calculates their relative positions with
@@ -723,8 +652,6 @@ class CarlagymEnv(gym.Env):
 
     def step(self, action):
         self.n_step += 1
-        self.u_lon_llast = self.u_lon_last
-        self.u_lat_llast = self.u_lat_last
         self.actor_enumerated_dict['EGO'] = {'NORM_S': [], 'NORM_D': [], 'S': [], 'D': [], 'SPEED': []}
         # birds-eye view
         spectator = self.world_module.world.get_spectator()
@@ -749,19 +676,15 @@ class CarlagymEnv(gym.Env):
         acc_angular = math.sqrt(angular_velocity.x ** 2 + angular_velocity.y ** 2 + angular_velocity.z ** 2)
         ego_state = [self.ego.get_location().x, self.ego.get_location().y, speed, acc, psi, temp, self.max_s]
 
-
         if self.n_step == 1:
             fpath, self.lanechange, off_the_road = self.motionPlanner.run_step_single_path(ego_state, self.f_idx,
-                                                                                           df_n=0,
-                                                                                           Tf=3,
-                                                                                           Vf_n=0)
+                                                                                           df_n=0, Tf=3, Vf_n=0)
         else:
             self.ref_idx = closest_wp_idx_ref(ego_state, self.fpath, self.f_idx)
             ego_state_ref = [self.fpath.x[self.ref_idx], self.fpath.y[self.ref_idx], speed, acc,
                              self.fpath.yaw[self.ref_idx], temp, self.max_s]
             fpath, self.lanechange, off_the_road = self.motionPlanner.run_step_single_path(ego_state_ref, self.f_idx,
-                                                                                           df_n=0,
-                                                                                           Tf=3, Vf_n=0)
+                                                                                           df_n=0, Tf=3, Vf_n=0)
 
         self.fpath = fpath
         """
@@ -769,7 +692,7 @@ class CarlagymEnv(gym.Env):
                 ************************************************* Controller *********************************************************
                 **********************************************************************************************************************
         """
-        # self.f_idx = 1
+        self.f_idx = 1
         collision = False
         vx_ego = self.ego.get_velocity().x
         vy_ego = self.ego.get_velocity().y
@@ -778,28 +701,21 @@ class CarlagymEnv(gym.Env):
         ego_d = self.motionPlanner.estimate_frenet_state(ego_state, self.f_idx)[3]
         v_S, v_D = velocity_inertial_to_frenet(ego_s, vx_ego, vy_ego, self.motionPlanner.csp)
         psi_Frenet = get_obj_S_yaw(psi, ego_s, self.motionPlanner.csp)
-        K_Frenet = get_calc_curvature(ego_s, self.motionPlanner.csp)
         ego_state = [self.ego.get_location().x, self.ego.get_location().y,
                      math.radians(self.ego.get_transform().rotation.yaw), 0, 0, temp, self.max_s]
         self.f_idx = closest_wp_idx(ego_state, fpath, self.f_idx)
         ego_init_d, ego_target_d = fpath.d[0], fpath.d[-1]
         vehicle_ahead = self.get_vehicle_ahead(ego_s, ego_d, ego_init_d, ego_target_d)
-        # if self.n_step == 1:
-        #     ego_d = self.init_d
-        # else:
-        #     ego_d = self.fpath.d[self.f_idx]
         norm_d = round((ego_d + self.LANE_WIDTH) / (3 * self.LANE_WIDTH), 2)
         ego_s_list = [ego_s for _ in range(self.look_back)]
         ego_d_list = [ego_d for _ in range(self.look_back)]
-
-        self.actor_enumerated_dict['EGO'] = {'NORM_S': [0], 'NORM_D': [norm_d],
-                                             'S': ego_s_list, 'D': ego_d_list, 'SPEED': [speed]}
+        self.actor_enumerated_dict['EGO'] = {'NORM_S': [0], 'NORM_D': [norm_d],'S': ego_s_list, 'D': ego_d_list, 'SPEED': [speed]}
         obj_info = self.obj_info()
 
         if self.n_step == 120:
             print("180")
-
-        ref_left = frenet_to_inertial(self.fpath.s[29],self.fpath.d[29]-3.5,self.motionPlanner.csp)
+        print(self.n_step)
+        ref_left = frenet_to_inertial(self.fpath.s[29], self.fpath.d[29] - 3.5, self.motionPlanner.csp)
 
         # terminal
         self.Input, MPC_unsolved, x_m = self.lon_lat_controller_ipopt.calc_input(
@@ -807,15 +723,13 @@ class CarlagymEnv(gym.Env):
             obj_info=obj_info,
             ref=np.array([self.fpath.x[29], self.fpath.y[29], self.fpath.yaw[29], self.fpath.s[29], self.fpath.d[29]]),
             ref_left=np.array([ref_left[0], ref_left[1], ref_left[3]]),
-            u_last=self.u_last,csp=self.motionPlanner.csp,fpath = fpath,
+            u_last=self.u_last, csp=self.motionPlanner.csp, fpath=fpath,
             q=1, ru=1, rdu=1)
 
         self.u_last = self.Input
         target_speed = self.Input[0]
         cmdSpeed = target_speed * np.cos(psi_Frenet)
-        # steer = self.Input[[0][1]] * np.pi / 35
         steer = self.Input[1] * 180.0 / 100.0 / np.pi  ##origin:70
-        # steer = self.Input[0][1] * 180.0 / 500.0 / np.pi
         throttle_and_brake = self.PIDLongitudinalController.run_step(cmdSpeed)  # calculate control
         throttle_and_brake = throttle_and_brake[0]
         throttle = max(throttle_and_brake, 0)
@@ -833,14 +747,15 @@ class CarlagymEnv(gym.Env):
 
         self.ego.apply_control(vehicle_control)
 
+        '''******   Lane change judgement    ******'''
         # lanechange should be set true if there is a lane change
-        if(-4.25<ego_d<-1.75):
+        if (-4.25 < ego_d < -1.75):
             lane = -1
-        elif(-1.75<ego_d<1.75):
+        elif (-1.75 < ego_d < 1.75):
             lane = 0
-        elif(1.75<ego_d<5.25):
+        elif (1.75 < ego_d < 5.25):
             lane = 1
-        elif(5.25<ego_d<8.75):
+        elif (5.25 < ego_d < 8.75):
             lane = 2
         else:
             lane = -2
@@ -913,7 +828,6 @@ class CarlagymEnv(gym.Env):
         '''******   State Design    ******'''
         state_vector = np.zeros(3)
 
-
         '''******   Reward Design   ******'''
         # # 碰撞惩罚
         if collision:
@@ -931,7 +845,6 @@ class CarlagymEnv(gym.Env):
         else:
             reward_offTheRoad = 0
 
-
         if MPC_unsolved == True:
             reward_mpcNoResult = -50
         else:
@@ -943,7 +856,7 @@ class CarlagymEnv(gym.Env):
         done = False
 
         # if collision or self.n_step >= 1750 or ego_s-obj_s>=50 :
-        if collision or self.n_step >= 1750:
+        if collision or self.n_step >= 500:
             done = True
 
         info = {'reserved': 0}
@@ -969,7 +882,6 @@ class CarlagymEnv(gym.Env):
         self.ego.set_simulate_physics(enabled=True)
 
         self.module_manager.tick()
-        # print(self.ego.get_velocity())
         self.ego.set_simulate_physics(enabled=True)
         return np.zeros_like(self.observation_space.sample()[0, :])
 

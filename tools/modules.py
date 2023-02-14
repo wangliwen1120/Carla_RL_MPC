@@ -1190,7 +1190,7 @@ class ModuleWorld:
         self.los_sensor.reset()
 
         # Set ego transform
-        self.init_s = 2135
+        self.init_s = 2120
         # self.init_s = np.random.uniform(50, self.max_s - self.track_length - 50)  # ego initial s location
         #  should be larger than 50. bc other actors will be spawned in range: s = [init_s-50, init_s+150]
         #  should be smaller than max_s - track_length to have all tracks with the same length
@@ -1889,9 +1889,9 @@ class TrafficManager:
         ego_grid_n = ego_lane + 9  # in Grid world (see notes above), ego is in column 2 so its grid number will be based on its lane number
         # grid_choices = np.arange(16, 60)
         # grid_choices = np.arange(21, 38, 4)
-        grid_choices = [40,29,53]  ## 40:25  50:29  60:33
+        # grid_choices = [40,29,53]  ## 40:25  50:29  60:33
         # grid_choices = [33]  ## 40:25  50:29  60:33
-        # grid_choices = [40,53,60]
+        grid_choices = [21,25,29,33,37,41,45,49,53,57,61,65,20,24,28,32,36,40,44,48,52,56,60]
         # 通过设置grid_choices可以设置其可能出现的初始位置，可以看上面的Grid world indices示意图。
         # 设置self.N_SPAWN_CARS为需要的障碍车个数
         rnd_indices = np.random.choice(grid_choices, self.N_SPAWN_CARS, replace=False)
@@ -2019,7 +2019,6 @@ class CruiseControl:
         self.IDM = IntelligentDriverModel(self.vehicle)
 
         self.los_sensor = los_sensor
-
         self.location = self.vehicle.get_location()
         self.velocity = self.vehicle.get_velocity()
         self.speed = get_speed(self.vehicle)
@@ -2027,6 +2026,7 @@ class CruiseControl:
         self.yaw = math.radians(self.vehicle.get_transform().rotation.yaw)
         self.LANE_WIDTH = float(cfg.CARLA.LANE_WIDTH)
         self.velocity_curve = velocity_curve
+        self.targetSpeed = targetSpeed
 
     def update_s(self, s):
         self.s = s
@@ -2075,8 +2075,8 @@ class CruiseControl:
             self.steps = self.steps - self.steps//1000 * 1000
 
         timesteps = self.steps
-        targetSpeed = self.velocity_curve[timesteps - 1] + 1e-6
-        # targetSpeed = self.targetSpeed
+        # targetSpeed = self.velocity_curve[timesteps - 1] + 1e-6
+        targetSpeed = self.targetSpeed
         # cmdSpeed = targetSpeed
         cmdSpeed = self.IDM.run_step(vd=targetSpeed, vehicle_ahead=vehicle_ahead)
         self.velocity = self.vehicle.get_velocity()
@@ -2088,37 +2088,3 @@ class CruiseControl:
         return [self.location.x, self.location.y, self.location.z, self.speed, self.acceleration, self.yaw,
                 self.velocity,control.steer,targetSpeed]
 
-    # def tick(self):
-    #
-    #     self.location = self.vehicle.get_location()
-    #     speed_ = self.speed  # speed in previous tick
-    #     self.speed = get_speed(self.vehicle)
-    #     self.acceleration = (self.speed - speed_) / self.dt
-    #     self.yaw = math.radians(self.vehicle.get_transform().rotation.yaw)
-    #
-    #     nextWP = self.world.town_map.get_waypoint(self.location, project_to_road=True).next(distance=5)[0]
-    #
-    #     targetWP = [nextWP.transform.location.x, nextWP.transform.location.y]
-    #
-    #     if self.lane == 2 and nextWP.is_junction:  # only if in right most lane
-    #         temploc = self.body_to_inertial_frame(xb=0, yb=-self.LANE_WIDTH)
-    #         tempWP = \
-    #             self.world.town_map.get_waypoint(carla.Location(x=temploc[0], y=temploc[1]), project_to_road=True).next(
-    #                 distance=10)[0]
-    #         tempWPb = self.inertial_to_body_frame(xi=tempWP.transform.location.x, yi=tempWP.transform.location.y)
-    #         targetWP = self.body_to_inertial_frame(xb=tempWPb[0], yb=tempWPb[1] + self.LANE_WIDTH)
-    #
-    #     vehicle_ahead = self.los_sensor.get_vehicle_ahead()
-    #     if self.steps >= 1001:
-    #         self.steps = self.steps - self.steps//1000 * 1000
-    #     timesteps = self.steps
-    #     targetSpeed = self.velocity_curve[timesteps - 1] + 1e-6
-    #
-    #     cmdSpeed = self.IDM.run_step(vd=targetSpeed, vehicle_ahead=vehicle_ahead)
-    #     self.velocity = self.vehicle.get_velocity()
-    #     control = self.vehicleController.run_step(cmdSpeed, targetWP)
-    #
-    #     self.vehicle.apply_control(control)
-    #     self.steps += 1
-    #     return [self.location.x, self.location.y, self.location.z, self.speed, self.acceleration, self.yaw,
-    #             self.velocity,control.steer]
