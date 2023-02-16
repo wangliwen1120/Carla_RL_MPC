@@ -40,6 +40,13 @@ TENSOR_ROW_NAMES = ['EGO', 'LEADING', 'FOLLOWING', 'LEFT', 'LEFT_UP', 'LEFT_DOWN
                     'RIGHT', 'RIGHT_UP', 'RIGHT_DOWN']
 
 
+def closest(lst, K):
+    """
+    Find closes value in a list
+    """
+    return lst[min(range(len(lst)), key=lambda i: abs(lst[i] - K))]
+
+
 def frenet_to_inertial(s, d, csp):
     """
     transform a point from frenet frame to inertial frame
@@ -157,6 +164,8 @@ class CarlagymEnv(gym.Env):
         self.minSpeed = float(cfg.GYM_ENV.MIN_SPEED)
         self.LANE_WIDTH = float(cfg.CARLA.LANE_WIDTH)
         self.N_SPAWN_CARS = int(cfg.TRAFFIC_MANAGER.N_SPAWN_CARS)
+        self.obj_max_vs = int(cfg.TRAFFIC_MANAGER.MAX_SPEED)
+        self.d_max_s = int(cfg.CARLA.D_MAX_S)
 
         # frenet
         self.f_idx = 0
@@ -213,9 +222,9 @@ class CarlagymEnv(gym.Env):
         action_high = 1
         self.acton_dim = (1, 1)
         self.action_space = spaces.Box(action_low, action_high, shape=self.acton_dim, dtype='float32')
-        self.obs_dim = (1, 3)
+        self.obs_dim = (1, (self.N_SPAWN_CARS + 1) * 4)
         self.observation_space = spaces.Box(-np.inf, np.inf, shape=self.obs_dim, dtype='float32')
-
+        self.state = np.zeros_like(self.observation_space.sample())
         # data_record
         # self.log = data_collection()
 
@@ -289,10 +298,24 @@ class CarlagymEnv(gym.Env):
             obj_actor[obj_idx] = actor['Actor']
             obj_frenet[obj_idx] = actor['Obj_Frenet_state']
             obj_cartesian[obj_idx] = actor['Obj_Cartesian_state']
-
         obj_dict = ({'Obj_actor': obj_actor, 'Obj_frenet': obj_frenet, 'Obj_cartesian': obj_cartesian})
 
-        return obj_dict
+        others_s = np.zeros(self.N_SPAWN_CARS)
+        others_d = np.zeros(self.N_SPAWN_CARS)
+        others_v_S = np.zeros(self.N_SPAWN_CARS)
+        others_v_D = np.zeros(self.N_SPAWN_CARS)
+        others_phi_Frenet = np.zeros(self.N_SPAWN_CARS)
+
+        for i, actor in enumerate(self.traffic_module.actors_batch):
+            act_s, act_d, act_v_S, act_v_D, act_psi_Frenet, act_K_Frenet = actor['Obj_Frenet_state']
+            others_s[i] = act_s
+            others_d[i] = act_d
+            others_v_S[i] = act_v_S
+            others_v_D[i] = act_v_D
+            others_phi_Frenet[i] = act_psi_Frenet
+        obj_info_Mux = np.vstack((others_s, others_d, others_v_S, others_v_D, others_phi_Frenet))
+
+        return obj_dict, obj_info_Mux
 
     def obj_info(self):
         """
@@ -499,7 +522,7 @@ class CarlagymEnv(gym.Env):
                                           if (any(sorted_same_s_idx[:, 1] < 0)) else -1)
 
         # --------------------------------------------- left lane -------------------------------------------------
-        left_lane_d_idx = np.where(((np.array(others_d) - ego_d) < -1.2) * ((np.array(others_d) - ego_d) > -4))[0]
+        left_lane_d_idx = np.where(((np.array(others_d) - ego_d) < -0.9) * ((np.array(others_d) - ego_d) > -4))[0]
         if ego_d < -1.75:
             self.actor_enumeration += [-2, -2, -2]
 
@@ -522,7 +545,7 @@ class CarlagymEnv(gym.Env):
             append_actor(lleft_lane_d_idx)
 
             # ---------------------------------------------- rigth lane --------------------------------------------------
-        right_lane_d_idx = np.where(((np.array(others_d) - ego_d) > 1.0) * ((np.array(others_d) - ego_d) < 4))[0]
+        right_lane_d_idx = np.where(((np.array(others_d) - ego_d) > 0.9) * ((np.array(others_d) - ego_d) < 4))[0]
         if ego_d > 5.25:
             self.actor_enumeration += [-2, -2, -2]
 
@@ -650,6 +673,42 @@ class CarlagymEnv(gym.Env):
         else:
             return -eps
 
+    def state_input_vector(self, v_S, ego_s, ego_d):
+        # Paper: Automated Speed and Lane Change Decision Making using Deep Reinforcement Learning
+        state_vector = np.zeros(4 * (1 + self.N_SPAWN_CARS))
+        state_vector[0] = v_S / self.maxSpeed
+
+        df_ego = closest([self.LANE_WIDTH * lane_n for lane_n in range(-1, 3)], ego_d)
+
+        if df_ego == -3.5:
+            lane_num = 'Lane_1'
+        elif df_ego == 0:
+            lane_num = 'Lane_2'
+        elif df_ego == 3.5:
+            lane_num = 'Lane_3'
+        elif df_ego == 7:
+            lane_num = 'Lane_4'
+
+        Nearby_lane_info = {'Lane_1': [0, 1], 'Lane_2': [1, 0], 'Lane_3': [1, 1], 'Lane_4': [1, 0]}
+        state_vector[1] = Nearby_lane_info[lane_num][0]
+        state_vector[2] = Nearby_lane_info[lane_num][1]
+        state_vector[3] = ego_d
+
+        obj_mat = self.obj_info_simple()[1]
+
+        obj_mat[0, :] = obj_mat[0, :] - ego_s
+        obj_sorted_id = np.argsort(abs(obj_mat[0, :]))
+        obj_mat_surr = obj_mat[:, obj_sorted_id][:, 0:8]
+
+        for i in range(np.shape(obj_mat_surr)[1]):
+            state_vector[(i + 1) * 4] = obj_mat_surr[0][i] / self.d_max_s
+            state_vector[(i + 1) * 4 + 1] = obj_mat_surr[2][i] / self.obj_max_vs
+            df_obj = closest([self.LANE_WIDTH * lane_n for lane_n in range(-1, 3)], obj_mat_surr[1][i])
+            state_vector[(i + 1) * 4 + 2] = (df_obj - df_ego) / 3.5  # * (1 / 3)
+            state_vector[(i + 1) * 4 + 3] = obj_mat_surr[1][i]
+
+        return state_vector
+
     def step(self, action):
         self.n_step += 1
         self.actor_enumerated_dict['EGO'] = {'NORM_S': [], 'NORM_D': [], 'S': [], 'D': [], 'SPEED': []}
@@ -709,7 +768,8 @@ class CarlagymEnv(gym.Env):
         norm_d = round((ego_d + self.LANE_WIDTH) / (3 * self.LANE_WIDTH), 2)
         ego_s_list = [ego_s for _ in range(self.look_back)]
         ego_d_list = [ego_d for _ in range(self.look_back)]
-        self.actor_enumerated_dict['EGO'] = {'NORM_S': [0], 'NORM_D': [norm_d],'S': ego_s_list, 'D': ego_d_list, 'SPEED': [speed]}
+        self.actor_enumerated_dict['EGO'] = {'NORM_S': [0], 'NORM_D': [norm_d], 'S': ego_s_list, 'D': ego_d_list,
+                                             'SPEED': [speed]}
         obj_info = self.obj_info()
 
         if self.n_step == 120:
@@ -724,7 +784,7 @@ class CarlagymEnv(gym.Env):
             ref=np.array([self.fpath.x[29], self.fpath.y[29], self.fpath.yaw[29], self.fpath.s[29], self.fpath.d[29]]),
             ref_left=np.array([ref_left[0], ref_left[1], ref_left[3]]),
             u_last=self.u_last, csp=self.motionPlanner.csp, fpath=fpath,
-            q=1, ru=1, rdu=1)
+            q=action[0], ru=1, rdu=1)
 
         self.u_last = self.Input
         target_speed = self.Input[0]
@@ -749,13 +809,13 @@ class CarlagymEnv(gym.Env):
 
         '''******   Lane change judgement    ******'''
         # lanechange should be set true if there is a lane change
-        if (-4.25 < ego_d < -1.75):
+        if (-4.35 <= ego_d < -1.75):
             lane = -1
-        elif (-1.75 < ego_d < 1.75):
+        elif (-1.75 <= ego_d < 1.75):
             lane = 0
-        elif (1.75 < ego_d < 5.25):
+        elif (1.75 <= ego_d < 5.25):
             lane = 1
-        elif (5.25 < ego_d < 8.75):
+        elif (5.25 <= ego_d < 8.75):
             lane = 2
         else:
             lane = -2
@@ -826,36 +886,54 @@ class CarlagymEnv(gym.Env):
         """
 
         '''******   State Design    ******'''
-        state_vector = np.zeros(3)
+        state_vector = self.state_input_vector(v_S, ego_s, ego_d)
+        for i in range(len(state_vector)):
+            self.state[0][i] = state_vector[i]
 
         '''******   Reward Design   ******'''
         # # 碰撞惩罚
         if collision:
-            reward_cl = self.collision_penalty  ## -100.0
+            reward_cl = -20  ## -100.0
         else:
-            reward_cl = 0.0
+            reward_cl = 1
 
         if lanechange:
-            reward_lanechange = -20
+            reward_lanechange = -2
         else:
             reward_lanechange = 0
 
         if off_the_road:
-            reward_offTheRoad = -50
+            reward_offTheRoad = -2
         else:
             reward_offTheRoad = 0
 
         if MPC_unsolved == True:
-            reward_mpcNoResult = -50
+            reward_mpcNoResult = -2
         else:
             reward_mpcNoResult = 0
 
-        reward_speed = v_S * 2
+        reward_dis_lon = 0
+        reward_dis_lat = 0
+        for i in range(self.N_SPAWN_CARS):
+            d_s = self.state[0, (i + 1) * 4] * self.d_max_s
+            d_d_f = self.state[0, (i + 1) * 4 + 2]
+            if d_d_f <= 0.5 and 0 < d_s < 5:  # same lane and before
+                reward_dis_lon += 0.1 * d_s - 0.5
+            else:
+                reward_dis_lon += 0
+            d_d = abs(self.state[0, (i + 1) * 4 + 3] - self.state[0, 3])
+            if 5 <= abs(d_s) <= 10 and d_d < 2:
+                reward_dis_lat += 2 * d_d - 4
+            elif abs(d_s) <= 5 and d_d < 4.2:
+                reward_dis_lat += 2 * d_d - 6
+            else:
+                reward_dis_lat += 0
 
-        reward = reward_cl + reward_mpcNoResult + reward_speed + reward_lanechange + reward_offTheRoad
+        reward_speed = v_S * 4 / self.maxSpeed
+
+        reward = reward_cl + reward_mpcNoResult + reward_speed + reward_lanechange + reward_offTheRoad + reward_dis_lon + reward_dis_lat
         done = False
 
-        # if collision or self.n_step >= 1750 or ego_s-obj_s>=50 :
         if collision or self.n_step >= 500:
             done = True
 

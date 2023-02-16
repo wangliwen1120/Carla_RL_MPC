@@ -157,10 +157,10 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
         # 这里给定当前/初始位置，目标终点(本车道/左车道)位置
 
         # 权重矩阵
-        self.q = 1.0
+        self.q = q
         self.ru = 0
         self.rdu = 0.3
-        self.S = 0.1  # Obstacle avoidance function coefficient
+        self.S = 0.2  # Obstacle avoidance function coefficient
         self.Q1 = self.q * np.eye(self.Nx)  # ego_lane: lane_2
         self.Q2 = (1 - self.q) * np.eye(self.Nx)  # left_lane: lane_1
         self.Ru = self.ru * np.eye(self.Nu)

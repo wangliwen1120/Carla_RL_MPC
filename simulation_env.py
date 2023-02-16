@@ -60,7 +60,7 @@ if __name__ == '__main__':
         model = SAC.load("sb3_SAC_model")
         obs = env.reset()
         while True:
-            action, _states = model.predict(obs.reshape(1, 3), deterministic=True)
+            action, _states = model.predict(obs.reshape(1, 16), deterministic=True)
             # action = np.array([0.4, 1, 1])
             obs, reward, done, info = env.step(action)
             if done:
