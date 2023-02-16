@@ -64,7 +64,7 @@ from agents.low_level_controller.controller import VehiclePIDController
 from agents.low_level_controller.controller import IntelligentDriverModel
 
 from agents.local_planner.frenet_optimal_trajectory import frenet_to_inertial, velocity_inertial_to_frenet, \
-    get_obj_S_yaw, update_d,get_calc_curvature
+    get_obj_S_yaw, update_d, get_calc_curvature
 from agents.tools.misc import get_speed
 from config import cfg
 from queue import Queue
@@ -1170,7 +1170,6 @@ class ModuleWorld:
 
         print('Spawned ego in: ', spawn_point)
 
-
         self.hero_transform = self.hero_actor.get_transform()
 
         # collision sensor
@@ -1211,7 +1210,6 @@ class ModuleWorld:
         transform = carla.Transform(location=carla.Location(x=x, y=y, z=z),
                                     rotation=carla.Rotation(pitch=0.0, yaw=math.degrees(yaw), roll=0.0))
         self.hero_actor.set_transform(transform)
-
 
     def tick(self):
         actors = self.world.get_actors()
@@ -1684,6 +1682,7 @@ class GNSS_Sensor(object):
         # reference.
         self.sensor.listen(lambda data: sensor_callback(data, self.gnss_sensor_queue, "gnss"))
 
+
 # ==============================================================================
 # -- IMU Sensor ----------------------------------------------------------
 # ==============================================================================
@@ -1699,6 +1698,8 @@ class IMU_Sensor(object):
         # We need to pass the lambda a weak reference to self to avoid circular
         # reference.
         self.sensor.listen(lambda data: sensor_callback(data, self.imu_sensor_queue, "imu"))
+
+
 # ==============================================================================
 # -- Traffic manager ----------------------------------------------------------------
 # ==============================================================================
@@ -1839,7 +1840,8 @@ class TrafficManager:
             cruiseControl = CruiseControl(otherActor, los_sensor, s, d, lane, self.module_manager,
                                           targetSpeed=targetSpeed, velocity_curve=velocity_curve)
             deq_s = deque([s], maxlen=50)
-            v_S, v_D = velocity_inertial_to_frenet(s, otherActor.get_velocity().x, otherActor.get_velocity().y, self.global_csp)
+            v_S, v_D = velocity_inertial_to_frenet(s, otherActor.get_velocity().x, otherActor.get_velocity().y,
+                                                   self.global_csp)
             psi = math.radians(otherActor.get_transform().rotation.yaw)
             psi_Frenet = get_obj_S_yaw(psi, s, self.global_csp)
             K_Frenet = get_calc_curvature(s, self.global_csp)
@@ -1847,10 +1849,13 @@ class TrafficManager:
             speed = get_speed(otherActor)
 
             self.actors_batch.append({'Actor': otherActor, 'Sensor': los_sensor, 'Cruise Control': cruiseControl,
-                                      'Frenet State': [deq_s, d], 'Obj_Frenet_state': [s, d, v_S, v_D, psi_Frenet, K_Frenet],
-                                       'Obj_Cartesian_state': [x,y,otherActor.get_velocity().x, otherActor.get_velocity().y
-                                           ,psi,speed,delta_f,targetSpeed]})
+                                      'Frenet State': [deq_s, d],
+                                      'Obj_Frenet_state': [s, d, v_S, v_D, psi_Frenet, K_Frenet],
+                                      'Obj_Cartesian_state': [x, y, otherActor.get_velocity().x,
+                                                              otherActor.get_velocity().y
+                                          , psi, speed, delta_f, targetSpeed]})
         return otherActor
+
     def start(self):
         self.world_module = self.module_manager.get_module(MODULE_WORLD)
         self.world = self.world_module.world
@@ -1889,9 +1894,9 @@ class TrafficManager:
         ego_grid_n = ego_lane + 9  # in Grid world (see notes above), ego is in column 2 so its grid number will be based on its lane number
         # grid_choices = np.arange(16, 60)
         # grid_choices = np.arange(21, 38, 4)
-        # grid_choices = [40,29,53]  ## 40:25  50:29  60:33
+        grid_choices = [25, 32, 41]  ## 40:25  50:29  60:33
         # grid_choices = [33]  ## 40:25  50:29  60:33
-        grid_choices = [21,25,29,33,37,41,45,49,53,57,61,65,20,24,28,32,36,40,44,48,52,56,60]
+        # grid_choices = [21,25,29,33,37,41,45,49,53,57,61,65,69,20,24,28,32,36,40,44,48,52,56,60,64,68]
         # 通过设置grid_choices可以设置其可能出现的初始位置，可以看上面的Grid world indices示意图。
         # 设置self.N_SPAWN_CARS为需要的障碍车个数
         rnd_indices = np.random.choice(grid_choices, self.N_SPAWN_CARS, replace=False)
@@ -1903,7 +1908,7 @@ class TrafficManager:
             targetSpeed = random.uniform(self.min_speed, self.max_speed)  # m/s
             i = '1'
             # i=np.array(['0','1'])[1 if idx%rnd_indices[0]==0 else 0]
-            data = xlrd.open_workbook(os.path.abspath('.')+ '/tools/ob_v_data_'+i+'.xlsx')
+            data = xlrd.open_workbook(os.path.abspath('.') + '/tools/ob_v_data_' + i + '.xlsx')
             table = data.sheets()[0]
             # velocity_curve = table.row_values(0)
             velocity_curve_0 = table.row_values(0)
@@ -1943,7 +1948,7 @@ class TrafficManager:
             actor_dic['Obj_Frenet_state'][5] = K_Frenet
             actor_dic['Obj_Cartesian_state'][0] = x
             actor_dic['Obj_Cartesian_state'][1] = y
-            actor_dic['Obj_Cartesian_state'][2] =v_x
+            actor_dic['Obj_Cartesian_state'][2] = v_x
             actor_dic['Obj_Cartesian_state'][3] = v_y
             actor_dic['Obj_Cartesian_state'][4] = yaw
             actor_dic['Obj_Cartesian_state'][5] = speed
@@ -1953,6 +1958,7 @@ class TrafficManager:
             # actor_dic['Frenet State'][0] = s
             # IMPORTANT actor d is NOT updated
             control.update_s(s)
+
 
 class LineOfSightSensor(object):
     def __init__(self, parent_actor):
@@ -2072,7 +2078,7 @@ class CruiseControl:
         vehicle_ahead = self.los_sensor.get_vehicle_ahead()
 
         if self.steps >= 1001:
-            self.steps = self.steps - self.steps//1000 * 1000
+            self.steps = self.steps - self.steps // 1000 * 1000
 
         timesteps = self.steps
         # targetSpeed = self.velocity_curve[timesteps - 1] + 1e-6
@@ -2086,5 +2092,4 @@ class CruiseControl:
         self.vehicle.apply_control(control)
         self.steps += 1
         return [self.location.x, self.location.y, self.location.z, self.speed, self.acceleration, self.yaw,
-                self.velocity,control.steer,targetSpeed]
-
+                self.velocity, control.steer, targetSpeed]
