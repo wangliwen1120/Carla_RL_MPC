@@ -917,21 +917,28 @@ class CarlagymEnv(gym.Env):
         for i in range(self.N_SPAWN_CARS):
             d_s = self.state[0, (i + 1) * 4] * self.d_max_s
             d_d_f = self.state[0, (i + 1) * 4 + 2]
+            d_d = abs(self.state[0, (i + 1) * 4 + 3] - self.state[0, 3])
+
+            reward_dis_lon += 1/(d_s**2+d_d**2)
+
             if d_d_f <= 0.5 and 0 < d_s < 5:  # same lane and before
-                reward_dis_lon += 0.1 * d_s - 0.5
+                reward_dis_lon += 0.5 * d_s - 2.5
             else:
                 reward_dis_lon += 0
-            d_d = abs(self.state[0, (i + 1) * 4 + 3] - self.state[0, 3])
+
             if 5 <= abs(d_s) <= 10 and d_d < 2:
-                reward_dis_lat += 2 * d_d - 4
-            elif abs(d_s) <= 5 and d_d < 4.2:
-                reward_dis_lat += 2 * d_d - 6
+                reward_dis_lat += 0.5 * d_d - 1
+            elif abs(d_s) <= 5 and d_d <= 2.2:
+                reward_dis_lat += 2 * d_d - 4.4
             else:
                 reward_dis_lat += 0
 
-        reward_speed = v_S * 4 / self.maxSpeed
 
-        reward = reward_cl + reward_mpcNoResult + reward_speed + reward_lanechange + reward_offTheRoad + reward_dis_lon + reward_dis_lat
+        reward_speed = v_S * 3 / self.maxSpeed
+
+        # reward = reward_cl + reward_mpcNoResult + reward_speed + reward_lanechange + reward_offTheRoad + reward_dis_lon + reward_dis_lat
+        reward = reward_cl + reward_dis_lon + reward_dis_lat + reward_speed
+
         done = False
 
         if collision or self.n_step >= 500:

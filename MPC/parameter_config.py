@@ -80,7 +80,7 @@ class MPC_lon_lat_Config(Config):
     def __init__(self):
         super().__init__()
 
-        self.dstop = 5
+        self.dstop = 10
         self.K_ref = 0
         self.omega_ref = 0
         self.mpc_Nx = 3  # State Size
