@@ -160,7 +160,7 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
         self.q = q
         self.ru = 0
         self.rdu = 0.3
-        self.S = 0.2  # Obstacle avoidance function coefficient
+        self.S = 0.1  # Obstacle avoidance function coefficient
         self.Q1 = self.q * np.eye(self.Nx)  # ego_lane: lane_2
         self.Q2 = (1 - self.q) * np.eye(self.Nx)  # left_lane: lane_1
         self.Ru = self.ru * np.eye(self.Nu)

@@ -505,7 +505,7 @@ class CarlagymEnv(gym.Env):
                     any(sorted_s_idx[:, 1][sorted_s_idx[:, 1] < 0] < -self.side_window)) else -1)
 
         # --------------------------------------------- ego lane -------------------------------------------------
-        same_lane_d_idx = np.where(abs(np.array(others_d) - ego_d) < 0.9)[0]
+        same_lane_d_idx = np.where(abs(np.array(others_d) - ego_d) <= 0.9)[0]
         if len(same_lane_d_idx) == 0:
             self.actor_enumeration.append(-2)
             self.actor_enumeration.append(-2)
@@ -751,7 +751,7 @@ class CarlagymEnv(gym.Env):
                 ************************************************* Controller *********************************************************
                 **********************************************************************************************************************
         """
-        self.f_idx = 1
+        self.f_idx = 0
         collision = False
         vx_ego = self.ego.get_velocity().x
         vy_ego = self.ego.get_velocity().y
@@ -772,7 +772,7 @@ class CarlagymEnv(gym.Env):
                                              'SPEED': [speed]}
         obj_info = self.obj_info()
 
-        if self.n_step == 120:
+        if self.n_step == 180:
             print("180")
         print(self.n_step)
         ref_left = frenet_to_inertial(self.fpath.s[29], self.fpath.d[29] - 3.5, self.motionPlanner.csp)
@@ -912,32 +912,17 @@ class CarlagymEnv(gym.Env):
         else:
             reward_mpcNoResult = 0
 
-        reward_dis_lon = 0
-        reward_dis_lat = 0
+        reward_dis = 0
         for i in range(self.N_SPAWN_CARS):
             d_s = self.state[0, (i + 1) * 4] * self.d_max_s
             d_d_f = self.state[0, (i + 1) * 4 + 2]
             d_d = abs(self.state[0, (i + 1) * 4 + 3] - self.state[0, 3])
-
-            reward_dis_lon += 1/(d_s**2+d_d**2)
-
-            if d_d_f <= 0.5 and 0 < d_s < 5:  # same lane and before
-                reward_dis_lon += 0.5 * d_s - 2.5
-            else:
-                reward_dis_lon += 0
-
-            if 5 <= abs(d_s) <= 10 and d_d < 2:
-                reward_dis_lat += 0.5 * d_d - 1
-            elif abs(d_s) <= 5 and d_d <= 2.2:
-                reward_dis_lat += 2 * d_d - 4.4
-            else:
-                reward_dis_lat += 0
-
+            reward_dis -= 30/(d_s**2+d_d**2)
 
         reward_speed = v_S * 3 / self.maxSpeed
 
         # reward = reward_cl + reward_mpcNoResult + reward_speed + reward_lanechange + reward_offTheRoad + reward_dis_lon + reward_dis_lat
-        reward = reward_cl + reward_dis_lon + reward_dis_lat + reward_speed
+        reward = reward_cl + reward_dis + reward_speed
 
         done = False
 
