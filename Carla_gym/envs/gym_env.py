@@ -226,7 +226,7 @@ class CarlagymEnv(gym.Env):
         self.observation_space = spaces.Box(-np.inf, np.inf, shape=self.obs_dim, dtype='float32')
         self.state = np.zeros_like(self.observation_space.sample())
         # data_record
-        # self.log = data_collection()
+        self.log = data_collection()
 
     def get_vehicle_ahead(self, ego_s, ego_d, ego_init_d, ego_target_d):
         """
@@ -866,12 +866,22 @@ class CarlagymEnv(gym.Env):
                 **********************************************************************************************************************
         """
         # 保存数据
-        # info = ('u', target_acc, 'du', self.du_lon_last, 'Cur_acc', current_acc, 'q', q, 'ru', ru, 'rdu', rdu)
-        # self.log.data_record(info, 'mpc')
-        # info_vehicle = ('vs', v_S, 'vs_cmd', cmdSpeed, 'throttle', control.throttle)
-        # self.log.data_record(info_vehicle, 'vehicle_info')
-        # info_vehicle_2_v = ('ego_s', ego_s, 's_ahead', obj_info_Mux[0][0], 'vs', v_S, 'v_ahead', obj_info_Mux[2][0])
-        # self.log.data_record(info_vehicle_2_v, 'vehicle_info_2_v')
+        info_ego = ('ego_s', ego_s, 'ego_d',ego_d)
+        self.log.data_record(info_ego, 'ego_info')
+        info_vehicle_1 = ('info_vehicle_1_s', obj_info['Obj_frenet'][0][0], 'info_vehicle_1_d',obj_info['Obj_frenet'][0][1])
+        self.log.data_record(info_vehicle_1, 'vehicle_info_1')
+        info_vehicle_2 = (
+        'info_vehicle_2_s', obj_info['Obj_frenet'][1][0], 'info_vehicle_2_d', obj_info['Obj_frenet'][1][1])
+        self.log.data_record(info_vehicle_2, 'vehicle_info_2')
+        info_vehicle_3 = (
+            'info_vehicle_3_s', obj_info['Obj_frenet'][2][0], 'info_vehicle_3_d', obj_info['Obj_frenet'][2][1])
+        self.log.data_record(info_vehicle_3, 'vehicle_info_3')
+        info_vehicle_4 = (
+            'info_vehicle_4_s', obj_info['Obj_frenet'][3][0], 'info_vehicle_4_d', obj_info['Obj_frenet'][3][1])
+        self.log.data_record(info_vehicle_4, 'vehicle_info_4')
+        info_vehicle_5= (
+            'info_vehicle_5_s', obj_info['Obj_frenet'][4][0], 'info_vehicle_5_d', obj_info['Obj_frenet'][4][1])
+        self.log.data_record(info_vehicle_5, 'vehicle_info_5')
 
         ##画动态曲线
         # self.x.append(self.n_step)
