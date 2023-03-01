@@ -1,9 +1,9 @@
-###1. 环境配置
+### 1. 环境配置
 可配置虚拟环境或者Virtualenv。如果配置Virtualenv，会在Carla_Gym文件夹中产生文件夹Carla_RL_env。
 
 按照requirements.txt按照依赖。
 
-###2. setup
+### 2. setup
 
 开启终端，启动CarlaUE4.sh：
 
