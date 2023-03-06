@@ -14,6 +14,5 @@
 
 `DISPLAY= ./CarlaUE4.sh -opengl`
 
-
 运行test.py
 

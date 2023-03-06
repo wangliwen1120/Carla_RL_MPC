@@ -18,6 +18,7 @@ from MPC.MPC_controller_lon import MPC_controller_lon
 from MPC.MPC_controller_lat import MPC_controller_lat
 from MPC.MPC_controller_lon_lat import MPC_controller_lon_lat
 from MPC.MPC_controller_lon_lat_ipopt_nonlinear_terminal import MPC_controller_lon_lat_ipopt_nonlinear_terminal
+from MPC.MPC_controller_lon_lat_acados_nonlinear_terminal import MPC_controller_lon_lat_acados_nonlinear_terminal
 from MPC.MPC_controller_lon_lat_ipopt_nonlinear_sequence import MPC_controller_lon_lat_ipopt_nonlinear_sequence
 from MPC.MPC_controller_lon_lat_ipopt_nonlinear_opt import MPC_controller_lon_lat_ipopt_nonlinear_opt
 from MPC.parameter_config import MPC_lon_lat_Config
@@ -119,6 +120,7 @@ class CarlagymEnv(gym.Env):
         self.__version__ = "9.9.2"
         self.lon_lat_param = MPC_lon_lat_Config
         self.lon_lat_controller_ipopt = MPC_controller_lon_lat_ipopt_nonlinear_terminal(self.lon_lat_param)
+        self.lon_lat_controller_acados = MPC_controller_lon_lat_acados_nonlinear_terminal(self.lon_lat_param)
         # self.lon_lat_controller_ipopt = MPC_controller_lon_lat_ipopt_nonlinear_sequence(self.lon_lat_param)
         # self.lon_lat_controller_ipopt = MPC_controller_lon_lat_ipopt_nonlinear_opt(self.lon_lat_param)
 
@@ -778,13 +780,23 @@ class CarlagymEnv(gym.Env):
         ref_left = frenet_to_inertial(self.fpath.s[29], self.fpath.d[29] - 3.5, self.motionPlanner.csp)
 
         # terminal
-        self.Input, MPC_unsolved, x_m = self.lon_lat_controller_ipopt.calc_input(
+        # self.Input, MPC_unsolved, x_m = self.lon_lat_controller_ipopt.calc_input(
+        #     x_current=np.array([[ego_state[0]], [ego_state[1]], [ego_state[2]]]),
+        #     obj_info=obj_info,
+        #     ref=np.array([self.fpath.x[29], self.fpath.y[29], self.fpath.yaw[29], self.fpath.s[29], self.fpath.d[29]]),
+        #     ref_left=np.array([ref_left[0], ref_left[1], ref_left[3]]),
+        #     u_last=self.u_last, csp=self.motionPlanner.csp, fpath=fpath,
+        #     q=action[0], ru=1, rdu=1)
+
+        self.Input, MPC_unsolved, x_m = self.lon_lat_controller_acados.calc_input(
             x_current=np.array([[ego_state[0]], [ego_state[1]], [ego_state[2]]]),
             obj_info=obj_info,
             ref=np.array([self.fpath.x[29], self.fpath.y[29], self.fpath.yaw[29], self.fpath.s[29], self.fpath.d[29]]),
             ref_left=np.array([ref_left[0], ref_left[1], ref_left[3]]),
             u_last=self.u_last, csp=self.motionPlanner.csp, fpath=fpath,
             q=action[0], ru=1, rdu=1)
+
+
 
         self.u_last = self.Input
         target_speed = self.Input[0]
@@ -809,13 +821,13 @@ class CarlagymEnv(gym.Env):
 
         '''******   Lane change judgement    ******'''
         # lanechange should be set true if there is a lane change
-        if (-4.35 <= ego_d < -1.75):
+        if -4.35 <= ego_d < -1.75:
             lane = -1
-        elif (-1.75 <= ego_d < 1.75):
+        elif -1.75 <= ego_d < 1.75:
             lane = 0
-        elif (1.75 <= ego_d < 5.25):
+        elif 1.75 <= ego_d < 5.25:
             lane = 1
-        elif (5.25 <= ego_d < 8.75):
+        elif 5.25 <= ego_d < 8.75:
             lane = 2
         else:
             lane = -2
@@ -850,11 +862,11 @@ class CarlagymEnv(gym.Env):
         #     self.world_module.points_to_draw['waypoint ahead'] = carla.Location(x=cmdWP[0], y=cmdWP[1])
         #     self.world_module.points_to_draw['waypoint ahead 2'] = carla.Location(x=cmdWP2[0], y=cmdWP2[1])
 
-        if self.world_module.args.play_mode != 0:
-            for i in range(len(x_m)):
-                self.world_module.points_to_draw['path wp {}'.format(i)] = [
-                    carla.Location(x=x_m[i, 0], y=x_m[i, 1]),
-                    'COLOR_ALUMINIUM_0']
+        # if self.world_module.args.play_mode != 0:
+        #     for i in range(len(x_m)):
+        #         self.world_module.points_to_draw['path wp {}'.format(i)] = [
+        #             carla.Location(x=x_m[i, 0], y=x_m[i, 1]),
+        #             'COLOR_ALUMINIUM_0']
 
         self.world_module.points_to_draw['ego'] = [self.ego.get_location(), 'COLOR_SCARLET_RED_0']
         # self.world_module.points_to_draw['waypoint ahead'] = carla.Location(x=cmdWP[0], y=cmdWP[1])
