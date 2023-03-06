@@ -14,7 +14,6 @@
 
 `DISPLAY= ./CarlaUE4.sh -opengl`
 
-（但没感觉快多少）
 
 运行test.py
 
