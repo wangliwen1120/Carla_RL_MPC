@@ -242,7 +242,7 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
         nlp_prob = {'f': obj, 'x': opt_variables, 'p': C_R, 'g': ca.vertcat(*g1, *g2, *g3)}
 
         # ipopt设置
-        opts_setting = {'ipopt.max_iter': 60, 'ipopt.print_level': 0, 'print_time': 0,
+        opts_setting = {'ipopt.max_iter': 100, 'ipopt.print_level': 0, 'print_time': 0,
                         'ipopt.acceptable_tol': 1e-8, 'ipopt.acceptable_obj_change_tol': 1e-8}
 
         # 最终目标，获得求解器
