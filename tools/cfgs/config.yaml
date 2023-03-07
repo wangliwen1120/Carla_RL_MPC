@@ -31,7 +31,8 @@ GYM_ENV:
   TIME_STEP: 4                                                  # [int] Steps to look back at last path for observation sequence vector (TIME_STEP + 1)
   LOOP_BREAK: 30                                                # NOT USED [int] steps to break path following while loop  - must be greater than LOOK_BACK
   DISTN_FRM_VHCL_AHD: 200                                       # Effective distance to keep from vehicle ahead for IDM
-
+  LOG_FLAG: False                                               # Log info or not
+  RT_PLOT_FLAG: False                                           # Real time plot or not
 RL:
   W_SPEED: 5                                                    # Speed Error Resolution
   W_R_SPEED: 10                                                 # Speed Reward Magnitude (w*r_speed)

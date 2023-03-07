@@ -130,7 +130,7 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
             obj_Mux.append(np.concatenate(
                 (self.obj_x_ref.T, self.obj_y_ref.T, self.obj_phi_ref.T, self.obj_actor_id.T, self.obj_pos.T)))
         vehicle_num = int(vehicle_num / self.Np)
-
+        # print(vehicle_num)
         # 根据数学模型建模
         # 系统状态
         x = ca.SX.sym('x')
@@ -242,8 +242,8 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
         nlp_prob = {'f': obj, 'x': opt_variables, 'p': C_R, 'g': ca.vertcat(*g1, *g2, *g3)}
 
         # ipopt设置
-        opts_setting = {'ipopt.max_iter': 100, 'ipopt.print_level': 5, 'print_time': 0,
-                        'ipopt.acceptable_tol': 1e-8, 'ipopt.acceptable_obj_change_tol': 1e-6}
+        opts_setting = {'ipopt.max_iter': 60, 'ipopt.print_level': 0, 'print_time': 0,
+                        'ipopt.acceptable_tol': 1e-8, 'ipopt.acceptable_obj_change_tol': 1e-8}
 
         # 最终目标，获得求解器
         solver = ca.nlpsol('solver', 'ipopt', nlp_prob, opts_setting)
@@ -322,8 +322,6 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
 
         self.u0 = np.concatenate((u0[1:], u0[-1:]))
 
-        print(estimated_opt[0])
-        print(estimated_opt[1])
-        print('t_cost =', time.time() - start_time)
+        # print('t_cost =', time.time() - start_time)
         MPC_unsolved = False
         return np.array([estimated_opt[0], estimated_opt[1]]), MPC_unsolved, x_m

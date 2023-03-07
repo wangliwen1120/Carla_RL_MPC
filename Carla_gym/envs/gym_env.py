@@ -18,7 +18,7 @@ from MPC.MPC_controller_lon import MPC_controller_lon
 from MPC.MPC_controller_lat import MPC_controller_lat
 from MPC.MPC_controller_lon_lat import MPC_controller_lon_lat
 from MPC.MPC_controller_lon_lat_ipopt_nonlinear_terminal import MPC_controller_lon_lat_ipopt_nonlinear_terminal
-from MPC.MPC_controller_lon_lat_acados_nonlinear_terminal import MPC_controller_lon_lat_acados_nonlinear_terminal
+from MPC.MPC_controller_lon_lat_acados_nonlinear_terminal_fail import MPC_controller_lon_lat_acados_nonlinear_terminal
 from MPC.MPC_controller_lon_lat_ipopt_nonlinear_sequence import MPC_controller_lon_lat_ipopt_nonlinear_sequence
 from MPC.MPC_controller_lon_lat_ipopt_nonlinear_opt import MPC_controller_lon_lat_ipopt_nonlinear_opt
 from MPC.parameter_config import MPC_lon_lat_Config
@@ -117,10 +117,11 @@ class CarlagymEnv(gym.Env):
 
     # metadata = {'render.modes': ['human']}
     def __init__(self):
+
         self.__version__ = "9.9.2"
         self.lon_lat_param = MPC_lon_lat_Config
         self.lon_lat_controller_ipopt = MPC_controller_lon_lat_ipopt_nonlinear_terminal(self.lon_lat_param)
-        self.lon_lat_controller_acados = MPC_controller_lon_lat_acados_nonlinear_terminal(self.lon_lat_param)
+        # self.lon_lat_controller_acados = MPC_controller_lon_lat_acados_nonlinear_terminal(self.lon_lat_param)
         # self.lon_lat_controller_ipopt = MPC_controller_lon_lat_ipopt_nonlinear_sequence(self.lon_lat_param)
         # self.lon_lat_controller_ipopt = MPC_controller_lon_lat_ipopt_nonlinear_opt(self.lon_lat_param)
 
@@ -209,6 +210,7 @@ class CarlagymEnv(gym.Env):
         self.actor_enumeration = []
         self.side_window = 5
         self.look_back = int(cfg.GYM_ENV.LOOK_BACK)
+        self.x_m = None
 
         self.motionPlanner = None
         self.vehicleController = None
@@ -228,7 +230,12 @@ class CarlagymEnv(gym.Env):
         self.observation_space = spaces.Box(-np.inf, np.inf, shape=self.obs_dim, dtype='float32')
         self.state = np.zeros_like(self.observation_space.sample())
         # data_record
-        self.log = data_collection()
+
+        self.log_flag = cfg.GYM_ENV.LOG_FLAG
+        if self.log_flag:
+            self.log = data_collection()
+        else:
+            pass
 
     def get_vehicle_ahead(self, ego_s, ego_d, ego_init_d, ego_target_d):
         """
@@ -714,6 +721,10 @@ class CarlagymEnv(gym.Env):
     def step(self, action):
         self.n_step += 1
         self.actor_enumerated_dict['EGO'] = {'NORM_S': [], 'NORM_D': [], 'S': [], 'D': [], 'SPEED': []}
+
+        action[0] = (action[0] + 1.0) * 0.5
+        # normalized
+
         # birds-eye view
         spectator = self.world_module.world.get_spectator()
         transform = self.ego.get_transform()
@@ -774,34 +785,27 @@ class CarlagymEnv(gym.Env):
                                              'SPEED': [speed]}
         obj_info = self.obj_info()
 
-        if self.n_step == 180:
-            print("180")
-        print(self.n_step)
+        # if self.n_step == 180:
+        #     print("180")
+        # print(self.n_step)
         ref_left = frenet_to_inertial(self.fpath.s[29], self.fpath.d[29] - 3.5, self.motionPlanner.csp)
 
         # terminal
-        # self.Input, MPC_unsolved, x_m = self.lon_lat_controller_ipopt.calc_input(
-        #     x_current=np.array([[ego_state[0]], [ego_state[1]], [ego_state[2]]]),
-        #     obj_info=obj_info,
-        #     ref=np.array([self.fpath.x[29], self.fpath.y[29], self.fpath.yaw[29], self.fpath.s[29], self.fpath.d[29]]),
-        #     ref_left=np.array([ref_left[0], ref_left[1], ref_left[3]]),
-        #     u_last=self.u_last, csp=self.motionPlanner.csp, fpath=fpath,
-        #     q=action[0], ru=1, rdu=1)
-
-        self.Input, MPC_unsolved, x_m = self.lon_lat_controller_acados.calc_input(
+        self.Input, MPC_unsolved, x_m = self.lon_lat_controller_ipopt.calc_input(
             x_current=np.array([[ego_state[0]], [ego_state[1]], [ego_state[2]]]),
             obj_info=obj_info,
-            ref=np.array([self.fpath.x[29], self.fpath.y[29], self.fpath.yaw[29], self.fpath.s[29], self.fpath.d[29]]),
+            ref=np.array(
+                [self.fpath.x[29], self.fpath.y[29], self.fpath.yaw[29], self.fpath.s[29], self.fpath.d[29]]),
             ref_left=np.array([ref_left[0], ref_left[1], ref_left[3]]),
             u_last=self.u_last, csp=self.motionPlanner.csp, fpath=fpath,
             q=action[0], ru=1, rdu=1)
-
-
-
         self.u_last = self.Input
+        self.x_m = x_m
+
+        delta_f = self.Input[1]
         target_speed = self.Input[0]
         cmdSpeed = target_speed * np.cos(psi_Frenet)
-        steer = self.Input[1] * 180.0 / 100.0 / np.pi  ##origin:70
+        steer = delta_f * 180.0 / 100.0 / np.pi  ##origin:70
         throttle_and_brake = self.PIDLongitudinalController.run_step(cmdSpeed)  # calculate control
         throttle_and_brake = throttle_and_brake[0]
         throttle = max(throttle_and_brake, 0)
@@ -862,11 +866,11 @@ class CarlagymEnv(gym.Env):
         #     self.world_module.points_to_draw['waypoint ahead'] = carla.Location(x=cmdWP[0], y=cmdWP[1])
         #     self.world_module.points_to_draw['waypoint ahead 2'] = carla.Location(x=cmdWP2[0], y=cmdWP2[1])
 
-        # if self.world_module.args.play_mode != 0:
-        #     for i in range(len(x_m)):
-        #         self.world_module.points_to_draw['path wp {}'.format(i)] = [
-        #             carla.Location(x=x_m[i, 0], y=x_m[i, 1]),
-        #             'COLOR_ALUMINIUM_0']
+        if self.world_module.args.play_mode != 0:
+            for i in range(len(self.x_m)):
+                self.world_module.points_to_draw['path wp {}'.format(i)] = [
+                    carla.Location(x=self.x_m[i, 0], y=self.x_m[i, 1]),
+                    'COLOR_ALUMINIUM_0']
 
         self.world_module.points_to_draw['ego'] = [self.ego.get_location(), 'COLOR_SCARLET_RED_0']
         # self.world_module.points_to_draw['waypoint ahead'] = carla.Location(x=cmdWP[0], y=cmdWP[1])
@@ -877,23 +881,29 @@ class CarlagymEnv(gym.Env):
                 *********************************************** Data Log *******************************************************
                 **********************************************************************************************************************
         """
-        # 保存数据
-        info_ego = ('ego_s', ego_s, 'ego_d',ego_d)
-        self.log.data_record(info_ego, 'ego_info')
-        info_vehicle_1 = ('info_vehicle_1_s', obj_info['Obj_frenet'][0][0], 'info_vehicle_1_d',obj_info['Obj_frenet'][0][1])
-        self.log.data_record(info_vehicle_1, 'vehicle_info_1')
-        info_vehicle_2 = (
-        'info_vehicle_2_s', obj_info['Obj_frenet'][1][0], 'info_vehicle_2_d', obj_info['Obj_frenet'][1][1])
-        self.log.data_record(info_vehicle_2, 'vehicle_info_2')
-        info_vehicle_3 = (
-            'info_vehicle_3_s', obj_info['Obj_frenet'][2][0], 'info_vehicle_3_d', obj_info['Obj_frenet'][2][1])
-        self.log.data_record(info_vehicle_3, 'vehicle_info_3')
-        info_vehicle_4 = (
-            'info_vehicle_4_s', obj_info['Obj_frenet'][3][0], 'info_vehicle_4_d', obj_info['Obj_frenet'][3][1])
-        self.log.data_record(info_vehicle_4, 'vehicle_info_4')
-        info_vehicle_5= (
-            'info_vehicle_5_s', obj_info['Obj_frenet'][4][0], 'info_vehicle_5_d', obj_info['Obj_frenet'][4][1])
-        self.log.data_record(info_vehicle_5, 'vehicle_info_5')
+        '''******   Data Record   ******'''
+
+        if self.log_flag:
+            # 保存数据
+            info_ego = ('ego_s', ego_s, 'ego_d', ego_d)
+            self.log.data_record(info_ego, 'ego_info')
+            info_vehicle_1 = (
+                'info_vehicle_1_s', obj_info['Obj_frenet'][0][0], 'info_vehicle_1_d', obj_info['Obj_frenet'][0][1])
+            self.log.data_record(info_vehicle_1, 'vehicle_info_1')
+            info_vehicle_2 = (
+                'info_vehicle_2_s', obj_info['Obj_frenet'][1][0], 'info_vehicle_2_d', obj_info['Obj_frenet'][1][1])
+            self.log.data_record(info_vehicle_2, 'vehicle_info_2')
+            info_vehicle_3 = (
+                'info_vehicle_3_s', obj_info['Obj_frenet'][2][0], 'info_vehicle_3_d', obj_info['Obj_frenet'][2][1])
+            self.log.data_record(info_vehicle_3, 'vehicle_info_3')
+            info_vehicle_4 = (
+                'info_vehicle_4_s', obj_info['Obj_frenet'][3][0], 'info_vehicle_4_d', obj_info['Obj_frenet'][3][1])
+            self.log.data_record(info_vehicle_4, 'vehicle_info_4')
+            info_vehicle_5 = (
+                'info_vehicle_5_s', obj_info['Obj_frenet'][4][0], 'info_vehicle_5_d', obj_info['Obj_frenet'][4][1])
+            self.log.data_record(info_vehicle_5, 'vehicle_info_5')
+        else:
+            pass
 
         ##画动态曲线
         # self.x.append(self.n_step)
@@ -939,7 +949,7 @@ class CarlagymEnv(gym.Env):
             d_s = self.state[0, (i + 1) * 4] * self.d_max_s
             d_d_f = self.state[0, (i + 1) * 4 + 2]
             d_d = abs(self.state[0, (i + 1) * 4 + 3] - self.state[0, 3])
-            reward_dis -= 30/(d_s**2+d_d**2)
+            reward_dis -= 30 / (d_s ** 2 + d_d ** 2)
 
         reward_speed = v_S * 3 / self.maxSpeed
 

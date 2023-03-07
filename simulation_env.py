@@ -6,7 +6,7 @@ import Carla_gym
 import argparse
 import os
 from config import cfg, log_config_to_file, cfg_from_list, cfg_from_yaml_file
-from stable_baselines3 import SAC
+from SAC.SAC_learner import SAC_Learner, SACConfig
 
 
 def parse_args_cfgs():
@@ -40,29 +40,27 @@ def parse_args_cfgs():
 
 if __name__ == '__main__':
     train = False
-    args, cfg = parse_args_cfgs()
-    print('Env is starting')
-    env = gym.make("gym_env-v0")
-    if args.play_mode:
-        env.enable_auto_render()
+    args, env_cfg = parse_args_cfgs()
 
-    env.begin_modules(args)
     if train:
-        model = SAC("MlpPolicy", env=env,
-                    verbose=1,
-                    tensorboard_log="sb3_Results/")
+        train_name = 'train_1'
+        # SAC agent
+        env_name = 'gym_env-v0'
+        SAC_cfg = SACConfig(env_name, train_name, total_timesteps=300)
 
-        model.learn(total_timesteps=50000, log_interval=1)
-        model.save("sb3_SAC_model")
-        del model  # remove to demonstrate saving and loading
+        agent_learner = SAC_Learner(SAC_cfg, env_cfg, args)
+        agent_learner.env_agent_initialize()
+        agent_learner.train()
+        agent_learner.save()
+
 
     else:
-        model = SAC.load("sb3_SAC_model")
-        obs = env.reset()
-        while True:
-            action, _states = model.predict(obs.reshape(1, 24), deterministic=True)
-            # action = np.array([0.4, 1, 1])
-            obs, reward, done, info = env.step(action)
-            if done:
-                break
-                # obs = env.reset()
+
+        train_name_1 = 'train_2'
+        env_adv_name = 'gym_env-v0'
+
+        SAC_cfg = SACConfig(env_adv_name, train_name_1)
+        agent_learner = SAC_Learner(SAC_cfg, env_cfg, args)
+        agent_learner.env_agent_initialize()
+        agent_learner.load(agent_learner.model_path)
+        agent_learner.eval()
