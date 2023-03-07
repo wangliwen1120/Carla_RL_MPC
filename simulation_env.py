@@ -18,7 +18,7 @@ def parse_args_cfgs():
     parser.add_argument('--agent_id', type=int, default=1),
     parser.add_argument('-p', '--carla_port', metavar='P', default=2000, type=int,
                         help='TCP port to listen to (default: 2000)')
-    parser.add_argument('--tm_port', default=8000, type=int,
+    parser.add_argument('--tm_port', default=3650, type=int,
                         help='Traffic Manager TCP port to listen to (default: 8000)')
     parser.add_argument('--carla_host', metavar='H', default='127.0.0.1',
                         help='IP of the host server (default: 127.0.0.1)')
