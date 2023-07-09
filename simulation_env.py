@@ -39,11 +39,11 @@ def parse_args_cfgs():
 
 
 if __name__ == '__main__':
-    train = True
+    train = False
     args, env_cfg = parse_args_cfgs()
 
     if train:
-        train_name = 'train_1'
+        train_name = 'train_3'
         # SAC agent
         env_name = 'gym_env-v0'
         SAC_cfg = SACConfig(env_name, train_name, total_timesteps=50000)
@@ -55,7 +55,7 @@ if __name__ == '__main__':
 
     else:
 
-        train_name_1 = 'train_2'
+        train_name_1 = 'train_3'
         env_adv_name = 'gym_env-v0'
 
         SAC_cfg = SACConfig(env_adv_name, train_name_1)
