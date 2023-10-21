@@ -18,7 +18,7 @@ from MPC.parameter_config_0 import MPC_Config_0
 # from MPC.MPC_controller_lat import MPC_controller_lat
 # from MPC.MPC_controller_lon_lat import MPC_controller_lon_lat
 from MPC.MPC_controller_lon_lat_ipopt_nonlinear_terminal import MPC_controller_lon_lat_ipopt_nonlinear_terminal
-# from MPC.MPC_controller_lon_lat_acados_nonlinear_terminal_fail import MPC_controller_lon_lat_acados_nonlinear_terminal
+from MPC.MPC_controller_lon_lat_acados_nonlinear_terminal_1016 import MPC_controller_lon_lat_acados_nonlinear_terminal
 from MPC.MPC_controller_lon_lat_ipopt_nonlinear_sequence import MPC_controller_lon_lat_ipopt_nonlinear_sequence
 from MPC.MPC_controller_lon_lat_ipopt_nonlinear_opt import MPC_controller_lon_lat_ipopt_nonlinear_opt
 from MPC.parameter_config import MPC_lon_lat_Config
@@ -120,8 +120,8 @@ class CarlagymEnv(gym.Env):
 
         self.__version__ = "9.9.2"
         self.lon_lat_param = MPC_lon_lat_Config
-        self.lon_lat_controller_ipopt = MPC_controller_lon_lat_ipopt_nonlinear_terminal(self.lon_lat_param)
-        # self.lon_lat_controller_acados = MPC_controller_lon_lat_acados_nonlinear_terminal(self.lon_lat_param)
+        # self.lon_lat_controller_ipopt = MPC_controller_lon_lat_ipopt_nonlinear_terminal(self.lon_lat_param)
+        self.lon_lat_controller_acados = MPC_controller_lon_lat_acados_nonlinear_terminal(self.lon_lat_param)
         # self.lon_lat_controller_ipopt = MPC_controller_lon_lat_ipopt_nonlinear_sequence(self.lon_lat_param)
         # self.lon_lat_controller_ipopt = MPC_controller_lon_lat_ipopt_nonlinear_opt(self.lon_lat_param)
 
@@ -200,7 +200,7 @@ class CarlagymEnv(gym.Env):
         self.Input = None
         self.fpath = None
         self.eps_rew = 0
-        self.u_last = np.array([[0.0], [0.0]])
+        self.u_last = [0.0,0.0]
         self.lane_last = 0
         self.ref_left_idx = 0
         self.fig, self.ax = plt.subplots()
@@ -785,20 +785,24 @@ class CarlagymEnv(gym.Env):
                                              'SPEED': [speed]}
         obj_info = self.obj_info()
 
-        # if self.n_step == 180:
-        #     print("180")
+        if self.n_step == 180:
+            print("180")
         # print(self.n_step)
         ref_left = frenet_to_inertial(self.fpath.s[29], self.fpath.d[29] - 3.5, self.motionPlanner.csp)
 
         # terminal
-        self.Input, MPC_unsolved, x_m = self.lon_lat_controller_ipopt.calc_input(
+        # self.Input, MPC_unsolved, x_m = self.lon_lat_controller_ipopt.calc_input(
+
+        self.Input, MPC_unsolved, x_m = self.lon_lat_controller_acados.calc_input_1(
             x_current=np.array([[ego_state[0]], [ego_state[1]], [ego_state[2]]]),
             obj_info=obj_info,
             ref=np.array(
                 [self.fpath.x[29], self.fpath.y[29], self.fpath.yaw[29], self.fpath.s[29], self.fpath.d[29]]),
             ref_left=np.array([ref_left[0], ref_left[1], ref_left[3]]),
             u_last=self.u_last, csp=self.motionPlanner.csp, fpath=fpath,
-            q=action[0], ru=1, rdu=1)
+            q=1, ru=1, rdu=1)
+            # q=action[0], ru=1, rdu=1)
+
         self.u_last = self.Input
         self.x_m = x_m
 
@@ -856,11 +860,11 @@ class CarlagymEnv(gym.Env):
                 **********************************************************************************************************************
         """
 
-        # if self.world_module.args.play_mode != 0:
-        #     for i in range(len(fpath.x)):
-        #         self.world_module.points_to_draw['path wp {}'.format(i)] = [
-        #             carla.Location(x=fpath.x[i], y=fpath.y[i]),
-        #             'COLOR_ALUMINIUM_0']
+        if self.world_module.args.play_mode != 0:
+            for i in range(len(fpath.x)):
+                self.world_module.points_to_draw['fpath wp {}'.format(i)] = [
+                    carla.Location(x=fpath.x[i], y=fpath.y[i]),
+                    'COLOR_ALUMINIUM_0']
         #
         #     self.world_module.points_to_draw['ego'] = [self.ego.get_location(), 'COLOR_SCARLET_RED_0']
         #     self.world_module.points_to_draw['waypoint ahead'] = carla.Location(x=cmdWP[0], y=cmdWP[1])
@@ -868,9 +872,9 @@ class CarlagymEnv(gym.Env):
 
         if self.world_module.args.play_mode != 0:
             for i in range(len(self.x_m)):
-                self.world_module.points_to_draw['path wp {}'.format(i)] = [
+                self.world_module.points_to_draw['x_m wp {}'.format(i)] = [
                     carla.Location(x=self.x_m[i, 0], y=self.x_m[i, 1]),
-                    'COLOR_ALUMINIUM_0']
+                    'COLOR_SCARLET_RED_0']
 
         self.world_module.points_to_draw['ego'] = [self.ego.get_location(), 'COLOR_SCARLET_RED_0']
         # self.world_module.points_to_draw['waypoint ahead'] = carla.Location(x=cmdWP[0], y=cmdWP[1])
@@ -958,7 +962,7 @@ class CarlagymEnv(gym.Env):
 
         done = False
 
-        if collision or self.n_step >= 500:
+        if collision or self.n_step >= 1000:
             done = True
 
         info = {'reserved': 0}
