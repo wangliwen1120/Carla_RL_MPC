@@ -18,7 +18,7 @@ from MPC.parameter_config_0 import MPC_Config_0
 # from MPC.MPC_controller_lat import MPC_controller_lat
 # from MPC.MPC_controller_lon_lat import MPC_controller_lon_lat
 from MPC.MPC_controller_lon_lat_ipopt_nonlinear_terminal import MPC_controller_lon_lat_ipopt_nonlinear_terminal
-from MPC.MPC_controller_lon_lat_acados_nonlinear_terminal_1016 import MPC_controller_lon_lat_acados_nonlinear_terminal
+from MPC.MPC_controller_lon_lat_acados_nonlinear_terminal_without_constrain import MPC_controller_lon_lat_acados_nonlinear_terminal
 from MPC.MPC_controller_lon_lat_ipopt_nonlinear_sequence import MPC_controller_lon_lat_ipopt_nonlinear_sequence
 from MPC.MPC_controller_lon_lat_ipopt_nonlinear_opt import MPC_controller_lon_lat_ipopt_nonlinear_opt
 from MPC.parameter_config import MPC_lon_lat_Config
@@ -800,8 +800,7 @@ class CarlagymEnv(gym.Env):
                 [self.fpath.x[29], self.fpath.y[29], self.fpath.yaw[29], self.fpath.s[29], self.fpath.d[29]]),
             ref_left=np.array([ref_left[0], ref_left[1], ref_left[3]]),
             u_last=self.u_last, csp=self.motionPlanner.csp, fpath=fpath,
-            q=1, ru=1, rdu=1)
-            # q=action[0], ru=1, rdu=1)
+            q=action[0], ru=1, rdu=1)
 
         self.u_last = self.Input
         self.x_m = x_m
@@ -961,6 +960,9 @@ class CarlagymEnv(gym.Env):
         reward = reward_cl + reward_dis + reward_speed
 
         done = False
+        if collision or self.n_step >= 400:
+            self.u_last = np.zeros(self.u_last.shape)
+            done = True
 
         if collision or self.n_step >= 1000:
             done = True

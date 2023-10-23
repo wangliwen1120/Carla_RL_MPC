@@ -217,14 +217,14 @@ class MPC_controller_lon_lat_acados_nonlinear_terminal:
                      + ca.mtimes([(model.x[:3] - model.p[6:9]).T, self.Q2, (model.x[:3] - model.p[6:9])]) \
                      + ca.mtimes([model.u.T, self.Ru, model.u]) \
                      + ca.mtimes([(model.u - model.p[1:3]).T, self.Rdu, (model.u - model.p[1:3])]) \
-                     # + obj
+                     + obj
         #
-        # terminal_cost = ca.mtimes([(model.x[:3] - model.p[3:6]).T, self.Q1, (model.x[:3] - model.p[3:6])]) \
-        #                 + ca.mtimes([(model.x[:3] - model.p[6:9]).T, self.Q2, (model.x[:3] - model.p[6:9])]) \
-        #                 # + obj
+        terminal_cost = ca.mtimes([(model.x[:3] - model.p[3:6]).T, self.Q1, (model.x[:3] - model.p[3:6])]) \
+                        + ca.mtimes([(model.x[:3] - model.p[6:9]).T, self.Q2, (model.x[:3] - model.p[6:9])]) \
+                        + obj
 
         ocp.model.cost_expr_ext_cost = stage_cost
-        # ocp.model.cost_expr_ext_cost_e = terminal_cost
+        ocp.model.cost_expr_ext_cost_e = terminal_cost
 
         # set constraints
         ocp.constraints.lbu = np.array([constraint.v_min, constraint.delta_f_min])
@@ -267,7 +267,7 @@ class MPC_controller_lon_lat_acados_nonlinear_terminal:
         # set lower and upper bounds for the constraints
         # cons_du_low = np.array([self.d_v_min, self.d_delta_f_min])
         # cons_du_up = np.array([self.d_v_max, self.d_delta_f_max])
-        cons_obs_low = np.ones(self.vehicle_num * 4) * (4 * ((self.Length / 4) ** 2 + (self.Width / 2) ** 2)) * 0
+        cons_obs_low = np.ones(self.vehicle_num * 4) * (4 * ((self.Length / 4) ** 2 + (self.Width / 2) ** 2))
         cons_obs_up = np.ones(self.vehicle_num * 4) * 1e15
 
         # ocp.model.con_h_expr = ca.vertcat(cons_du, cons_obs)
@@ -277,10 +277,10 @@ class MPC_controller_lon_lat_acados_nonlinear_terminal:
         # ocp.model.con_h_expr = cons_du
         # ocp.constraints.lh = cons_du_low
         # ocp.constraints.uh = cons_du_up
-        ocp.model.con_h_expr = cons_obs
-        ocp.constraints.lh = cons_obs_low
-        ocp.constraints.uh = cons_obs_up
-        # ocp.constraints.x0 = np.array([-415, 30, 0.0])
+        # ocp.model.con_h_expr = cons_obs
+        # ocp.constraints.lh = cons_obs_low
+        # ocp.constraints.uh = cons_obs_up
+
         # solver options
         ocp.solver_options.qp_solver = 'PARTIAL_CONDENSING_HPIPM'  # FULL_CONDENSING_QPOASES
         # PARTIAL_CONDENSING_HPIPM, FULL_CONDENSING_QPOASES, FULL_CONDENSING_HPIPM,
@@ -395,8 +395,8 @@ class MPC_controller_lon_lat_acados_nonlinear_terminal:
         self.solver.set(self.Np, 'p', xs)
 
         start = timeit.default_timer()
-        self.solver.set(0, 'lbx', x_current)
-        self.solver.set(0, 'ubx', x_current)
+        self.solver.set(0, 'lbx', np.array(x_current))
+        self.solver.set(0, 'ubx', np.array(x_current))
 
         for i in range(self.Np):
             self.solver.set(i, 'x', np.array([fpath.x[i],fpath.y[i],fpath.yaw[i]]))
@@ -414,7 +414,7 @@ class MPC_controller_lon_lat_acados_nonlinear_terminal:
 
         time_record = timeit.default_timer() - start
         # simulate system
-        self.integrator.set('x', x_current)
+        self.integrator.set('x', np.array(x_current))
         self.integrator.set('u', simU[0])
 
         status_s = self.integrator.solve()
