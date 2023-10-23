@@ -793,7 +793,7 @@ class CarlagymEnv(gym.Env):
         # terminal
         # self.Input, MPC_unsolved, x_m = self.lon_lat_controller_ipopt.calc_input(
 
-        self.Input, MPC_unsolved, x_m = self.lon_lat_controller_acados.calc_input_1(
+        self.Input, MPC_unsolved, x_m = self.lon_lat_controller_acados.calc_input(
             x_current=np.array([[ego_state[0]], [ego_state[1]], [ego_state[2]]]),
             obj_info=obj_info,
             ref=np.array(

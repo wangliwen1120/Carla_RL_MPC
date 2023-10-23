@@ -322,6 +322,6 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
 
         self.u0 = np.concatenate((u0[1:], u0[-1:]))
 
-        # print('t_cost =', time.time() - start_time)
+        print('t_cost =', time.time() - start_time)
         MPC_unsolved = False
         return np.array([estimated_opt[0], estimated_opt[1]]), MPC_unsolved, x_m
