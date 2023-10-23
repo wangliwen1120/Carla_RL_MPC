@@ -100,6 +100,7 @@ class MPC_controller_lon_lat_acados_nonlinear_terminal:
 
         self.next_states = np.zeros((self.Nx, self.Np)).copy().T
         self.u0 = np.array([0, 0] * self.Nc).reshape(-1, 2).T
+
         self.vehicle_model()
         self.ocp_problem()
 
@@ -261,6 +262,8 @@ class MPC_controller_lon_lat_acados_nonlinear_terminal:
             cons_obs_list[j * 4 + 3] = (vehicle_ego_center2_x - vehicle_obs_center2_x) ** 2 + (
                     vehicle_ego_center2_y - vehicle_obs_center2_y) ** 2
 
+        cons_obs = ca.vertcat(*cons_obs_list)
+
         # set lower and upper bounds for the constraints
         cons_du_low = np.array([self.d_v_min, self.d_delta_f_min])
         cons_du_up = np.array([self.d_v_max, self.d_delta_f_max])
@@ -274,9 +277,9 @@ class MPC_controller_lon_lat_acados_nonlinear_terminal:
         # ocp.model.con_h_expr = cons_du
         # ocp.constraints.lh = cons_du_low
         # ocp.constraints.uh = cons_du_up
-        # ocp.model.con_h_expr = cons_obs
-        # ocp.constraints.lh = cons_obs_low
-        # ocp.constraints.uh = cons_obs_up
+        ocp.model.con_h_expr = cons_obs
+        ocp.constraints.lh = cons_obs_low
+        ocp.constraints.uh = cons_obs_up
 
         # solver options
         ocp.solver_options.qp_solver = 'PARTIAL_CONDENSING_HPIPM'  # FULL_CONDENSING_QPOASES
@@ -286,7 +289,7 @@ class MPC_controller_lon_lat_acados_nonlinear_terminal:
         ocp.solver_options.integrator_type = 'ERK'  # 'DISCRETE'
         # ocp.solver_options.print_level = 1
         ocp.solver_options.tol = 1e-6
-        ocp.solver_options.nlp_solver_type = 'SQP'  # SQP_RTI, SQP
+        ocp.solver_options.nlp_solver_type = 'SQP_RTI'  # SQP_RTI, SQP
         ocp.solver_options.globalization = 'FIXED_STEP'
         ocp.solver_options.alpha_min = 1e-2
         # ocp.solver_options.__initialize_t_slacks = 0
@@ -294,7 +297,7 @@ class MPC_controller_lon_lat_acados_nonlinear_terminal:
         ocp.solver_options.levenberg_marquardt = 1e-1
         # ocp.solver_options.print_level = 2
         SQP_max_iter = 300
-        ocp.solver_options.qp_solver_iter_max = 800
+        ocp.solver_options.qp_solver_iter_max = 300
         ocp.solver_options.regularize_method = 'MIRROR'
         # ocp.solver_options.exact_hess_constr = 0
         # ocp.solver_options.line_search_use_sufficient_descent = line_search_use_sufficient_descent
