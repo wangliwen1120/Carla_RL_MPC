@@ -120,8 +120,8 @@ class CarlagymEnv(gym.Env):
 
         self.__version__ = "9.9.2"
         self.lon_lat_param = MPC_lon_lat_Config
-        # self.lon_lat_controller_ipopt = MPC_controller_lon_lat_ipopt_nonlinear_terminal(self.lon_lat_param)
-        self.lon_lat_controller_acados = MPC_controller_lon_lat_acados_nonlinear_terminal(self.lon_lat_param)
+        self.lon_lat_controller_ipopt = MPC_controller_lon_lat_ipopt_nonlinear_terminal(self.lon_lat_param)
+        # self.lon_lat_controller_acados = MPC_controller_lon_lat_acados_nonlinear_terminal(self.lon_lat_param)
         # self.lon_lat_controller_ipopt = MPC_controller_lon_lat_ipopt_nonlinear_sequence(self.lon_lat_param)
         # self.lon_lat_controller_ipopt = MPC_controller_lon_lat_ipopt_nonlinear_opt(self.lon_lat_param)
 
@@ -791,9 +791,9 @@ class CarlagymEnv(gym.Env):
         ref_left = frenet_to_inertial(self.fpath.s[29], self.fpath.d[29] - 3.5, self.motionPlanner.csp)
 
         # terminal
-        # self.Input, MPC_unsolved, x_m = self.lon_lat_controller_ipopt.calc_input(
+        self.Input, MPC_unsolved, x_m = self.lon_lat_controller_ipopt.calc_input(
 
-        self.Input, MPC_unsolved, x_m = self.lon_lat_controller_acados.calc_input(
+        # self.Input, MPC_unsolved, x_m = self.lon_lat_controller_acados.calc_input(
             x_current=np.array([[ego_state[0]], [ego_state[1]], [ego_state[2]]]),
             obj_info=obj_info,
             ref=np.array(

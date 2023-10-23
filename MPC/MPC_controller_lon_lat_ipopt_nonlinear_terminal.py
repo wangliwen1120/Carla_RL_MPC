@@ -45,6 +45,7 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
         self.Cy = self.param.mpc_Cy
         self.Lane = self.param.lanewidth
         self.stop_line = self.param.dstop
+        self.vehicle_nums = 5
 
         # 横纵向约束
         self.v_min = 0.0
@@ -75,12 +76,13 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
         self.next_states = np.zeros((self.Nx, self.Np)).copy().T
         self.u0 = np.array([0, 0] * self.Nc).reshape(-1, 2).T
 
-    def calc_input(self, x_current, obj_info, ref, ref_left, u_last, csp, fpath, q, ru, rdu):
-        start_time = time.time()
-        obj_Mux = []
-        vehicle_num = 0
-        # # 预测时域内的ref矩阵
-        # # 预测时域内的obj矩阵
+        # self.model_ocp()
+        self.cons_g()
+
+
+    def solve_obj(self, obj_info):
+        self.obj_Mux = []
+        self.vehicle_num = 0
 
         # 预测时域内的obj矩阵
         for j in range(np.size(obj_info['Obj_actor'])):
@@ -98,39 +100,67 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
                 if obj_info['Ego_preceding'][0] != None:
                     if self.obj_actor_id[i] == obj_info['Ego_preceding'][0].id:
                         self.obj_pos[i] = 1  # 'Ego_preceding'
-                        vehicle_num += 1
+                        self.vehicle_num += 1
                 if obj_info['Ego_following'][0] != None:
                     if self.obj_actor_id[i] == obj_info['Ego_following'][0].id:
                         self.obj_pos[i] = 2  # 'Ego_following'
-                        vehicle_num += 1
+                        self.vehicle_num += 1
                 if obj_info['Left_preceding'][0] != None:
                     if self.obj_actor_id[i] == obj_info['Left_preceding'][0].id:
                         self.obj_pos[i] = 3  # 'Ego_preceding'
-                        vehicle_num += 1
+                        self.vehicle_num += 1
                 if obj_info['Left_following'][0] != None:
                     if self.obj_actor_id[i] == obj_info['Left_following'][0].id:
                         self.obj_pos[i] = 4  # 'Left_following'
-                        vehicle_num += 1
+                        self.vehicle_num += 1
                 if obj_info['Right_preceding'][0] != None:
                     if self.obj_actor_id[i] == obj_info['Right_preceding'][0].id:
                         self.obj_pos[i] = 5  # 'Right_preceding'
-                        vehicle_num += 1
+                        self.vehicle_num += 1
                 if obj_info['Right_following'][0] != None:
                     if self.obj_actor_id[i] == obj_info['Right_following'][0].id:
                         self.obj_pos[i] = 6  # 'Right_following'
-                        vehicle_num += 1
+                        self.vehicle_num += 1
                 if obj_info['Left'][0] != None:
                     if self.obj_actor_id[i] == obj_info['Left'][0].id:
                         self.obj_pos[i] = 7  # 'Left'
-                        vehicle_num += 1
+                        self.vehicle_num += 1
                 if obj_info['Right'][0] != None:
                     if self.obj_actor_id[i] == obj_info['Right'][0].id:
                         self.obj_pos[i] = 8  # 'Right'
-                        vehicle_num += 1
-            obj_Mux.append(np.concatenate(
+                        self.vehicle_num += 1
+            self.obj_Mux.append(np.concatenate(
                 (self.obj_x_ref.T, self.obj_y_ref.T, self.obj_phi_ref.T, self.obj_actor_id.T, self.obj_pos.T)))
-        vehicle_num = int(vehicle_num / self.Np)
-        # print(vehicle_num)
+        self.vehicle_num = int(self.vehicle_num / self.Np)
+
+    def cons_g(self):
+        # 状态约束
+        self.lbg = []
+        self.ubg = []
+
+        # g1
+        for _ in range(self.Np):
+            self.lbg.append(0)
+            self.lbg.append(0)
+            self.lbg.append(0)
+            self.ubg.append(0)
+            self.ubg.append(0)
+            self.ubg.append(0)
+
+        # g2
+        for _ in range(self.Nc):
+            self.lbg.append(self.d_v_min)
+            self.lbg.append(self.d_delta_f_min)
+            self.ubg.append(self.d_v_max)
+            self.ubg.append(self.d_delta_f_max)
+
+        # g3
+        for i in range(self.Np):
+            for _ in range(self.vehicle_nums * 4):
+                self.lbg.append(4 * ((self.Length / 4) ** 2 + (self.Width / 2) ** 2))
+                self.ubg.append(np.inf)
+
+    def model_ocp(self):
         # 根据数学模型建模
         # 系统状态
         x = ca.SX.sym('x')
@@ -153,11 +183,11 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
         # 相关变量，格式(状态长度， 步长)
         U = ca.SX.sym('U', self.Nu, self.Nc)  # 控制输出
         X = ca.SX.sym('X', self.Nx, self.Np)  # 系统状态
-        C_R = ca.SX.sym('C_R', self.Nx + self.Nx + self.Nx)  # 构建问题的相关参数
+        C_R = ca.SX.sym('C_R', 1+ self.Nu + self.Nx + self.Nx + self.Nx + self.vehicle_nums*self.Np*4)  # 构建问题的相关参数
         # 这里给定当前/初始位置，目标终点(本车道/左车道)位置
 
         # 权重矩阵
-        self.q = q
+        self.q = 1    #C_R[0]
         self.ru = 0
         self.rdu = 0.3
         self.S = 0.1  # Obstacle avoidance function coefficient
@@ -179,22 +209,23 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
             obj = obj + U_cost + dU_cost
 
         # Obstacle avoidance cost function
-        for j in range(np.size(obj_info['Obj_actor'])):
+        for j in range(self.vehicle_nums):
+            i =
             if obj_Mux[j][4, 0] != 0:  # 'not vehicle_around'
                 for i in range(self.Np):
                     Obj_cost = self.S / (((X[0, i] - obj_Mux[j][0, i]) ** 2) + ((X[1, i] - obj_Mux[j][1, i]) ** 2))
                     obj = obj + Obj_cost
 
         # Terminal cost function
-        Ref_ter_1 = ca.mtimes([(X[:, -1] - C_R[3:6]).T, self.Q1, X[:, -1] - C_R[3:6]])
-        Ref_ter_2 = ca.mtimes([(X[:, -1] - C_R[6:9]).T, self.Q2, X[:, -1] - C_R[6:9]])
+        Ref_ter_1 = ca.mtimes([(X[:, -1] - C_R[6:9]).T, self.Q1, X[:, -1] - C_R[6:9]])
+        Ref_ter_2 = ca.mtimes([(X[:, -1] - C_R[9:12]).T, self.Q2, X[:, -1] - C_R[9:12]])
         obj = obj + Ref_ter_1 + Ref_ter_2
 
         g1 = []  # 用list来存储优化目标的向量
         g2 = []
         g3 = []
         # constraint 1: dynamic constraint
-        g1.append(X[:, 0] - C_R[:3])
+        g1.append(X[:, 0] - C_R[3:6])
         for i in range(self.Np - 1):
             if i in range(self.Nc):
                 x_next_ = f(X[:, i], U[:, i]) * self.T + X[:, i]
@@ -205,8 +236,8 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
         # constraint 2: dU constraint
         for i in range(self.Nc):
             if i == 0:
-                g2.append((U[0, 0] - u_last[0]) / self.T)
-                g2.append((U[1, 0] - u_last[1]) / self.T)
+                g2.append((U[0, 0] - C_R[1]) / self.T)
+                g2.append((U[1, 0] - C_R[2]) / self.T)
             else:
                 g2.append((U[:, i] - U[:, i - 1]) / self.T)
 
@@ -217,20 +248,19 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
             vehicle_ego_center2_x = X[0, i] + self.Length / 4 * np.cos(X[2, i])
             vehicle_ego_center2_y = X[1, i] + self.Length / 4 * np.sin(X[2, i])
 
-            for j in range(np.size(obj_info['Obj_actor'])):
-                if obj_Mux[j][4, 0] != 0:  # 'not vehicle_around'
-                    vehicle_obs_center1_x = obj_Mux[j][0, i] - self.Length / 4 * np.cos(obj_Mux[j][2, i])
-                    vehicle_obs_center1_y = obj_Mux[j][1, i] - self.Length / 4 * np.sin(obj_Mux[j][2, i])
-                    vehicle_obs_center2_x = obj_Mux[j][0, i] + self.Length / 4 * np.cos(obj_Mux[j][2, i])
-                    vehicle_obs_center2_y = obj_Mux[j][1, i] + self.Length / 4 * np.sin(obj_Mux[j][2, i])
-                    g3.append((vehicle_ego_center1_x - vehicle_obs_center1_x) ** 2 + (
-                            vehicle_ego_center1_y - vehicle_obs_center1_y) ** 2)
-                    g3.append((vehicle_ego_center1_x - vehicle_obs_center2_x) ** 2 + (
-                            vehicle_ego_center1_y - vehicle_obs_center2_y) ** 2)
-                    g3.append((vehicle_ego_center2_x - vehicle_obs_center1_x) ** 2 + (
-                            vehicle_ego_center2_y - vehicle_obs_center1_y) ** 2)
-                    g3.append((vehicle_ego_center2_x - vehicle_obs_center2_x) ** 2 + (
-                            vehicle_ego_center2_y - vehicle_obs_center2_y) ** 2)
+            for j in range(self.vehicle_nums):
+                vehicle_obs_center1_x = obj_Mux[j][0, i] - self.Length / 4 * np.cos(obj_Mux[j][2, i])
+                vehicle_obs_center1_y = obj_Mux[j][1, i] - self.Length / 4 * np.sin(obj_Mux[j][2, i])
+                vehicle_obs_center2_x = obj_Mux[j][0, i] + self.Length / 4 * np.cos(obj_Mux[j][2, i])
+                vehicle_obs_center2_y = obj_Mux[j][1, i] + self.Length / 4 * np.sin(obj_Mux[j][2, i])
+                g3.append((vehicle_ego_center1_x - vehicle_obs_center1_x) ** 2 + (
+                        vehicle_ego_center1_y - vehicle_obs_center1_y) ** 2)
+                g3.append((vehicle_ego_center1_x - vehicle_obs_center2_x) ** 2 + (
+                        vehicle_ego_center1_y - vehicle_obs_center2_y) ** 2)
+                g3.append((vehicle_ego_center2_x - vehicle_obs_center1_x) ** 2 + (
+                        vehicle_ego_center2_y - vehicle_obs_center1_y) ** 2)
+                g3.append((vehicle_ego_center2_x - vehicle_obs_center2_x) ** 2 + (
+                        vehicle_ego_center2_y - vehicle_obs_center2_y) ** 2)
 
         # 定义优化问题
         # 输入变量，这里需要同时将系统状态X也作为优化变量输入，
@@ -243,54 +273,45 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
 
         # ipopt设置
         opts_setting = {'ipopt.max_iter': 100, 'ipopt.print_level': 0, 'print_time': 0,
-                        'ipopt.acceptable_tol': 1e-8, 'ipopt.acceptable_obj_change_tol': 1e-8}
+                        'ipopt.acceptable_tol': 1e-6, 'ipopt.acceptable_obj_change_tol': 1e-6}
 
         # 最终目标，获得求解器
-        solver = ca.nlpsol('solver', 'ipopt', nlp_prob, opts_setting)
+        self.solver = ca.nlpsol('solver', 'ipopt', nlp_prob, opts_setting)
 
-        # 状态约束
-        lbg = []
-        ubg = []
 
-        # g1
-        for _ in range(self.Np):
-            lbg.append(0)
-            lbg.append(0)
-            lbg.append(0)
-            ubg.append(0)
-            ubg.append(0)
-            ubg.append(0)
 
-        # g2
-        for _ in range(self.Nc):
-            lbg.append(self.d_v_min)
-            lbg.append(self.d_delta_f_min)
-            ubg.append(self.d_v_max)
-            ubg.append(self.d_delta_f_max)
+    def calc_input(self, x_current, obj_info, ref, ref_left, u_last, csp, fpath, q, ru, rdu):
+        start_time = time.time()
+        self.solve_obj(obj_info)
+        obj_Mux = self.obj_Mux
 
-        # g3
-        for i in range(self.Np):
-            for _ in range(vehicle_num * 4):
-                lbg.append(4 * ((self.Length / 4) ** 2 + (self.Width / 2) ** 2))
-                ubg.append(np.inf)
+        #  obs_list:  1. 车的数目  2. x y phi num 3.self.Np
+        obs_list = []
+        index = [0,1,2,4]
+        for i in range(self.vehicle_nums):
+            for j in range(self.Np):
+                for k in index:
+                    obs_list.append(obj_Mux[i][k][j])
+        # 初始化优化参数
+        C_R = np.concatenate(([q],u_last,x_current,ref[:3],ref_left[:3],obs_list))
 
         # 控制约束
-        lbx = []
-        ubx = []
+        self.lbx = []
+        self.ubx = []
 
         # v,delta_f,x,y,phi
         for _ in range(self.Nc):
-            lbx.append(self.v_min)
-            lbx.append(self.delta_f_min)
-            ubx.append(self.v_max)
-            ubx.append(self.delta_f_max)
+            self.lbx.append(self.v_min)
+            self.lbx.append(self.delta_f_min)
+            self.ubx.append(self.v_max)
+            self.ubx.append(self.delta_f_max)
 
         for i in range(self.Np):
             y_min = frenet_to_inertial(fpath.s[i], - 4.2, csp)[1]
             y_max = frenet_to_inertial(fpath.s[i], + 0.3, csp)[1]
-            lbx.append(-np.inf)
-            lbx.append(y_min)
-            lbx.append(-np.inf)
+            self.lbx.append(-np.inf)
+            self.lbx.append(y_min)
+            self.lbx.append(-np.inf)
             if obj_info['Ego_preceding'][0] != None:  # if no vehicle_ahead
                 obj_preceding_x = obj_info['Ego_preceding'][2][0]
                 obj_preceding_y = obj_info['Ego_preceding'][2][1]
@@ -298,21 +319,18 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
                 obj_preceding_speed = obj_info['Ego_preceding'][2][5]
                 obj_preceding_delta_f = obj_info['Ego_preceding'][2][6]
                 obj_preceding_x_ref = obj_preceding_x + obj_preceding_speed * np.cos(obj_preceding_phi) * self.T * i
-                ubx.append(obj_preceding_x_ref - self.stop_line)
+                self.ubx.append(obj_preceding_x_ref - self.stop_line)
             else:
-                ubx.append(np.inf)
-            ubx.append(y_max)
-            ubx.append(np.inf)
+                self.ubx.append(np.inf)
+            self.ubx.append(y_max)
+            self.ubx.append(np.inf)
 
-        # 初始化优化参数
-        C_R = np.array([x_current[0], x_current[1], x_current[2], ref[0], ref[1], ref[2],
-                        ref_left[0], ref_left[1], ref_left[2]])
 
         # 初始化优化目标变量
         init_control = np.concatenate((self.u0.reshape(-1, 1), self.next_states.reshape(-1, 1)))
-        t_ = time.time()
-        res = solver(x0=init_control, p=C_R, lbg=lbg,
-                     lbx=lbx, ubg=ubg, ubx=ubx)
+        res = self.solver(x0=init_control, p=C_R, lbg=self.lbg,
+                     lbx=self.lbx, ubg=self.ubg, ubx=self.ubx)
+        print('t_cost =', time.time() - start_time)
         # the feedback is in the series [u0, x0, u1, x1, ...]
         # 获得最优控制结果estimated_opt，u0，x_m
         estimated_opt = res['x'].full()
@@ -322,6 +340,6 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
 
         self.u0 = np.concatenate((u0[1:], u0[-1:]))
 
-        print('t_cost =', time.time() - start_time)
+
         MPC_unsolved = False
         return np.array([estimated_opt[0], estimated_opt[1]]), MPC_unsolved, x_m

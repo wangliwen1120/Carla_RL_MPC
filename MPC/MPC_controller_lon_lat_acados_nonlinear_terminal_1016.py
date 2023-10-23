@@ -200,7 +200,7 @@ class MPC_controller_lon_lat_acados_nonlinear_terminal:
         self.Rdu = self.rdu * np.eye(self.Nu)
 
         ocp.cost.cost_type = 'EXTERNAL'
-        ocp.cost.cost_type_e = 'EXTERNAL'
+        # ocp.cost.cost_type_e = 'EXTERNAL'
 
         # initial state
         x_ref = np.zeros(nx)
@@ -217,14 +217,14 @@ class MPC_controller_lon_lat_acados_nonlinear_terminal:
                      + ca.mtimes([(model.x[:3] - model.p[6:9]).T, self.Q2, (model.x[:3] - model.p[6:9])]) \
                      + ca.mtimes([model.u.T, self.Ru, model.u]) \
                      + ca.mtimes([(model.u - model.p[1:3]).T, self.Rdu, (model.u - model.p[1:3])]) \
-                     + obj
-
-        terminal_cost = ca.mtimes([(model.x[:3] - model.p[3:6]).T, self.Q1, (model.x[:3] - model.p[3:6])]) \
-                        + ca.mtimes([(model.x[:3] - model.p[6:9]).T, self.Q2, (model.x[:3] - model.p[6:9])]) \
-                        + obj
+                     # + obj
+        #
+        # terminal_cost = ca.mtimes([(model.x[:3] - model.p[3:6]).T, self.Q1, (model.x[:3] - model.p[3:6])]) \
+        #                 + ca.mtimes([(model.x[:3] - model.p[6:9]).T, self.Q2, (model.x[:3] - model.p[6:9])]) \
+        #                 # + obj
 
         ocp.model.cost_expr_ext_cost = stage_cost
-        ocp.model.cost_expr_ext_cost_e = terminal_cost
+        # ocp.model.cost_expr_ext_cost_e = terminal_cost
 
         # set constraints
         ocp.constraints.lbu = np.array([constraint.v_min, constraint.delta_f_min])
@@ -265,44 +265,44 @@ class MPC_controller_lon_lat_acados_nonlinear_terminal:
         cons_obs = ca.vertcat(*cons_obs_list)
 
         # set lower and upper bounds for the constraints
-        cons_du_low = np.array([self.d_v_min, self.d_delta_f_min])
-        cons_du_up = np.array([self.d_v_max, self.d_delta_f_max])
-        cons_obs_low = np.ones(self.vehicle_num * 4) * (4 * ((self.Length / 4) ** 2 + (self.Width / 2) ** 2))
+        # cons_du_low = np.array([self.d_v_min, self.d_delta_f_min])
+        # cons_du_up = np.array([self.d_v_max, self.d_delta_f_max])
+        cons_obs_low = np.ones(self.vehicle_num * 4) * (4 * ((self.Length / 4) ** 2 + (self.Width / 2) ** 2)) * 0
         cons_obs_up = np.ones(self.vehicle_num * 4) * 1e15
 
         # ocp.model.con_h_expr = ca.vertcat(cons_du, cons_obs)
         # ocp.constraints.lh = np.concatenate((cons_du_low,cons_obs_low))
         # ocp.constraints.uh = np.concatenate((cons_du_up,cons_obs_up))
-
+        #
         # ocp.model.con_h_expr = cons_du
         # ocp.constraints.lh = cons_du_low
         # ocp.constraints.uh = cons_du_up
         ocp.model.con_h_expr = cons_obs
         ocp.constraints.lh = cons_obs_low
         ocp.constraints.uh = cons_obs_up
-
+        # ocp.constraints.x0 = np.array([-415, 30, 0.0])
         # solver options
         ocp.solver_options.qp_solver = 'PARTIAL_CONDENSING_HPIPM'  # FULL_CONDENSING_QPOASES
         # PARTIAL_CONDENSING_HPIPM, FULL_CONDENSING_QPOASES, FULL_CONDENSING_HPIPM,
         # PARTIAL_CONDENSING_QPDUNES, PARTIAL_CONDENSING_OSQP
-        ocp.solver_options.hessian_approx = 'EXACT'
+        ocp.solver_options.hessian_approx = 'EXACT'# GAUSS_NEWTON
         ocp.solver_options.integrator_type = 'ERK'  # 'DISCRETE'
         # ocp.solver_options.print_level = 1
-        ocp.solver_options.tol = 1e-6
-        ocp.solver_options.nlp_solver_type = 'SQP_RTI'  # SQP_RTI, SQP
+        ocp.solver_options.tol = 1e-4
+        ocp.solver_options.nlp_solver_type = 'SQP'  # SQP_RTI, SQP
         ocp.solver_options.globalization = 'FIXED_STEP'
-        ocp.solver_options.alpha_min = 1e-2
+        # ocp.solver_options.alpha_min = 1e-2
         # ocp.solver_options.__initialize_t_slacks = 0
         # ocp.solver_options.regularize_method = 'CONVEXIFY'
-        ocp.solver_options.levenberg_marquardt = 1e-1
+        # ocp.solver_options.levenberg_marquardt = 1e-6
         # ocp.solver_options.print_level = 2
         SQP_max_iter = 300
         ocp.solver_options.qp_solver_iter_max = 300
-        ocp.solver_options.regularize_method = 'MIRROR'
+        ocp.solver_options.regularize_method = 'PROJECT'
         # ocp.solver_options.exact_hess_constr = 0
         # ocp.solver_options.line_search_use_sufficient_descent = line_search_use_sufficient_descent
         # ocp.solver_options.globalization_use_SOC = globalization_use_SOC
-        ocp.solver_options.eps_sufficient_descent = 1e-1
+        # ocp.solver_options.eps_sufficient_descent = 1e-1
         ocp.solver_options.qp_tol = 5e-7
         # compile acados ocp
         json_file = os.path.join('./' + model.name + '_acados_ocp.json')
@@ -397,6 +397,10 @@ class MPC_controller_lon_lat_acados_nonlinear_terminal:
         start = timeit.default_timer()
         self.solver.set(0, 'lbx', x_current)
         self.solver.set(0, 'ubx', x_current)
+
+        for i in range(self.Np):
+            self.solver.set(i, 'x', np.array([fpath.x[i],fpath.y[i],fpath.yaw[i]]))
+
         status = self.solver.solve()
         if status != 0:
             raise Exception('acados acados_ocp_solver returned status {}. Exiting.'.format(status))
