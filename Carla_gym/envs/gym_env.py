@@ -794,7 +794,7 @@ class CarlagymEnv(gym.Env):
         self.Input, MPC_unsolved, x_m = self.lon_lat_controller_ipopt.calc_input(
 
         # self.Input, MPC_unsolved, x_m = self.lon_lat_controller_acados.calc_input(
-            x_current=[ego_state[0], ego_state[1], ego_state[2]],
+            x_current=[ego_state[0],ego_state[1], ego_state[2]],
             obj_info=obj_info,
             ref=np.array(
                 [self.fpath.x[29], self.fpath.y[29], self.fpath.yaw[29], self.fpath.s[29], self.fpath.d[29]]),
