@@ -76,7 +76,7 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
         self.next_states = np.zeros((self.Nx, self.Np)).copy().T
         self.u0 = np.array([0, 0] * self.Nc).reshape(-1, 2).T
 
-        # self.model_ocp()
+        self.model_ocp()
         self.cons_g()
 
 
@@ -210,11 +210,11 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
 
         # Obstacle avoidance cost function
         for j in range(self.vehicle_nums):
-            i =
-            if obj_Mux[j][4, 0] != 0:  # 'not vehicle_around'
-                for i in range(self.Np):
-                    Obj_cost = self.S / (((X[0, i] - obj_Mux[j][0, i]) ** 2) + ((X[1, i] - obj_Mux[j][1, i]) ** 2))
-                    obj = obj + Obj_cost
+            k = 12 + j * self.Np * 4
+            # if C_R[k+3] != 0:  # 'not vehicle_around'   #all vehicle to cal mot vehicle around
+            for i in range(self.Np):
+                Obj_cost = self.S / (((X[0, i] - ca.if_else(C_R[k+3+i*4] != 0,C_R[k+i*4],1e6)) ** 2) + ((X[1, i] - ca.if_else(C_R[k+3+i*4] != 0,C_R[k+1+i*4],1e6)) ** 2))
+                obj = obj + Obj_cost
 
         # Terminal cost function
         Ref_ter_1 = ca.mtimes([(X[:, -1] - C_R[6:9]).T, self.Q1, X[:, -1] - C_R[6:9]])
@@ -249,10 +249,11 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
             vehicle_ego_center2_y = X[1, i] + self.Length / 4 * np.sin(X[2, i])
 
             for j in range(self.vehicle_nums):
-                vehicle_obs_center1_x = obj_Mux[j][0, i] - self.Length / 4 * np.cos(obj_Mux[j][2, i])
-                vehicle_obs_center1_y = obj_Mux[j][1, i] - self.Length / 4 * np.sin(obj_Mux[j][2, i])
-                vehicle_obs_center2_x = obj_Mux[j][0, i] + self.Length / 4 * np.cos(obj_Mux[j][2, i])
-                vehicle_obs_center2_y = obj_Mux[j][1, i] + self.Length / 4 * np.sin(obj_Mux[j][2, i])
+                k = 12+self.Np*j*4
+                vehicle_obs_center1_x = C_R[k+i*4] - self.Length / 4 * np.cos(C_R[k+2+i*4])
+                vehicle_obs_center1_y = C_R[k+1+i*4] - self.Length / 4 * np.sin(C_R[k+2+i*4])
+                vehicle_obs_center2_x = C_R[k+i*4] + self.Length / 4 * np.cos(C_R[k+2+i*4])
+                vehicle_obs_center2_y = C_R[k+1+i*4] + self.Length / 4 * np.sin(C_R[k+2+i*4])
                 g3.append((vehicle_ego_center1_x - vehicle_obs_center1_x) ** 2 + (
                         vehicle_ego_center1_y - vehicle_obs_center1_y) ** 2)
                 g3.append((vehicle_ego_center1_x - vehicle_obs_center2_x) ** 2 + (
@@ -272,7 +273,7 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
         nlp_prob = {'f': obj, 'x': opt_variables, 'p': C_R, 'g': ca.vertcat(*g1, *g2, *g3)}
 
         # ipopt设置
-        opts_setting = {'ipopt.max_iter': 100, 'ipopt.print_level': 0, 'print_time': 0,
+        opts_setting = {'ipopt.max_iter': 20, 'ipopt.print_level': 0, 'print_time': 0,
                         'ipopt.acceptable_tol': 1e-6, 'ipopt.acceptable_obj_change_tol': 1e-6}
 
         # 最终目标，获得求解器
@@ -281,7 +282,7 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
 
 
     def calc_input(self, x_current, obj_info, ref, ref_left, u_last, csp, fpath, q, ru, rdu):
-        start_time = time.time()
+
         self.solve_obj(obj_info)
         obj_Mux = self.obj_Mux
 
@@ -293,7 +294,7 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
                 for k in index:
                     obs_list.append(obj_Mux[i][k][j])
         # 初始化优化参数
-        C_R = np.concatenate(([q],u_last,x_current,ref[:3],ref_left[:3],obs_list))
+        C_R = np.concatenate(([q,u_last[0],u_last[1]],x_current,ref[:3],ref_left[:3],obs_list))
 
         # 控制约束
         self.lbx = []
@@ -328,6 +329,7 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
 
         # 初始化优化目标变量
         init_control = np.concatenate((self.u0.reshape(-1, 1), self.next_states.reshape(-1, 1)))
+        start_time = time.time()
         res = self.solver(x0=init_control, p=C_R, lbg=self.lbg,
                      lbx=self.lbx, ubg=self.ubg, ubx=self.ubx)
         print('t_cost =', time.time() - start_time)
