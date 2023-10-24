@@ -29,7 +29,7 @@ class Config:
         self.b = 1.50
         self.L = self.a + self.b    # 轴距
         self.Length = 5.000  # vehicle_length
-        self.Width = 2.000   # vehicle_width
+        self.Width = 2.500   # vehicle_width
         self.Height = 1.450  #vehicle_height
         self.M = 1650
         self.Iz = 3234

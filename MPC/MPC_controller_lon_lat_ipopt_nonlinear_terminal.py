@@ -183,7 +183,7 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
         # 相关变量，格式(状态长度， 步长)
         U = ca.SX.sym('U', self.Nu, self.Nc)  # 控制输出
         X = ca.SX.sym('X', self.Nx, self.Np)  # 系统状态
-        C_R = ca.SX.sym('C_R', 1+ self.Nu + self.Nx + self.Nx + self.Nx + self.vehicle_nums*self.Np*5)  # 构建问题的相关参数
+        C_R = ca.SX.sym('C_R', 1+ self.Nu + self.Nx + self.Nx + self.Nx + self.vehicle_nums*self.Np*6)  # 构建问题的相关参数
         # 这里给定当前/初始位置，目标终点(本车道/左车道)位置
 
         # 权重矩阵
@@ -210,11 +210,11 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
 
         # Obstacle avoidance cost function
         for j in range(self.vehicle_nums):
-            k = 12 + j * self.Np * 5
+            k = 12 + j * self.Np * 6
             # if C_R[k+3] != 0:  # 'not vehicle_around'   #all vehicle to cal mot vehicle around
             for i in range(self.Np):
-                Obj_cost = self.S / (((X[0, i] - ca.if_else(C_R[k+3+i*5] != 0,C_R[k+i*5],1e6)) ** 2) +
-                                     ((X[1, i] - ca.if_else(C_R[k+3+i*5] != 0,C_R[k+1+i*5],1e6)) ** 2))
+                Obj_cost = self.S / (((X[0, i] - ca.if_else(C_R[k+3+i*6] != 0,C_R[k+i*6],1e6)) ** 2) +
+                                     ((X[1, i] - ca.if_else(C_R[k+3+i*6] != 0,C_R[k+1+i*6],1e6)) ** 2))
                 obj = obj + Obj_cost
 
         # Terminal cost function
@@ -243,34 +243,16 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
             else:
                 g2.append((U[:, i] - U[:, i - 1]) / self.T)
 
-        # constraint 3: Obstacle avoidance
-        # for i in range(self.Np):
-        #     vehicle_ego_center1_x = X[0, i] - self.Length / 4 * np.cos(X[2, i])
-        #     vehicle_ego_center1_y = X[1, i] - self.Length / 4 * np.sin(X[2, i])
-        #     vehicle_ego_center2_x = X[0, i] + self.Length / 4 * np.cos(X[2, i])
-        #     vehicle_ego_center2_y = X[1, i] + self.Length / 4 * np.sin(X[2, i])
-        #
-        #     for j in range(self.vehicle_nums):
-        #         k = 12+self.Np*j*4
-        #         vehicle_obs_center1_x = C_R[k+i*4] - self.Length / 4 * np.cos(C_R[k+2+i*4])
-        #         vehicle_obs_center1_y = C_R[k+1+i*4] - self.Length / 4 * np.sin(C_R[k+2+i*4])
-        #         vehicle_obs_center2_x = C_R[k+i*4] + self.Length / 4 * np.cos(C_R[k+2+i*4])
-        #         vehicle_obs_center2_y = C_R[k+1+i*4] + self.Length / 4 * np.sin(C_R[k+2+i*4])
-        #         g3.append((vehicle_ego_center1_x - vehicle_obs_center1_x) ** 2 + (
-        #                 vehicle_ego_center1_y - vehicle_obs_center1_y) ** 2)
-        #         g3.append((vehicle_ego_center1_x - vehicle_obs_center2_x) ** 2 + (
-        #                 vehicle_ego_center1_y - vehicle_obs_center2_y) ** 2)
-        #         g3.append((vehicle_ego_center2_x - vehicle_obs_center1_x) ** 2 + (
-        #                 vehicle_ego_center2_y - vehicle_obs_center1_y) ** 2)
-        #         g3.append((vehicle_ego_center2_x - vehicle_obs_center2_x) ** 2 + (
-        #                 vehicle_ego_center2_y - vehicle_obs_center2_y) ** 2)
 
         # constraint 3: Obstacle avoidance
         for i in range(self.Np):
             for j in range(self.vehicle_nums):
-                k = 12 + self.Np * j * 5
-                cons_obs_h = X[1, i] + (X[0, i]-X[0, i-1])*X[2, i] - C_R[k+1+i*5] + C_R[k+3+i*5] * self.Width
-                g3.append(C_R[k+3+i*5] * cons_obs_h + C_R[k+4+i*5])
+                k = 12 + self.Np * j * 6
+                if i==0:
+                    cons_obs_h = X[1, i] - C_R[k + 1 + i * 6] + C_R[k + 4 + i * 6] * self.Width
+                else:
+                    cons_obs_h = X[1, i] + (X[0, i]-X[0, i-1])*X[2, i] - C_R[k+1+i*6] + C_R[k+4+i*6] * self.Width
+                g3.append(C_R[k+4+i*6] * cons_obs_h + C_R[k+5+i*6])
 
         # 定义优化问题
         # 输入变量，这里需要同时将系统状态X也作为优化变量输入，
@@ -289,7 +271,6 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
         self.solver = ca.nlpsol('solver', 'ipopt', nlp_prob, opts_setting)
 
 
-
     def calc_input(self, x_current, obj_info, ref, ref_left, u_last, csp, fpath, q, ru, rdu):
         current_x_list = np.zeros(self.Np)
         current_y_list = np.zeros(self.Np)
@@ -300,21 +281,22 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
             current_phi_list[i] = x_current[2] + u_last[1] * self.T * i
         self.solve_obj(obj_info)
         obj_Mux = self.obj_Mux
-        #  obs_list:  1. 车的数目  2. x, y, phi, l(1) or r(-1),cons or not(0/-1e5) 3.self.Np
+        #  obs_list:  1. 车的数目  2. x, y, phi, id, l(1) or r(-1),cons or not(0/-1e5) 3.self.Np
         obs_list = []
+        index = [0,1,2,4]
         for i in range(self.vehicle_nums):
             for j in range(self.Np):
-                for k in range(3):
+                for k in index:
                     obs_list.append(obj_Mux[i][k][j])
-                obs_list.append(1 if current_y_list[i]<obj_Mux[i][1][j] else -1)
+                obs_list.append(1 if current_y_list[i] < obj_Mux[i][1][j] else -1)
 
-                ego_x_fl = current_x_list[i] - self.Width / 2 * np.sin(current_phi_list[i]) + self.Length / 2 * np.cos(current_phi_list[i])
-                ego_x_fr = current_x_list[i] + self.Width / 2 * np.sin(current_phi_list[i]) + self.Length / 2 * np.cos(current_phi_list[i])
-                ego_x_rl = current_x_list[i] - self.Width / 2 * np.sin(current_phi_list[i]) - self.Length / 2 * np.cos(current_phi_list[i])
-                ego_x_rr = current_x_list[i] + self.Width / 2 * np.sin(current_phi_list[i]) - self.Length / 2 * np.cos(current_phi_list[i])
+                ego_x_fl = current_x_list[j] - self.Width / 2 * np.sin(current_phi_list[j]) + self.Length / 2 * np.cos(current_phi_list[j])
+                ego_x_fr = current_x_list[j] + self.Width / 2 * np.sin(current_phi_list[j]) + self.Length / 2 * np.cos(current_phi_list[j])
+                ego_x_rl = current_x_list[j] - self.Width / 2 * np.sin(current_phi_list[j]) - self.Length / 2 * np.cos(current_phi_list[j])
+                ego_x_rr = current_x_list[j] + self.Width / 2 * np.sin(current_phi_list[j]) - self.Length / 2 * np.cos(current_phi_list[j])
                 ego_f = max(ego_x_fl, ego_x_fr)
                 ego_r = min(ego_x_rl, ego_x_rr)
-                obs_list.append(0 if ego_f > obj_Mux[i][0][j] and ego_r < obj_Mux[i][0][j] + self.Length else -1e5)
+                obs_list.append(0 if ego_f > obj_Mux[i][0][j] and ego_r < (obj_Mux[i][0][j] + self.Length) else -1e5)
 
         # 初始化优化参数
         C_R = np.concatenate(([q,u_last[0],u_last[1]],x_current,ref[:3],ref_left[:3],obs_list))
@@ -336,16 +318,17 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
             self.lbx.append(-np.inf)
             self.lbx.append(y_min)
             self.lbx.append(-np.inf)
-            if obj_info['Ego_preceding'][0] != None:  # if no vehicle_ahead
-                obj_preceding_x = obj_info['Ego_preceding'][2][0]
-                obj_preceding_y = obj_info['Ego_preceding'][2][1]
-                obj_preceding_phi = obj_info['Ego_preceding'][2][4]
-                obj_preceding_speed = obj_info['Ego_preceding'][2][5]
-                obj_preceding_delta_f = obj_info['Ego_preceding'][2][6]
-                obj_preceding_x_ref = obj_preceding_x + obj_preceding_speed * np.cos(obj_preceding_phi) * self.T * i
-                self.ubx.append(obj_preceding_x_ref - self.stop_line)
-            else:
-                self.ubx.append(np.inf)
+            # if obj_info['Ego_preceding'][0] != None:  # if no vehicle_ahead
+            #     obj_preceding_x = obj_info['Ego_preceding'][2][0]
+            #     obj_preceding_y = obj_info['Ego_preceding'][2][1]
+            #     obj_preceding_phi = obj_info['Ego_preceding'][2][4]
+            #     obj_preceding_speed = obj_info['Ego_preceding'][2][5]
+            #     obj_preceding_delta_f = obj_info['Ego_preceding'][2][6]
+            #     obj_preceding_x_ref = obj_preceding_x + obj_preceding_speed * np.cos(obj_preceding_phi) * self.T * i
+            #     self.ubx.append(obj_preceding_x_ref - self.stop_line)
+            # else:
+            #     self.ubx.append(np.inf)
+            self.ubx.append(np.inf)
             self.ubx.append(y_max)
             self.ubx.append(np.inf)
 
