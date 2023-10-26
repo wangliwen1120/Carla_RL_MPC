@@ -1,0 +1,3588 @@
+Determining if compiler supports C++ filesystem failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_fbed2/fast && make  -f CMakeFiles/cmTC_fbed2.dir/build.make CMakeFiles/cmTC_fbed2.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building CXX object CMakeFiles/cmTC_fbed2.dir/cm_cxx_filesystem.cxx.o
+/usr/bin/g++   -std=gnu++1z -o CMakeFiles/cmTC_fbed2.dir/cm_cxx_filesystem.cxx.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Source/Checks/cm_cxx_filesystem.cxx
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Source/Checks/cm_cxx_filesystem.cxx:2:10: fatal error: filesystem: 没有那个文件或目录
+ #include <filesystem>
+          ^~~~~~~~~~~~
+compilation terminated.
+CMakeFiles/cmTC_fbed2.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_fbed2.dir/cm_cxx_filesystem.cxx.o' failed
+make[1]: *** [CMakeFiles/cmTC_fbed2.dir/cm_cxx_filesystem.cxx.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_fbed2/fast' failed
+make: *** [cmTC_fbed2/fast] Error 2
+
+
+
+Determining if the environ exist failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_943cb/fast && make  -f CMakeFiles/cmTC_943cb.dir/build.make CMakeFiles/cmTC_943cb.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_943cb.dir/CheckSymbolExists.c.o
+/usr/bin/gcc   -std=gnu11 -o CMakeFiles/cmTC_943cb.dir/CheckSymbolExists.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c: In function ‘main’:
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c:8:19: error: ‘environ’ undeclared (first use in this function)
+   return ((int*)(&environ))[argc];
+                   ^~~~~~~
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c:8:19: note: each undeclared identifier is reported only once for each function it appears in
+CMakeFiles/cmTC_943cb.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_943cb.dir/CheckSymbolExists.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_943cb.dir/CheckSymbolExists.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_943cb/fast' failed
+make: *** [cmTC_943cb/fast] Error 2
+
+
+File /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <stdlib.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef environ
+  return ((int*)(&environ))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_9efde/fast && make  -f CMakeFiles/cmTC_9efde.dir/build.make CMakeFiles/cmTC_9efde.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_9efde.dir/src.c.o
+/usr/bin/gcc -DCMAKE_HAVE_LIBC_PTHREAD  -std=gnu11 -o CMakeFiles/cmTC_9efde.dir/src.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/src.c
+Linking C executable cmTC_9efde
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Bootstrap.cmk/cmake -E cmake_link_script CMakeFiles/cmTC_9efde.dir/link.txt --verbose=1
+/usr/bin/gcc CMakeFiles/cmTC_9efde.dir/src.c.o -o cmTC_9efde 
+CMakeFiles/cmTC_9efde.dir/src.c.o：在函数‘main’中：
+src.c:(.text+0x3e)：对‘pthread_create’未定义的引用
+src.c:(.text+0x4a)：对‘pthread_detach’未定义的引用
+src.c:(.text+0x56)：对‘pthread_cancel’未定义的引用
+src.c:(.text+0x67)：对‘pthread_join’未定义的引用
+src.c:(.text+0x7b)：对‘pthread_atfork’未定义的引用
+collect2: error: ld returned 1 exit status
+CMakeFiles/cmTC_9efde.dir/build.make:98: recipe for target 'cmTC_9efde' failed
+make[1]: *** [cmTC_9efde] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_9efde/fast' failed
+make: *** [cmTC_9efde/fast] Error 2
+
+
+Source file was:
+#include <pthread.h>
+
+static void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_cancel(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_9cacd/fast && make  -f CMakeFiles/cmTC_9cacd.dir/build.make CMakeFiles/cmTC_9cacd.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_9cacd.dir/CheckFunctionExists.c.o
+/usr/bin/gcc   -DCHECK_FUNCTION_EXISTS=pthread_create -std=gnu11 -o CMakeFiles/cmTC_9cacd.dir/CheckFunctionExists.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Modules/CheckFunctionExists.c
+Linking C executable cmTC_9cacd
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Bootstrap.cmk/cmake -E cmake_link_script CMakeFiles/cmTC_9cacd.dir/link.txt --verbose=1
+/usr/bin/gcc  -DCHECK_FUNCTION_EXISTS=pthread_create CMakeFiles/cmTC_9cacd.dir/CheckFunctionExists.c.o -o cmTC_9cacd  -lpthreads 
+/usr/bin/ld: 找不到 -lpthreads
+collect2: error: ld returned 1 exit status
+CMakeFiles/cmTC_9cacd.dir/build.make:98: recipe for target 'cmTC_9cacd' failed
+make[1]: *** [cmTC_9cacd] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_9cacd/fast' failed
+make: *** [cmTC_9cacd/fast] Error 2
+
+
+
+Checking whether CXX compiler has environ in stdlib.h failed to compile with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Source/kwsys/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_1f07d/fast && make  -f CMakeFiles/cmTC_1f07d.dir/build.make CMakeFiles/cmTC_1f07d.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Source/kwsys/CMakeFiles/CMakeTmp”
+Building CXX object CMakeFiles/cmTC_1f07d.dir/kwsysPlatformTestsCXX.cxx.o
+/usr/bin/g++ -DTEST_KWSYS_CXX_HAS_ENVIRON_IN_STDLIB_H  -std=gnu++1z -o CMakeFiles/cmTC_1f07d.dir/kwsysPlatformTestsCXX.cxx.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Source/kwsys/kwsysPlatformTestsCXX.cxx
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Source/kwsys/kwsysPlatformTestsCXX.cxx: In function ‘int main()’:
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Source/kwsys/kwsysPlatformTestsCXX.cxx:53:13: error: ‘environ’ was not declared in this scope
+   char* e = environ[0];
+             ^~~~~~~
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Source/kwsys/kwsysPlatformTestsCXX.cxx:53:13: note: suggested alternative: ‘union’
+   char* e = environ[0];
+             ^~~~~~~
+             union
+CMakeFiles/cmTC_1f07d.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_1f07d.dir/kwsysPlatformTestsCXX.cxx.o' failed
+make[1]: *** [CMakeFiles/cmTC_1f07d.dir/kwsysPlatformTestsCXX.cxx.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Source/kwsys/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_1f07d/fast' failed
+make: *** [cmTC_1f07d/fast] Error 2
+
+
+
+Checking whether CXX compiler struct stat has st_mtimespec member failed to compile with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Source/kwsys/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_ded3e/fast && make  -f CMakeFiles/cmTC_ded3e.dir/build.make CMakeFiles/cmTC_ded3e.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Source/kwsys/CMakeFiles/CMakeTmp”
+Building CXX object CMakeFiles/cmTC_ded3e.dir/kwsysPlatformTestsCXX.cxx.o
+/usr/bin/g++ -DTEST_KWSYS_CXX_STAT_HAS_ST_MTIMESPEC  -std=gnu++1z -o CMakeFiles/cmTC_ded3e.dir/kwsysPlatformTestsCXX.cxx.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Source/kwsys/kwsysPlatformTestsCXX.cxx
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Source/kwsys/kwsysPlatformTestsCXX.cxx: In function ‘int main()’:
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Source/kwsys/kwsysPlatformTestsCXX.cxx:26:15: error: ‘struct stat’ has no member named ‘st_mtimespec’; did you mean ‘st_mtim’?
+   (void)stat1.st_mtimespec.tv_sec;
+               ^~~~~~~~~~~~
+               st_mtim
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Source/kwsys/kwsysPlatformTestsCXX.cxx:27:15: error: ‘struct stat’ has no member named ‘st_mtimespec’; did you mean ‘st_mtim’?
+   (void)stat1.st_mtimespec.tv_nsec;
+               ^~~~~~~~~~~~
+               st_mtim
+CMakeFiles/cmTC_ded3e.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_ded3e.dir/kwsysPlatformTestsCXX.cxx.o' failed
+make[1]: *** [CMakeFiles/cmTC_ded3e.dir/kwsysPlatformTestsCXX.cxx.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Source/kwsys/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_ded3e/fast' failed
+make: *** [cmTC_ded3e/fast] Error 2
+
+
+
+Determining if the function connect exists in the socket;dl failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_47f6f/fast && make  -f CMakeFiles/cmTC_47f6f.dir/build.make CMakeFiles/cmTC_47f6f.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_47f6f.dir/CheckFunctionExists.c.o
+/usr/bin/gcc   -w -DCHECK_FUNCTION_EXISTS=connect -std=gnu11 -o CMakeFiles/cmTC_47f6f.dir/CheckFunctionExists.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Modules/CheckFunctionExists.c
+Linking C executable cmTC_47f6f
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Bootstrap.cmk/cmake -E cmake_link_script CMakeFiles/cmTC_47f6f.dir/link.txt --verbose=1
+/usr/bin/gcc  -w -DCHECK_FUNCTION_EXISTS=connect CMakeFiles/cmTC_47f6f.dir/CheckFunctionExists.c.o -o cmTC_47f6f  -lsocket -ldl 
+/usr/bin/ld: 找不到 -lsocket
+collect2: error: ld returned 1 exit status
+CMakeFiles/cmTC_47f6f.dir/build.make:98: recipe for target 'cmTC_47f6f' failed
+make[1]: *** [cmTC_47f6f] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_47f6f/fast' failed
+make: *** [cmTC_47f6f/fast] Error 2
+
+
+
+Determining if the function recv exists in the network;dl failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_3b529/fast && make  -f CMakeFiles/cmTC_3b529.dir/build.make CMakeFiles/cmTC_3b529.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_3b529.dir/CheckFunctionExists.c.o
+/usr/bin/gcc   -w -DCHECK_FUNCTION_EXISTS=recv -std=gnu11 -o CMakeFiles/cmTC_3b529.dir/CheckFunctionExists.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Modules/CheckFunctionExists.c
+Linking C executable cmTC_3b529
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Bootstrap.cmk/cmake -E cmake_link_script CMakeFiles/cmTC_3b529.dir/link.txt --verbose=1
+/usr/bin/gcc  -w -DCHECK_FUNCTION_EXISTS=recv CMakeFiles/cmTC_3b529.dir/CheckFunctionExists.c.o -o cmTC_3b529  -lnetwork -ldl 
+/usr/bin/ld: 找不到 -lnetwork
+collect2: error: ld returned 1 exit status
+CMakeFiles/cmTC_3b529.dir/build.make:98: recipe for target 'cmTC_3b529' failed
+make[1]: *** [cmTC_3b529] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_3b529/fast' failed
+make: *** [cmTC_3b529/fast] Error 2
+
+
+
+Determining if the RAND_status exist failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_65ba2/fast && make  -f CMakeFiles/cmTC_65ba2.dir/build.make CMakeFiles/cmTC_65ba2.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_65ba2.dir/CheckSymbolExists.c.o
+/usr/bin/gcc   -w  -std=gnu11 -o CMakeFiles/cmTC_65ba2.dir/CheckSymbolExists.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c: In function ‘main’:
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c:7:19: error: ‘RAND_status’ undeclared (first use in this function)
+   return ((int*)(&RAND_status))[argc];
+                   ^~~~~~~~~~~
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c:7:19: note: each undeclared identifier is reported only once for each function it appears in
+CMakeFiles/cmTC_65ba2.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_65ba2.dir/CheckSymbolExists.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_65ba2.dir/CheckSymbolExists.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_65ba2/fast' failed
+make: *** [cmTC_65ba2/fast] Error 2
+
+
+File /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef RAND_status
+  return ((int*)(&RAND_status))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+Determining if the RAND_screen exist failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_c3f1a/fast && make  -f CMakeFiles/cmTC_c3f1a.dir/build.make CMakeFiles/cmTC_c3f1a.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_c3f1a.dir/CheckSymbolExists.c.o
+/usr/bin/gcc   -w  -std=gnu11 -o CMakeFiles/cmTC_c3f1a.dir/CheckSymbolExists.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c: In function ‘main’:
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c:7:19: error: ‘RAND_screen’ undeclared (first use in this function)
+   return ((int*)(&RAND_screen))[argc];
+                   ^~~~~~~~~~~
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c:7:19: note: each undeclared identifier is reported only once for each function it appears in
+CMakeFiles/cmTC_c3f1a.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_c3f1a.dir/CheckSymbolExists.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_c3f1a.dir/CheckSymbolExists.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_c3f1a/fast' failed
+make: *** [cmTC_c3f1a/fast] Error 2
+
+
+File /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef RAND_screen
+  return ((int*)(&RAND_screen))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+Determining if the RAND_egd exist failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_bb157/fast && make  -f CMakeFiles/cmTC_bb157.dir/build.make CMakeFiles/cmTC_bb157.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_bb157.dir/CheckSymbolExists.c.o
+/usr/bin/gcc   -w  -std=gnu11 -o CMakeFiles/cmTC_bb157.dir/CheckSymbolExists.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c: In function ‘main’:
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c:7:19: error: ‘RAND_egd’ undeclared (first use in this function)
+   return ((int*)(&RAND_egd))[argc];
+                   ^~~~~~~~
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c:7:19: note: each undeclared identifier is reported only once for each function it appears in
+CMakeFiles/cmTC_bb157.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_bb157.dir/CheckSymbolExists.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_bb157.dir/CheckSymbolExists.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_bb157/fast' failed
+make: *** [cmTC_bb157/fast] Error 2
+
+
+File /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef RAND_egd
+  return ((int*)(&RAND_egd))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+Determining if the function dlopen exists in the dl;/usr/lib/x86_64-linux-gnu/libssl.so;/usr/lib/x86_64-linux-gnu/libcrypto.so;cmnghttp2 failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_04896/fast && make  -f CMakeFiles/cmTC_04896.dir/build.make CMakeFiles/cmTC_04896.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_04896.dir/CheckFunctionExists.c.o
+/usr/bin/gcc   -w -DCHECK_FUNCTION_EXISTS=dlopen -std=gnu11 -o CMakeFiles/cmTC_04896.dir/CheckFunctionExists.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Modules/CheckFunctionExists.c
+Linking C executable cmTC_04896
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Bootstrap.cmk/cmake -E cmake_link_script CMakeFiles/cmTC_04896.dir/link.txt --verbose=1
+/usr/bin/gcc  -w -DCHECK_FUNCTION_EXISTS=dlopen CMakeFiles/cmTC_04896.dir/CheckFunctionExists.c.o -o cmTC_04896  -ldl /usr/lib/x86_64-linux-gnu/libssl.so /usr/lib/x86_64-linux-gnu/libcrypto.so -lcmnghttp2 
+/usr/bin/ld: 找不到 -lcmnghttp2
+collect2: error: ld returned 1 exit status
+CMakeFiles/cmTC_04896.dir/build.make:100: recipe for target 'cmTC_04896' failed
+make[1]: *** [cmTC_04896] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_04896/fast' failed
+make: *** [cmTC_04896/fast] Error 2
+
+
+
+Determining if files stdio.h;inttypes.h;sys/filio.h exist failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_32944/fast && make  -f CMakeFiles/cmTC_32944.dir/build.make CMakeFiles/cmTC_32944.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_32944.dir/HAVE_SYS_FILIO_H.c.o
+/usr/bin/gcc   -w  -std=gnu11 -o CMakeFiles/cmTC_32944.dir/HAVE_SYS_FILIO_H.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CheckIncludeFiles/HAVE_SYS_FILIO_H.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CheckIncludeFiles/HAVE_SYS_FILIO_H.c:4:10: fatal error: sys/filio.h: 没有那个文件或目录
+ #include <sys/filio.h>
+          ^~~~~~~~~~~~~
+compilation terminated.
+CMakeFiles/cmTC_32944.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_32944.dir/HAVE_SYS_FILIO_H.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_32944.dir/HAVE_SYS_FILIO_H.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_32944/fast' failed
+make: *** [cmTC_32944/fast] Error 2
+
+
+Source:
+/* */
+#include <stdio.h>
+#include <inttypes.h>
+#include <sys/filio.h>
+
+
+int main(void){return 0;}
+
+Determining if files stdio.h;inttypes.h;sys/ioctl.h;sys/param.h;sys/poll.h;sys/resource.h;sys/select.h;sys/socket.h;sys/sockio.h exist failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_acc53/fast && make  -f CMakeFiles/cmTC_acc53.dir/build.make CMakeFiles/cmTC_acc53.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_acc53.dir/HAVE_SYS_SOCKIO_H.c.o
+/usr/bin/gcc   -w  -std=gnu11 -o CMakeFiles/cmTC_acc53.dir/HAVE_SYS_SOCKIO_H.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CheckIncludeFiles/HAVE_SYS_SOCKIO_H.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CheckIncludeFiles/HAVE_SYS_SOCKIO_H.c:10:10: fatal error: sys/sockio.h: 没有那个文件或目录
+ #include <sys/sockio.h>
+          ^~~~~~~~~~~~~~
+compilation terminated.
+CMakeFiles/cmTC_acc53.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_acc53.dir/HAVE_SYS_SOCKIO_H.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_acc53.dir/HAVE_SYS_SOCKIO_H.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_acc53/fast' failed
+make: *** [cmTC_acc53/fast] Error 2
+
+
+Source:
+/* */
+#include <stdio.h>
+#include <inttypes.h>
+#include <sys/ioctl.h>
+#include <sys/param.h>
+#include <sys/poll.h>
+#include <sys/resource.h>
+#include <sys/select.h>
+#include <sys/socket.h>
+#include <sys/sockio.h>
+
+
+int main(void){return 0;}
+
+Determining if files stdio.h;inttypes.h;sys/ioctl.h;sys/param.h;sys/poll.h;sys/resource.h;sys/select.h;sys/socket.h;sys/stat.h;sys/time.h;sys/types.h;sys/uio.h;sys/un.h;sys/utime.h exist failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_28ae7/fast && make  -f CMakeFiles/cmTC_28ae7.dir/build.make CMakeFiles/cmTC_28ae7.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_28ae7.dir/HAVE_SYS_UTIME_H.c.o
+/usr/bin/gcc   -w  -std=gnu11 -o CMakeFiles/cmTC_28ae7.dir/HAVE_SYS_UTIME_H.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CheckIncludeFiles/HAVE_SYS_UTIME_H.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CheckIncludeFiles/HAVE_SYS_UTIME_H.c:15:10: fatal error: sys/utime.h: 没有那个文件或目录
+ #include <sys/utime.h>
+          ^~~~~~~~~~~~~
+compilation terminated.
+CMakeFiles/cmTC_28ae7.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_28ae7.dir/HAVE_SYS_UTIME_H.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_28ae7.dir/HAVE_SYS_UTIME_H.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_28ae7/fast' failed
+make: *** [cmTC_28ae7/fast] Error 2
+
+
+Source:
+/* */
+#include <stdio.h>
+#include <inttypes.h>
+#include <sys/ioctl.h>
+#include <sys/param.h>
+#include <sys/poll.h>
+#include <sys/resource.h>
+#include <sys/select.h>
+#include <sys/socket.h>
+#include <sys/stat.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <sys/uio.h>
+#include <sys/un.h>
+#include <sys/utime.h>
+
+
+int main(void){return 0;}
+
+Determining if files stdio.h;inttypes.h;sys/ioctl.h;sys/param.h;sys/poll.h;sys/resource.h;sys/select.h;sys/socket.h;sys/stat.h;sys/time.h;sys/types.h;sys/uio.h;sys/un.h;sys/xattr.h;alloca.h;arpa/inet.h;arpa/tftp.h;assert.h;crypto.h exist failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_7eb59/fast && make  -f CMakeFiles/cmTC_7eb59.dir/build.make CMakeFiles/cmTC_7eb59.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_7eb59.dir/HAVE_CRYPTO_H.c.o
+/usr/bin/gcc   -w  -std=gnu11 -o CMakeFiles/cmTC_7eb59.dir/HAVE_CRYPTO_H.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CheckIncludeFiles/HAVE_CRYPTO_H.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CheckIncludeFiles/HAVE_CRYPTO_H.c:20:10: fatal error: crypto.h: 没有那个文件或目录
+ #include <crypto.h>
+          ^~~~~~~~~~
+compilation terminated.
+CMakeFiles/cmTC_7eb59.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_7eb59.dir/HAVE_CRYPTO_H.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_7eb59.dir/HAVE_CRYPTO_H.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_7eb59/fast' failed
+make: *** [cmTC_7eb59/fast] Error 2
+
+
+Source:
+/* */
+#include <stdio.h>
+#include <inttypes.h>
+#include <sys/ioctl.h>
+#include <sys/param.h>
+#include <sys/poll.h>
+#include <sys/resource.h>
+#include <sys/select.h>
+#include <sys/socket.h>
+#include <sys/stat.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <sys/uio.h>
+#include <sys/un.h>
+#include <sys/xattr.h>
+#include <alloca.h>
+#include <arpa/inet.h>
+#include <arpa/tftp.h>
+#include <assert.h>
+#include <crypto.h>
+
+
+int main(void){return 0;}
+
+Determining if files stdio.h;inttypes.h;sys/ioctl.h;sys/param.h;sys/poll.h;sys/resource.h;sys/select.h;sys/socket.h;sys/stat.h;sys/time.h;sys/types.h;sys/uio.h;sys/un.h;sys/xattr.h;alloca.h;arpa/inet.h;arpa/tftp.h;assert.h;err.h;errno.h;fcntl.h;idn2.h exist failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_19c01/fast && make  -f CMakeFiles/cmTC_19c01.dir/build.make CMakeFiles/cmTC_19c01.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_19c01.dir/HAVE_IDN2_H.c.o
+/usr/bin/gcc   -w  -std=gnu11 -o CMakeFiles/cmTC_19c01.dir/HAVE_IDN2_H.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CheckIncludeFiles/HAVE_IDN2_H.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CheckIncludeFiles/HAVE_IDN2_H.c:23:10: fatal error: idn2.h: 没有那个文件或目录
+ #include <idn2.h>
+          ^~~~~~~~
+compilation terminated.
+CMakeFiles/cmTC_19c01.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_19c01.dir/HAVE_IDN2_H.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_19c01.dir/HAVE_IDN2_H.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_19c01/fast' failed
+make: *** [cmTC_19c01/fast] Error 2
+
+
+Source:
+/* */
+#include <stdio.h>
+#include <inttypes.h>
+#include <sys/ioctl.h>
+#include <sys/param.h>
+#include <sys/poll.h>
+#include <sys/resource.h>
+#include <sys/select.h>
+#include <sys/socket.h>
+#include <sys/stat.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <sys/uio.h>
+#include <sys/un.h>
+#include <sys/xattr.h>
+#include <alloca.h>
+#include <arpa/inet.h>
+#include <arpa/tftp.h>
+#include <assert.h>
+#include <err.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <idn2.h>
+
+
+int main(void){return 0;}
+
+Determining if files stdio.h;inttypes.h;sys/ioctl.h;sys/param.h;sys/poll.h;sys/resource.h;sys/select.h;sys/socket.h;sys/stat.h;sys/time.h;sys/types.h;sys/uio.h;sys/un.h;sys/xattr.h;alloca.h;arpa/inet.h;arpa/tftp.h;assert.h;err.h;errno.h;fcntl.h;ifaddrs.h;io.h exist failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_5821b/fast && make  -f CMakeFiles/cmTC_5821b.dir/build.make CMakeFiles/cmTC_5821b.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_5821b.dir/HAVE_IO_H.c.o
+/usr/bin/gcc   -w  -std=gnu11 -o CMakeFiles/cmTC_5821b.dir/HAVE_IO_H.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CheckIncludeFiles/HAVE_IO_H.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CheckIncludeFiles/HAVE_IO_H.c:24:10: fatal error: io.h: 没有那个文件或目录
+ #include <io.h>
+          ^~~~~~
+compilation terminated.
+CMakeFiles/cmTC_5821b.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_5821b.dir/HAVE_IO_H.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_5821b.dir/HAVE_IO_H.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_5821b/fast' failed
+make: *** [cmTC_5821b/fast] Error 2
+
+
+Source:
+/* */
+#include <stdio.h>
+#include <inttypes.h>
+#include <sys/ioctl.h>
+#include <sys/param.h>
+#include <sys/poll.h>
+#include <sys/resource.h>
+#include <sys/select.h>
+#include <sys/socket.h>
+#include <sys/stat.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <sys/uio.h>
+#include <sys/un.h>
+#include <sys/xattr.h>
+#include <alloca.h>
+#include <arpa/inet.h>
+#include <arpa/tftp.h>
+#include <assert.h>
+#include <err.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <ifaddrs.h>
+#include <io.h>
+
+
+int main(void){return 0;}
+
+Determining if files stdio.h;inttypes.h;sys/ioctl.h;sys/param.h;sys/poll.h;sys/resource.h;sys/select.h;sys/socket.h;sys/stat.h;sys/time.h;sys/types.h;sys/uio.h;sys/un.h;sys/xattr.h;alloca.h;arpa/inet.h;arpa/tftp.h;assert.h;err.h;errno.h;fcntl.h;ifaddrs.h;krb.h exist failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_db927/fast && make  -f CMakeFiles/cmTC_db927.dir/build.make CMakeFiles/cmTC_db927.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_db927.dir/HAVE_KRB_H.c.o
+/usr/bin/gcc   -w  -std=gnu11 -o CMakeFiles/cmTC_db927.dir/HAVE_KRB_H.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CheckIncludeFiles/HAVE_KRB_H.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CheckIncludeFiles/HAVE_KRB_H.c:24:10: fatal error: krb.h: 没有那个文件或目录
+ #include <krb.h>
+          ^~~~~~~
+compilation terminated.
+CMakeFiles/cmTC_db927.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_db927.dir/HAVE_KRB_H.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_db927.dir/HAVE_KRB_H.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_db927/fast' failed
+make: *** [cmTC_db927/fast] Error 2
+
+
+Source:
+/* */
+#include <stdio.h>
+#include <inttypes.h>
+#include <sys/ioctl.h>
+#include <sys/param.h>
+#include <sys/poll.h>
+#include <sys/resource.h>
+#include <sys/select.h>
+#include <sys/socket.h>
+#include <sys/stat.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <sys/uio.h>
+#include <sys/un.h>
+#include <sys/xattr.h>
+#include <alloca.h>
+#include <arpa/inet.h>
+#include <arpa/tftp.h>
+#include <assert.h>
+#include <err.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <ifaddrs.h>
+#include <krb.h>
+
+
+int main(void){return 0;}
+
+Determining if files stdio.h;inttypes.h;sys/ioctl.h;sys/param.h;sys/poll.h;sys/resource.h;sys/select.h;sys/socket.h;sys/stat.h;sys/time.h;sys/types.h;sys/uio.h;sys/un.h;sys/xattr.h;alloca.h;arpa/inet.h;arpa/tftp.h;assert.h;err.h;errno.h;fcntl.h;ifaddrs.h;libgen.h;locale.h;net/if.h;netdb.h;netinet/in.h;netinet/tcp.h;pem.h exist failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_29ce9/fast && make  -f CMakeFiles/cmTC_29ce9.dir/build.make CMakeFiles/cmTC_29ce9.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_29ce9.dir/HAVE_PEM_H.c.o
+/usr/bin/gcc   -w  -std=gnu11 -o CMakeFiles/cmTC_29ce9.dir/HAVE_PEM_H.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CheckIncludeFiles/HAVE_PEM_H.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CheckIncludeFiles/HAVE_PEM_H.c:30:10: fatal error: pem.h: 没有那个文件或目录
+ #include <pem.h>
+          ^~~~~~~
+compilation terminated.
+CMakeFiles/cmTC_29ce9.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_29ce9.dir/HAVE_PEM_H.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_29ce9.dir/HAVE_PEM_H.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_29ce9/fast' failed
+make: *** [cmTC_29ce9/fast] Error 2
+
+
+Source:
+/* */
+#include <stdio.h>
+#include <inttypes.h>
+#include <sys/ioctl.h>
+#include <sys/param.h>
+#include <sys/poll.h>
+#include <sys/resource.h>
+#include <sys/select.h>
+#include <sys/socket.h>
+#include <sys/stat.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <sys/uio.h>
+#include <sys/un.h>
+#include <sys/xattr.h>
+#include <alloca.h>
+#include <arpa/inet.h>
+#include <arpa/tftp.h>
+#include <assert.h>
+#include <err.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <ifaddrs.h>
+#include <libgen.h>
+#include <locale.h>
+#include <net/if.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+#include <pem.h>
+
+
+int main(void){return 0;}
+
+Determining if files stdio.h;inttypes.h;sys/ioctl.h;sys/param.h;sys/poll.h;sys/resource.h;sys/select.h;sys/socket.h;sys/stat.h;sys/time.h;sys/types.h;sys/uio.h;sys/un.h;sys/xattr.h;alloca.h;arpa/inet.h;arpa/tftp.h;assert.h;err.h;errno.h;fcntl.h;ifaddrs.h;libgen.h;locale.h;net/if.h;netdb.h;netinet/in.h;netinet/tcp.h;poll.h;pwd.h;rsa.h exist failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_47ade/fast && make  -f CMakeFiles/cmTC_47ade.dir/build.make CMakeFiles/cmTC_47ade.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_47ade.dir/HAVE_RSA_H.c.o
+/usr/bin/gcc   -w  -std=gnu11 -o CMakeFiles/cmTC_47ade.dir/HAVE_RSA_H.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CheckIncludeFiles/HAVE_RSA_H.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CheckIncludeFiles/HAVE_RSA_H.c:32:10: fatal error: rsa.h: 没有那个文件或目录
+ #include <rsa.h>
+          ^~~~~~~
+compilation terminated.
+CMakeFiles/cmTC_47ade.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_47ade.dir/HAVE_RSA_H.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_47ade.dir/HAVE_RSA_H.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_47ade/fast' failed
+make: *** [cmTC_47ade/fast] Error 2
+
+
+Source:
+/* */
+#include <stdio.h>
+#include <inttypes.h>
+#include <sys/ioctl.h>
+#include <sys/param.h>
+#include <sys/poll.h>
+#include <sys/resource.h>
+#include <sys/select.h>
+#include <sys/socket.h>
+#include <sys/stat.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <sys/uio.h>
+#include <sys/un.h>
+#include <sys/xattr.h>
+#include <alloca.h>
+#include <arpa/inet.h>
+#include <arpa/tftp.h>
+#include <assert.h>
+#include <err.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <ifaddrs.h>
+#include <libgen.h>
+#include <locale.h>
+#include <net/if.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+#include <poll.h>
+#include <pwd.h>
+#include <rsa.h>
+
+
+int main(void){return 0;}
+
+Determining if files stdio.h;inttypes.h;sys/ioctl.h;sys/param.h;sys/poll.h;sys/resource.h;sys/select.h;sys/socket.h;sys/stat.h;sys/time.h;sys/types.h;sys/uio.h;sys/un.h;sys/xattr.h;alloca.h;arpa/inet.h;arpa/tftp.h;assert.h;err.h;errno.h;fcntl.h;ifaddrs.h;libgen.h;locale.h;net/if.h;netdb.h;netinet/in.h;netinet/tcp.h;poll.h;pwd.h;setjmp.h;sgtty.h;signal.h;ssl.h exist failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_d7883/fast && make  -f CMakeFiles/cmTC_d7883.dir/build.make CMakeFiles/cmTC_d7883.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_d7883.dir/HAVE_SSL_H.c.o
+/usr/bin/gcc   -w  -std=gnu11 -o CMakeFiles/cmTC_d7883.dir/HAVE_SSL_H.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CheckIncludeFiles/HAVE_SSL_H.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CheckIncludeFiles/HAVE_SSL_H.c:35:10: fatal error: ssl.h: 没有那个文件或目录
+ #include <ssl.h>
+          ^~~~~~~
+compilation terminated.
+CMakeFiles/cmTC_d7883.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_d7883.dir/HAVE_SSL_H.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_d7883.dir/HAVE_SSL_H.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_d7883/fast' failed
+make: *** [cmTC_d7883/fast] Error 2
+
+
+Source:
+/* */
+#include <stdio.h>
+#include <inttypes.h>
+#include <sys/ioctl.h>
+#include <sys/param.h>
+#include <sys/poll.h>
+#include <sys/resource.h>
+#include <sys/select.h>
+#include <sys/socket.h>
+#include <sys/stat.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <sys/uio.h>
+#include <sys/un.h>
+#include <sys/xattr.h>
+#include <alloca.h>
+#include <arpa/inet.h>
+#include <arpa/tftp.h>
+#include <assert.h>
+#include <err.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <ifaddrs.h>
+#include <libgen.h>
+#include <locale.h>
+#include <net/if.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+#include <poll.h>
+#include <pwd.h>
+#include <setjmp.h>
+#include <sgtty.h>
+#include <signal.h>
+#include <ssl.h>
+
+
+int main(void){return 0;}
+
+Determining if files stdio.h;inttypes.h;sys/ioctl.h;sys/param.h;sys/poll.h;sys/resource.h;sys/select.h;sys/socket.h;sys/stat.h;sys/time.h;sys/types.h;sys/uio.h;sys/un.h;sys/xattr.h;alloca.h;arpa/inet.h;arpa/tftp.h;assert.h;err.h;errno.h;fcntl.h;ifaddrs.h;libgen.h;locale.h;net/if.h;netdb.h;netinet/in.h;netinet/tcp.h;poll.h;pwd.h;setjmp.h;sgtty.h;signal.h;stdbool.h;stdint.h;stdio.h;stdlib.h;string.h;strings.h;stropts.h;termio.h;termios.h;time.h;unistd.h;utime.h;x509.h exist failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_1a584/fast && make  -f CMakeFiles/cmTC_1a584.dir/build.make CMakeFiles/cmTC_1a584.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_1a584.dir/HAVE_X509_H.c.o
+/usr/bin/gcc   -w  -std=gnu11 -o CMakeFiles/cmTC_1a584.dir/HAVE_X509_H.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CheckIncludeFiles/HAVE_X509_H.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CheckIncludeFiles/HAVE_X509_H.c:47:10: fatal error: x509.h: 没有那个文件或目录
+ #include <x509.h>
+          ^~~~~~~~
+compilation terminated.
+CMakeFiles/cmTC_1a584.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_1a584.dir/HAVE_X509_H.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_1a584.dir/HAVE_X509_H.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_1a584/fast' failed
+make: *** [cmTC_1a584/fast] Error 2
+
+
+Source:
+/* */
+#include <stdio.h>
+#include <inttypes.h>
+#include <sys/ioctl.h>
+#include <sys/param.h>
+#include <sys/poll.h>
+#include <sys/resource.h>
+#include <sys/select.h>
+#include <sys/socket.h>
+#include <sys/stat.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <sys/uio.h>
+#include <sys/un.h>
+#include <sys/xattr.h>
+#include <alloca.h>
+#include <arpa/inet.h>
+#include <arpa/tftp.h>
+#include <assert.h>
+#include <err.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <ifaddrs.h>
+#include <libgen.h>
+#include <locale.h>
+#include <net/if.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+#include <poll.h>
+#include <pwd.h>
+#include <setjmp.h>
+#include <sgtty.h>
+#include <signal.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <strings.h>
+#include <stropts.h>
+#include <termio.h>
+#include <termios.h>
+#include <time.h>
+#include <unistd.h>
+#include <utime.h>
+#include <x509.h>
+
+
+int main(void){return 0;}
+
+Determining if files stdio.h;inttypes.h;sys/ioctl.h;sys/param.h;sys/poll.h;sys/resource.h;sys/select.h;sys/socket.h;sys/stat.h;sys/time.h;sys/types.h;sys/uio.h;sys/un.h;sys/xattr.h;alloca.h;arpa/inet.h;arpa/tftp.h;assert.h;err.h;errno.h;fcntl.h;ifaddrs.h;libgen.h;locale.h;net/if.h;netdb.h;netinet/in.h;netinet/tcp.h;poll.h;pwd.h;setjmp.h;sgtty.h;signal.h;stdbool.h;stdint.h;stdio.h;stdlib.h;string.h;strings.h;stropts.h;termio.h;termios.h;time.h;unistd.h;utime.h;process.h exist failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_81291/fast && make  -f CMakeFiles/cmTC_81291.dir/build.make CMakeFiles/cmTC_81291.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_81291.dir/HAVE_PROCESS_H.c.o
+/usr/bin/gcc   -w  -std=gnu11 -o CMakeFiles/cmTC_81291.dir/HAVE_PROCESS_H.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CheckIncludeFiles/HAVE_PROCESS_H.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CheckIncludeFiles/HAVE_PROCESS_H.c:47:10: fatal error: process.h: 没有那个文件或目录
+ #include <process.h>
+          ^~~~~~~~~~~
+compilation terminated.
+CMakeFiles/cmTC_81291.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_81291.dir/HAVE_PROCESS_H.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_81291.dir/HAVE_PROCESS_H.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_81291/fast' failed
+make: *** [cmTC_81291/fast] Error 2
+
+
+Source:
+/* */
+#include <stdio.h>
+#include <inttypes.h>
+#include <sys/ioctl.h>
+#include <sys/param.h>
+#include <sys/poll.h>
+#include <sys/resource.h>
+#include <sys/select.h>
+#include <sys/socket.h>
+#include <sys/stat.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <sys/uio.h>
+#include <sys/un.h>
+#include <sys/xattr.h>
+#include <alloca.h>
+#include <arpa/inet.h>
+#include <arpa/tftp.h>
+#include <assert.h>
+#include <err.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <ifaddrs.h>
+#include <libgen.h>
+#include <locale.h>
+#include <net/if.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+#include <poll.h>
+#include <pwd.h>
+#include <setjmp.h>
+#include <sgtty.h>
+#include <signal.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <strings.h>
+#include <stropts.h>
+#include <termio.h>
+#include <termios.h>
+#include <time.h>
+#include <unistd.h>
+#include <utime.h>
+#include <process.h>
+
+
+int main(void){return 0;}
+
+Determining if files stdio.h;inttypes.h;sys/ioctl.h;sys/param.h;sys/poll.h;sys/resource.h;sys/select.h;sys/socket.h;sys/stat.h;sys/time.h;sys/types.h;sys/uio.h;sys/un.h;sys/xattr.h;alloca.h;arpa/inet.h;arpa/tftp.h;assert.h;err.h;errno.h;fcntl.h;ifaddrs.h;libgen.h;locale.h;net/if.h;netdb.h;netinet/in.h;netinet/tcp.h;poll.h;pwd.h;setjmp.h;sgtty.h;signal.h;stdbool.h;stdint.h;stdio.h;stdlib.h;string.h;strings.h;stropts.h;termio.h;termios.h;time.h;unistd.h;utime.h;stddef.h;dlfcn.h;malloc.h;memory.h;netinet/if_ether.h;stdint.h;sockio.h exist failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_e363f/fast && make  -f CMakeFiles/cmTC_e363f.dir/build.make CMakeFiles/cmTC_e363f.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_e363f.dir/HAVE_SOCKIO_H.c.o
+/usr/bin/gcc   -w  -std=gnu11 -o CMakeFiles/cmTC_e363f.dir/HAVE_SOCKIO_H.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CheckIncludeFiles/HAVE_SOCKIO_H.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CheckIncludeFiles/HAVE_SOCKIO_H.c:53:10: fatal error: sockio.h: 没有那个文件或目录
+ #include <sockio.h>
+          ^~~~~~~~~~
+compilation terminated.
+CMakeFiles/cmTC_e363f.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_e363f.dir/HAVE_SOCKIO_H.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_e363f.dir/HAVE_SOCKIO_H.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_e363f/fast' failed
+make: *** [cmTC_e363f/fast] Error 2
+
+
+Source:
+/* */
+#include <stdio.h>
+#include <inttypes.h>
+#include <sys/ioctl.h>
+#include <sys/param.h>
+#include <sys/poll.h>
+#include <sys/resource.h>
+#include <sys/select.h>
+#include <sys/socket.h>
+#include <sys/stat.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <sys/uio.h>
+#include <sys/un.h>
+#include <sys/xattr.h>
+#include <alloca.h>
+#include <arpa/inet.h>
+#include <arpa/tftp.h>
+#include <assert.h>
+#include <err.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <ifaddrs.h>
+#include <libgen.h>
+#include <locale.h>
+#include <net/if.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+#include <poll.h>
+#include <pwd.h>
+#include <setjmp.h>
+#include <sgtty.h>
+#include <signal.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <strings.h>
+#include <stropts.h>
+#include <termio.h>
+#include <termios.h>
+#include <time.h>
+#include <unistd.h>
+#include <utime.h>
+#include <stddef.h>
+#include <dlfcn.h>
+#include <malloc.h>
+#include <memory.h>
+#include <netinet/if_ether.h>
+#include <stdint.h>
+#include <sockio.h>
+
+
+int main(void){return 0;}
+
+Determining if the stricmp exist failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_f433d/fast && make  -f CMakeFiles/cmTC_f433d.dir/build.make CMakeFiles/cmTC_f433d.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_f433d.dir/CheckSymbolExists.c.o
+/usr/bin/gcc   -w  -std=gnu11 -o CMakeFiles/cmTC_f433d.dir/CheckSymbolExists.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c: In function ‘main’:
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c:59:19: error: ‘stricmp’ undeclared (first use in this function); did you mean ‘strncmp’?
+   return ((int*)(&stricmp))[argc];
+                   ^~~~~~~
+                   strncmp
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c:59:19: note: each undeclared identifier is reported only once for each function it appears in
+CMakeFiles/cmTC_f433d.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_f433d.dir/CheckSymbolExists.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_f433d.dir/CheckSymbolExists.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_f433d/fast' failed
+make: *** [cmTC_f433d/fast] Error 2
+
+
+File /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <stdio.h>
+#include <inttypes.h>
+#include <sys/ioctl.h>
+#include <sys/param.h>
+#include <sys/poll.h>
+#include <sys/resource.h>
+#include <sys/select.h>
+#include <sys/socket.h>
+#include <sys/stat.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <sys/uio.h>
+#include <sys/un.h>
+#include <sys/xattr.h>
+#include <alloca.h>
+#include <arpa/inet.h>
+#include <arpa/tftp.h>
+#include <assert.h>
+#include <err.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <ifaddrs.h>
+#include <libgen.h>
+#include <locale.h>
+#include <net/if.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+#include <poll.h>
+#include <pwd.h>
+#include <setjmp.h>
+#include <sgtty.h>
+#include <signal.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <strings.h>
+#include <stropts.h>
+#include <termio.h>
+#include <termios.h>
+#include <time.h>
+#include <unistd.h>
+#include <utime.h>
+#include <stddef.h>
+#include <dlfcn.h>
+#include <malloc.h>
+#include <memory.h>
+#include <netinet/if_ether.h>
+#include <stdint.h>
+#include <sys/utsname.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef stricmp
+  return ((int*)(&stricmp))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+Determining if the strcmpi exist failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_3f7f8/fast && make  -f CMakeFiles/cmTC_3f7f8.dir/build.make CMakeFiles/cmTC_3f7f8.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_3f7f8.dir/CheckSymbolExists.c.o
+/usr/bin/gcc   -w  -std=gnu11 -o CMakeFiles/cmTC_3f7f8.dir/CheckSymbolExists.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c: In function ‘main’:
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c:59:19: error: ‘strcmpi’ undeclared (first use in this function); did you mean ‘strcmp’?
+   return ((int*)(&strcmpi))[argc];
+                   ^~~~~~~
+                   strcmp
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c:59:19: note: each undeclared identifier is reported only once for each function it appears in
+CMakeFiles/cmTC_3f7f8.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_3f7f8.dir/CheckSymbolExists.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_3f7f8.dir/CheckSymbolExists.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_3f7f8/fast' failed
+make: *** [cmTC_3f7f8/fast] Error 2
+
+
+File /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <stdio.h>
+#include <inttypes.h>
+#include <sys/ioctl.h>
+#include <sys/param.h>
+#include <sys/poll.h>
+#include <sys/resource.h>
+#include <sys/select.h>
+#include <sys/socket.h>
+#include <sys/stat.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <sys/uio.h>
+#include <sys/un.h>
+#include <sys/xattr.h>
+#include <alloca.h>
+#include <arpa/inet.h>
+#include <arpa/tftp.h>
+#include <assert.h>
+#include <err.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <ifaddrs.h>
+#include <libgen.h>
+#include <locale.h>
+#include <net/if.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+#include <poll.h>
+#include <pwd.h>
+#include <setjmp.h>
+#include <sgtty.h>
+#include <signal.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <strings.h>
+#include <stropts.h>
+#include <termio.h>
+#include <termios.h>
+#include <time.h>
+#include <unistd.h>
+#include <utime.h>
+#include <stddef.h>
+#include <dlfcn.h>
+#include <malloc.h>
+#include <memory.h>
+#include <netinet/if_ether.h>
+#include <stdint.h>
+#include <sys/utsname.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef strcmpi
+  return ((int*)(&strcmpi))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+Determining if the strncmpi exist failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_34a8e/fast && make  -f CMakeFiles/cmTC_34a8e.dir/build.make CMakeFiles/cmTC_34a8e.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_34a8e.dir/CheckSymbolExists.c.o
+/usr/bin/gcc   -w  -std=gnu11 -o CMakeFiles/cmTC_34a8e.dir/CheckSymbolExists.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c: In function ‘main’:
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c:59:19: error: ‘strncmpi’ undeclared (first use in this function); did you mean ‘strncmp’?
+   return ((int*)(&strncmpi))[argc];
+                   ^~~~~~~~
+                   strncmp
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c:59:19: note: each undeclared identifier is reported only once for each function it appears in
+CMakeFiles/cmTC_34a8e.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_34a8e.dir/CheckSymbolExists.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_34a8e.dir/CheckSymbolExists.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_34a8e/fast' failed
+make: *** [cmTC_34a8e/fast] Error 2
+
+
+File /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <stdio.h>
+#include <inttypes.h>
+#include <sys/ioctl.h>
+#include <sys/param.h>
+#include <sys/poll.h>
+#include <sys/resource.h>
+#include <sys/select.h>
+#include <sys/socket.h>
+#include <sys/stat.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <sys/uio.h>
+#include <sys/un.h>
+#include <sys/xattr.h>
+#include <alloca.h>
+#include <arpa/inet.h>
+#include <arpa/tftp.h>
+#include <assert.h>
+#include <err.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <ifaddrs.h>
+#include <libgen.h>
+#include <locale.h>
+#include <net/if.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+#include <poll.h>
+#include <pwd.h>
+#include <setjmp.h>
+#include <sgtty.h>
+#include <signal.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <strings.h>
+#include <stropts.h>
+#include <termio.h>
+#include <termios.h>
+#include <time.h>
+#include <unistd.h>
+#include <utime.h>
+#include <stddef.h>
+#include <dlfcn.h>
+#include <malloc.h>
+#include <memory.h>
+#include <netinet/if_ether.h>
+#include <stdint.h>
+#include <sys/utsname.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef strncmpi
+  return ((int*)(&strncmpi))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+Determining if the inet_ntoa_r exist failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_79d8e/fast && make  -f CMakeFiles/cmTC_79d8e.dir/build.make CMakeFiles/cmTC_79d8e.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_79d8e.dir/CheckSymbolExists.c.o
+/usr/bin/gcc   -w  -std=gnu11 -o CMakeFiles/cmTC_79d8e.dir/CheckSymbolExists.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c: In function ‘main’:
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c:59:19: error: ‘inet_ntoa_r’ undeclared (first use in this function); did you mean ‘inet_ntoa’?
+   return ((int*)(&inet_ntoa_r))[argc];
+                   ^~~~~~~~~~~
+                   inet_ntoa
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c:59:19: note: each undeclared identifier is reported only once for each function it appears in
+CMakeFiles/cmTC_79d8e.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_79d8e.dir/CheckSymbolExists.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_79d8e.dir/CheckSymbolExists.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_79d8e/fast' failed
+make: *** [cmTC_79d8e/fast] Error 2
+
+
+File /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <stdio.h>
+#include <inttypes.h>
+#include <sys/ioctl.h>
+#include <sys/param.h>
+#include <sys/poll.h>
+#include <sys/resource.h>
+#include <sys/select.h>
+#include <sys/socket.h>
+#include <sys/stat.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <sys/uio.h>
+#include <sys/un.h>
+#include <sys/xattr.h>
+#include <alloca.h>
+#include <arpa/inet.h>
+#include <arpa/tftp.h>
+#include <assert.h>
+#include <err.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <ifaddrs.h>
+#include <libgen.h>
+#include <locale.h>
+#include <net/if.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+#include <poll.h>
+#include <pwd.h>
+#include <setjmp.h>
+#include <sgtty.h>
+#include <signal.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <strings.h>
+#include <stropts.h>
+#include <termio.h>
+#include <termios.h>
+#include <time.h>
+#include <unistd.h>
+#include <utime.h>
+#include <stddef.h>
+#include <dlfcn.h>
+#include <malloc.h>
+#include <memory.h>
+#include <netinet/if_ether.h>
+#include <stdint.h>
+#include <sys/utsname.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef inet_ntoa_r
+  return ((int*)(&inet_ntoa_r))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+Determining if the closesocket exist failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_2a9cb/fast && make  -f CMakeFiles/cmTC_2a9cb.dir/build.make CMakeFiles/cmTC_2a9cb.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_2a9cb.dir/CheckSymbolExists.c.o
+/usr/bin/gcc   -w  -std=gnu11 -o CMakeFiles/cmTC_2a9cb.dir/CheckSymbolExists.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c: In function ‘main’:
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c:59:19: error: ‘closesocket’ undeclared (first use in this function); did you mean ‘socket’?
+   return ((int*)(&closesocket))[argc];
+                   ^~~~~~~~~~~
+                   socket
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c:59:19: note: each undeclared identifier is reported only once for each function it appears in
+CMakeFiles/cmTC_2a9cb.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_2a9cb.dir/CheckSymbolExists.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_2a9cb.dir/CheckSymbolExists.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_2a9cb/fast' failed
+make: *** [cmTC_2a9cb/fast] Error 2
+
+
+File /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <stdio.h>
+#include <inttypes.h>
+#include <sys/ioctl.h>
+#include <sys/param.h>
+#include <sys/poll.h>
+#include <sys/resource.h>
+#include <sys/select.h>
+#include <sys/socket.h>
+#include <sys/stat.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <sys/uio.h>
+#include <sys/un.h>
+#include <sys/xattr.h>
+#include <alloca.h>
+#include <arpa/inet.h>
+#include <arpa/tftp.h>
+#include <assert.h>
+#include <err.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <ifaddrs.h>
+#include <libgen.h>
+#include <locale.h>
+#include <net/if.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+#include <poll.h>
+#include <pwd.h>
+#include <setjmp.h>
+#include <sgtty.h>
+#include <signal.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <strings.h>
+#include <stropts.h>
+#include <termio.h>
+#include <termios.h>
+#include <time.h>
+#include <unistd.h>
+#include <utime.h>
+#include <stddef.h>
+#include <dlfcn.h>
+#include <malloc.h>
+#include <memory.h>
+#include <netinet/if_ether.h>
+#include <stdint.h>
+#include <sys/utsname.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef closesocket
+  return ((int*)(&closesocket))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+Determining if the getpass_r exist failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_4a905/fast && make  -f CMakeFiles/cmTC_4a905.dir/build.make CMakeFiles/cmTC_4a905.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_4a905.dir/CheckSymbolExists.c.o
+/usr/bin/gcc   -w  -std=gnu11 -o CMakeFiles/cmTC_4a905.dir/CheckSymbolExists.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c: In function ‘main’:
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c:59:19: error: ‘getpass_r’ undeclared (first use in this function); did you mean ‘getpass’?
+   return ((int*)(&getpass_r))[argc];
+                   ^~~~~~~~~
+                   getpass
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c:59:19: note: each undeclared identifier is reported only once for each function it appears in
+CMakeFiles/cmTC_4a905.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_4a905.dir/CheckSymbolExists.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_4a905.dir/CheckSymbolExists.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_4a905/fast' failed
+make: *** [cmTC_4a905/fast] Error 2
+
+
+File /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <stdio.h>
+#include <inttypes.h>
+#include <sys/ioctl.h>
+#include <sys/param.h>
+#include <sys/poll.h>
+#include <sys/resource.h>
+#include <sys/select.h>
+#include <sys/socket.h>
+#include <sys/stat.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <sys/uio.h>
+#include <sys/un.h>
+#include <sys/xattr.h>
+#include <alloca.h>
+#include <arpa/inet.h>
+#include <arpa/tftp.h>
+#include <assert.h>
+#include <err.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <ifaddrs.h>
+#include <libgen.h>
+#include <locale.h>
+#include <net/if.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+#include <poll.h>
+#include <pwd.h>
+#include <setjmp.h>
+#include <sgtty.h>
+#include <signal.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <strings.h>
+#include <stropts.h>
+#include <termio.h>
+#include <termios.h>
+#include <time.h>
+#include <unistd.h>
+#include <utime.h>
+#include <stddef.h>
+#include <dlfcn.h>
+#include <malloc.h>
+#include <memory.h>
+#include <netinet/if_ether.h>
+#include <stdint.h>
+#include <sys/utsname.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef getpass_r
+  return ((int*)(&getpass_r))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+Determining if the strlcat exist failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_38605/fast && make  -f CMakeFiles/cmTC_38605.dir/build.make CMakeFiles/cmTC_38605.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_38605.dir/CheckSymbolExists.c.o
+/usr/bin/gcc   -w  -std=gnu11 -o CMakeFiles/cmTC_38605.dir/CheckSymbolExists.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c: In function ‘main’:
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c:59:19: error: ‘strlcat’ undeclared (first use in this function); did you mean ‘strncat’?
+   return ((int*)(&strlcat))[argc];
+                   ^~~~~~~
+                   strncat
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c:59:19: note: each undeclared identifier is reported only once for each function it appears in
+CMakeFiles/cmTC_38605.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_38605.dir/CheckSymbolExists.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_38605.dir/CheckSymbolExists.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_38605/fast' failed
+make: *** [cmTC_38605/fast] Error 2
+
+
+File /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <stdio.h>
+#include <inttypes.h>
+#include <sys/ioctl.h>
+#include <sys/param.h>
+#include <sys/poll.h>
+#include <sys/resource.h>
+#include <sys/select.h>
+#include <sys/socket.h>
+#include <sys/stat.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <sys/uio.h>
+#include <sys/un.h>
+#include <sys/xattr.h>
+#include <alloca.h>
+#include <arpa/inet.h>
+#include <arpa/tftp.h>
+#include <assert.h>
+#include <err.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <ifaddrs.h>
+#include <libgen.h>
+#include <locale.h>
+#include <net/if.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+#include <poll.h>
+#include <pwd.h>
+#include <setjmp.h>
+#include <sgtty.h>
+#include <signal.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <strings.h>
+#include <stropts.h>
+#include <termio.h>
+#include <termios.h>
+#include <time.h>
+#include <unistd.h>
+#include <utime.h>
+#include <stddef.h>
+#include <dlfcn.h>
+#include <malloc.h>
+#include <memory.h>
+#include <netinet/if_ether.h>
+#include <stdint.h>
+#include <sys/utsname.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef strlcat
+  return ((int*)(&strlcat))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+Determining if the _strtoi64 exist failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_584cc/fast && make  -f CMakeFiles/cmTC_584cc.dir/build.make CMakeFiles/cmTC_584cc.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_584cc.dir/CheckSymbolExists.c.o
+/usr/bin/gcc   -w  -std=gnu11 -o CMakeFiles/cmTC_584cc.dir/CheckSymbolExists.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c: In function ‘main’:
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c:59:19: error: ‘_strtoi64’ undeclared (first use in this function); did you mean ‘strtoull’?
+   return ((int*)(&_strtoi64))[argc];
+                   ^~~~~~~~~
+                   strtoull
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c:59:19: note: each undeclared identifier is reported only once for each function it appears in
+CMakeFiles/cmTC_584cc.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_584cc.dir/CheckSymbolExists.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_584cc.dir/CheckSymbolExists.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_584cc/fast' failed
+make: *** [cmTC_584cc/fast] Error 2
+
+
+File /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <stdio.h>
+#include <inttypes.h>
+#include <sys/ioctl.h>
+#include <sys/param.h>
+#include <sys/poll.h>
+#include <sys/resource.h>
+#include <sys/select.h>
+#include <sys/socket.h>
+#include <sys/stat.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <sys/uio.h>
+#include <sys/un.h>
+#include <sys/xattr.h>
+#include <alloca.h>
+#include <arpa/inet.h>
+#include <arpa/tftp.h>
+#include <assert.h>
+#include <err.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <ifaddrs.h>
+#include <libgen.h>
+#include <locale.h>
+#include <net/if.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+#include <poll.h>
+#include <pwd.h>
+#include <setjmp.h>
+#include <sgtty.h>
+#include <signal.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <strings.h>
+#include <stropts.h>
+#include <termio.h>
+#include <termios.h>
+#include <time.h>
+#include <unistd.h>
+#include <utime.h>
+#include <stddef.h>
+#include <dlfcn.h>
+#include <malloc.h>
+#include <memory.h>
+#include <netinet/if_ether.h>
+#include <stdint.h>
+#include <sys/utsname.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef _strtoi64
+  return ((int*)(&_strtoi64))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+Determining if the setmode exist failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_c766f/fast && make  -f CMakeFiles/cmTC_c766f.dir/build.make CMakeFiles/cmTC_c766f.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_c766f.dir/CheckSymbolExists.c.o
+/usr/bin/gcc   -w  -std=gnu11 -o CMakeFiles/cmTC_c766f.dir/CheckSymbolExists.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c: In function ‘main’:
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c:59:19: error: ‘setmode’ undeclared (first use in this function); did you mean ‘setgid’?
+   return ((int*)(&setmode))[argc];
+                   ^~~~~~~
+                   setgid
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c:59:19: note: each undeclared identifier is reported only once for each function it appears in
+CMakeFiles/cmTC_c766f.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_c766f.dir/CheckSymbolExists.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_c766f.dir/CheckSymbolExists.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_c766f/fast' failed
+make: *** [cmTC_c766f/fast] Error 2
+
+
+File /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <stdio.h>
+#include <inttypes.h>
+#include <sys/ioctl.h>
+#include <sys/param.h>
+#include <sys/poll.h>
+#include <sys/resource.h>
+#include <sys/select.h>
+#include <sys/socket.h>
+#include <sys/stat.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <sys/uio.h>
+#include <sys/un.h>
+#include <sys/xattr.h>
+#include <alloca.h>
+#include <arpa/inet.h>
+#include <arpa/tftp.h>
+#include <assert.h>
+#include <err.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <ifaddrs.h>
+#include <libgen.h>
+#include <locale.h>
+#include <net/if.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+#include <poll.h>
+#include <pwd.h>
+#include <setjmp.h>
+#include <sgtty.h>
+#include <signal.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <strings.h>
+#include <stropts.h>
+#include <termio.h>
+#include <termios.h>
+#include <time.h>
+#include <unistd.h>
+#include <utime.h>
+#include <stddef.h>
+#include <dlfcn.h>
+#include <malloc.h>
+#include <memory.h>
+#include <netinet/if_ether.h>
+#include <stdint.h>
+#include <sys/utsname.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef setmode
+  return ((int*)(&setmode))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+Determining if the function mach_absolute_time exists failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_2e5ec/fast && make  -f CMakeFiles/cmTC_2e5ec.dir/build.make CMakeFiles/cmTC_2e5ec.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_2e5ec.dir/CheckFunctionExists.c.o
+/usr/bin/gcc   -w -DCHECK_FUNCTION_EXISTS=mach_absolute_time -std=gnu11 -o CMakeFiles/cmTC_2e5ec.dir/CheckFunctionExists.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Modules/CheckFunctionExists.c
+Linking C executable cmTC_2e5ec
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Bootstrap.cmk/cmake -E cmake_link_script CMakeFiles/cmTC_2e5ec.dir/link.txt --verbose=1
+/usr/bin/gcc  -w -DCHECK_FUNCTION_EXISTS=mach_absolute_time CMakeFiles/cmTC_2e5ec.dir/CheckFunctionExists.c.o -o cmTC_2e5ec 
+CMakeFiles/cmTC_2e5ec.dir/CheckFunctionExists.c.o：在函数‘main’中：
+CheckFunctionExists.c:(.text+0x10)：对‘mach_absolute_time’未定义的引用
+collect2: error: ld returned 1 exit status
+CMakeFiles/cmTC_2e5ec.dir/build.make:98: recipe for target 'cmTC_2e5ec' failed
+make[1]: *** [cmTC_2e5ec] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_2e5ec/fast' failed
+make: *** [cmTC_2e5ec/fast] Error 2
+
+
+
+Performing Curl Test HAVE_FSETXATTR_6 failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_869fe/fast && make  -f CMakeFiles/cmTC_869fe.dir/build.make CMakeFiles/cmTC_869fe.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_869fe.dir/CurlTests.c.o
+/usr/bin/gcc   -w -DHAVE_FSETXATTR_6  -DHAVE_STDIO_H -DHAVE_INTTYPES_H -DHAVE_SYS_IOCTL_H -DHAVE_SYS_PARAM_H -DHAVE_SYS_POLL_H -DHAVE_SYS_RESOURCE_H -DHAVE_SYS_SELECT_H -DHAVE_SYS_SOCKET_H -DHAVE_SYS_STAT_H -DHAVE_SYS_TIME_H -DHAVE_SYS_TYPES_H -DHAVE_SYS_UIO_H -DHAVE_SYS_UN_H -DHAVE_SYS_XATTR_H -DHAVE_ALLOCA_H -DHAVE_ARPA_INET_H -DHAVE_ARPA_TFTP_H -DHAVE_ASSERT_H -DHAVE_ERR_H -DHAVE_ERRNO_H -DHAVE_FCNTL_H -DHAVE_IFADDRS_H -DHAVE_LIBGEN_H -DHAVE_LOCALE_H -DHAVE_NET_IF_H -DHAVE_NETDB_H -DHAVE_NETINET_IN_H -DHAVE_NETINET_TCP_H -DHAVE_POLL_H -DHAVE_PWD_H -DHAVE_SETJMP_H -DHAVE_SGTTY_H -DHAVE_SIGNAL_H -DHAVE_STDBOOL_H -DHAVE_STDINT_H -DHAVE_STDIO_H -DHAVE_STDLIB_H -DHAVE_STRING_H -DHAVE_STRINGS_H -DHAVE_STROPTS_H -DHAVE_TERMIO_H -DHAVE_TERMIOS_H -DHAVE_TIME_H -DHAVE_UNISTD_H -DHAVE_UTIME_H -DHAVE_STDDEF_H -DHAVE_DLFCN_H -DHAVE_MALLOC_H -DHAVE_MEMORY_H -DHAVE_NETINET_IF_ETHER_H -DHAVE_STDINT_H -DHAVE_SYS_UTSNAME_H -std=gnu11 -o CMakeFiles/cmTC_869fe.dir/CurlTests.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c: In function ‘main’:
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c:544:3: error: too many arguments to function ‘fsetxattr’
+   fsetxattr(0, 0, 0, 0, 0, 0);
+   ^~~~~~~~~
+In file included from /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c:541:0:
+/usr/include/x86_64-linux-gnu/sys/xattr.h:54:12: note: declared here
+ extern int fsetxattr (int __fd, const char *__name, const void *__value,
+            ^~~~~~~~~
+CMakeFiles/cmTC_869fe.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_869fe.dir/CurlTests.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_869fe.dir/CurlTests.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_869fe/fast' failed
+make: *** [cmTC_869fe/fast] Error 2
+
+
+Performing Curl Test HAVE_IOCTLSOCKET failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_00c1e/fast && make  -f CMakeFiles/cmTC_00c1e.dir/build.make CMakeFiles/cmTC_00c1e.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_00c1e.dir/CurlTests.c.o
+/usr/bin/gcc   -w -DHAVE_IOCTLSOCKET  -DHAVE_STDIO_H -DHAVE_INTTYPES_H -DHAVE_SYS_IOCTL_H -DHAVE_SYS_PARAM_H -DHAVE_SYS_POLL_H -DHAVE_SYS_RESOURCE_H -DHAVE_SYS_SELECT_H -DHAVE_SYS_SOCKET_H -DHAVE_SYS_STAT_H -DHAVE_SYS_TIME_H -DHAVE_SYS_TYPES_H -DHAVE_SYS_UIO_H -DHAVE_SYS_UN_H -DHAVE_SYS_XATTR_H -DHAVE_ALLOCA_H -DHAVE_ARPA_INET_H -DHAVE_ARPA_TFTP_H -DHAVE_ASSERT_H -DHAVE_ERR_H -DHAVE_ERRNO_H -DHAVE_FCNTL_H -DHAVE_IFADDRS_H -DHAVE_LIBGEN_H -DHAVE_LOCALE_H -DHAVE_NET_IF_H -DHAVE_NETDB_H -DHAVE_NETINET_IN_H -DHAVE_NETINET_TCP_H -DHAVE_POLL_H -DHAVE_PWD_H -DHAVE_SETJMP_H -DHAVE_SGTTY_H -DHAVE_SIGNAL_H -DHAVE_STDBOOL_H -DHAVE_STDINT_H -DHAVE_STDIO_H -DHAVE_STDLIB_H -DHAVE_STRING_H -DHAVE_STRINGS_H -DHAVE_STROPTS_H -DHAVE_TERMIO_H -DHAVE_TERMIOS_H -DHAVE_TIME_H -DHAVE_UNISTD_H -DHAVE_UTIME_H -DHAVE_STDDEF_H -DHAVE_DLFCN_H -DHAVE_MALLOC_H -DHAVE_MEMORY_H -DHAVE_NETINET_IF_ETHER_H -DHAVE_STDINT_H -DHAVE_SYS_UTSNAME_H -std=gnu11 -o CMakeFiles/cmTC_00c1e.dir/CurlTests.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c: In function ‘main’:
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c:326:44: error: ‘FIONBIO’ undeclared (first use in this function)
+  unsigned long flags = ioctlsocket(socket, FIONBIO, &flags);
+                                            ^~~~~~~
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c:326:44: note: each undeclared identifier is reported only once for each function it appears in
+CMakeFiles/cmTC_00c1e.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_00c1e.dir/CurlTests.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_00c1e.dir/CurlTests.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_00c1e/fast' failed
+make: *** [cmTC_00c1e/fast] Error 2
+
+
+Performing Curl Test HAVE_IOCTLSOCKET_CAMEL failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_a7ff6/fast && make  -f CMakeFiles/cmTC_a7ff6.dir/build.make CMakeFiles/cmTC_a7ff6.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_a7ff6.dir/CurlTests.c.o
+/usr/bin/gcc   -w -DHAVE_IOCTLSOCKET_CAMEL  -DHAVE_STDIO_H -DHAVE_INTTYPES_H -DHAVE_SYS_IOCTL_H -DHAVE_SYS_PARAM_H -DHAVE_SYS_POLL_H -DHAVE_SYS_RESOURCE_H -DHAVE_SYS_SELECT_H -DHAVE_SYS_SOCKET_H -DHAVE_SYS_STAT_H -DHAVE_SYS_TIME_H -DHAVE_SYS_TYPES_H -DHAVE_SYS_UIO_H -DHAVE_SYS_UN_H -DHAVE_SYS_XATTR_H -DHAVE_ALLOCA_H -DHAVE_ARPA_INET_H -DHAVE_ARPA_TFTP_H -DHAVE_ASSERT_H -DHAVE_ERR_H -DHAVE_ERRNO_H -DHAVE_FCNTL_H -DHAVE_IFADDRS_H -DHAVE_LIBGEN_H -DHAVE_LOCALE_H -DHAVE_NET_IF_H -DHAVE_NETDB_H -DHAVE_NETINET_IN_H -DHAVE_NETINET_TCP_H -DHAVE_POLL_H -DHAVE_PWD_H -DHAVE_SETJMP_H -DHAVE_SGTTY_H -DHAVE_SIGNAL_H -DHAVE_STDBOOL_H -DHAVE_STDINT_H -DHAVE_STDIO_H -DHAVE_STDLIB_H -DHAVE_STRING_H -DHAVE_STRINGS_H -DHAVE_STROPTS_H -DHAVE_TERMIO_H -DHAVE_TERMIOS_H -DHAVE_TIME_H -DHAVE_UNISTD_H -DHAVE_UTIME_H -DHAVE_STDDEF_H -DHAVE_DLFCN_H -DHAVE_MALLOC_H -DHAVE_MEMORY_H -DHAVE_NETINET_IF_ETHER_H -DHAVE_STDINT_H -DHAVE_SYS_UTSNAME_H -std=gnu11 -o CMakeFiles/cmTC_a7ff6.dir/CurlTests.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c
+Linking C executable cmTC_a7ff6
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Bootstrap.cmk/cmake -E cmake_link_script CMakeFiles/cmTC_a7ff6.dir/link.txt --verbose=1
+/usr/bin/gcc  -w -DHAVE_IOCTLSOCKET_CAMEL  -DHAVE_STDIO_H -DHAVE_INTTYPES_H -DHAVE_SYS_IOCTL_H -DHAVE_SYS_PARAM_H -DHAVE_SYS_POLL_H -DHAVE_SYS_RESOURCE_H -DHAVE_SYS_SELECT_H -DHAVE_SYS_SOCKET_H -DHAVE_SYS_STAT_H -DHAVE_SYS_TIME_H -DHAVE_SYS_TYPES_H -DHAVE_SYS_UIO_H -DHAVE_SYS_UN_H -DHAVE_SYS_XATTR_H -DHAVE_ALLOCA_H -DHAVE_ARPA_INET_H -DHAVE_ARPA_TFTP_H -DHAVE_ASSERT_H -DHAVE_ERR_H -DHAVE_ERRNO_H -DHAVE_FCNTL_H -DHAVE_IFADDRS_H -DHAVE_LIBGEN_H -DHAVE_LOCALE_H -DHAVE_NET_IF_H -DHAVE_NETDB_H -DHAVE_NETINET_IN_H -DHAVE_NETINET_TCP_H -DHAVE_POLL_H -DHAVE_PWD_H -DHAVE_SETJMP_H -DHAVE_SGTTY_H -DHAVE_SIGNAL_H -DHAVE_STDBOOL_H -DHAVE_STDINT_H -DHAVE_STDIO_H -DHAVE_STDLIB_H -DHAVE_STRING_H -DHAVE_STRINGS_H -DHAVE_STROPTS_H -DHAVE_TERMIO_H -DHAVE_TERMIOS_H -DHAVE_TIME_H -DHAVE_UNISTD_H -DHAVE_UTIME_H -DHAVE_STDDEF_H -DHAVE_DLFCN_H -DHAVE_MALLOC_H -DHAVE_MEMORY_H -DHAVE_NETINET_IF_ETHER_H -DHAVE_STDINT_H -DHAVE_SYS_UTSNAME_H CMakeFiles/cmTC_a7ff6.dir/CurlTests.c.o -o cmTC_a7ff6 
+CMakeFiles/cmTC_a7ff6.dir/CurlTests.c.o：在函数‘main’中：
+CurlTests.c:(.text+0x19)：对‘IoctlSocket’未定义的引用
+collect2: error: ld returned 1 exit status
+CMakeFiles/cmTC_a7ff6.dir/build.make:98: recipe for target 'cmTC_a7ff6' failed
+make[1]: *** [cmTC_a7ff6] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_a7ff6/fast' failed
+make: *** [cmTC_a7ff6/fast] Error 2
+
+
+Performing Curl Test HAVE_IOCTLSOCKET_CAMEL_FIONBIO failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_9fa8a/fast && make  -f CMakeFiles/cmTC_9fa8a.dir/build.make CMakeFiles/cmTC_9fa8a.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_9fa8a.dir/CurlTests.c.o
+/usr/bin/gcc   -w -DHAVE_IOCTLSOCKET_CAMEL_FIONBIO  -DHAVE_STDIO_H -DHAVE_INTTYPES_H -DHAVE_SYS_IOCTL_H -DHAVE_SYS_PARAM_H -DHAVE_SYS_POLL_H -DHAVE_SYS_RESOURCE_H -DHAVE_SYS_SELECT_H -DHAVE_SYS_SOCKET_H -DHAVE_SYS_STAT_H -DHAVE_SYS_TIME_H -DHAVE_SYS_TYPES_H -DHAVE_SYS_UIO_H -DHAVE_SYS_UN_H -DHAVE_SYS_XATTR_H -DHAVE_ALLOCA_H -DHAVE_ARPA_INET_H -DHAVE_ARPA_TFTP_H -DHAVE_ASSERT_H -DHAVE_ERR_H -DHAVE_ERRNO_H -DHAVE_FCNTL_H -DHAVE_IFADDRS_H -DHAVE_LIBGEN_H -DHAVE_LOCALE_H -DHAVE_NET_IF_H -DHAVE_NETDB_H -DHAVE_NETINET_IN_H -DHAVE_NETINET_TCP_H -DHAVE_POLL_H -DHAVE_PWD_H -DHAVE_SETJMP_H -DHAVE_SGTTY_H -DHAVE_SIGNAL_H -DHAVE_STDBOOL_H -DHAVE_STDINT_H -DHAVE_STDIO_H -DHAVE_STDLIB_H -DHAVE_STRING_H -DHAVE_STRINGS_H -DHAVE_STROPTS_H -DHAVE_TERMIO_H -DHAVE_TERMIOS_H -DHAVE_TIME_H -DHAVE_UNISTD_H -DHAVE_UTIME_H -DHAVE_STDDEF_H -DHAVE_DLFCN_H -DHAVE_MALLOC_H -DHAVE_MEMORY_H -DHAVE_NETINET_IF_ETHER_H -DHAVE_STDINT_H -DHAVE_SYS_UTSNAME_H -std=gnu11 -o CMakeFiles/cmTC_9fa8a.dir/CurlTests.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c: In function ‘main’:
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c:382:32: error: ‘FIONBIO’ undeclared (first use in this function)
+         if(0 != ioctlsocket(0, FIONBIO, &flags))
+                                ^~~~~~~
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c:382:32: note: each undeclared identifier is reported only once for each function it appears in
+CMakeFiles/cmTC_9fa8a.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_9fa8a.dir/CurlTests.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_9fa8a.dir/CurlTests.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_9fa8a/fast' failed
+make: *** [cmTC_9fa8a/fast] Error 2
+
+
+Performing Curl Test HAVE_IOCTLSOCKET_FIONBIO failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_36aa6/fast && make  -f CMakeFiles/cmTC_36aa6.dir/build.make CMakeFiles/cmTC_36aa6.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_36aa6.dir/CurlTests.c.o
+/usr/bin/gcc   -w -DHAVE_IOCTLSOCKET_FIONBIO  -DHAVE_STDIO_H -DHAVE_INTTYPES_H -DHAVE_SYS_IOCTL_H -DHAVE_SYS_PARAM_H -DHAVE_SYS_POLL_H -DHAVE_SYS_RESOURCE_H -DHAVE_SYS_SELECT_H -DHAVE_SYS_SOCKET_H -DHAVE_SYS_STAT_H -DHAVE_SYS_TIME_H -DHAVE_SYS_TYPES_H -DHAVE_SYS_UIO_H -DHAVE_SYS_UN_H -DHAVE_SYS_XATTR_H -DHAVE_ALLOCA_H -DHAVE_ARPA_INET_H -DHAVE_ARPA_TFTP_H -DHAVE_ASSERT_H -DHAVE_ERR_H -DHAVE_ERRNO_H -DHAVE_FCNTL_H -DHAVE_IFADDRS_H -DHAVE_LIBGEN_H -DHAVE_LOCALE_H -DHAVE_NET_IF_H -DHAVE_NETDB_H -DHAVE_NETINET_IN_H -DHAVE_NETINET_TCP_H -DHAVE_POLL_H -DHAVE_PWD_H -DHAVE_SETJMP_H -DHAVE_SGTTY_H -DHAVE_SIGNAL_H -DHAVE_STDBOOL_H -DHAVE_STDINT_H -DHAVE_STDIO_H -DHAVE_STDLIB_H -DHAVE_STRING_H -DHAVE_STRINGS_H -DHAVE_STROPTS_H -DHAVE_TERMIO_H -DHAVE_TERMIOS_H -DHAVE_TIME_H -DHAVE_UNISTD_H -DHAVE_UTIME_H -DHAVE_STDDEF_H -DHAVE_DLFCN_H -DHAVE_MALLOC_H -DHAVE_MEMORY_H -DHAVE_NETINET_IF_ETHER_H -DHAVE_STDINT_H -DHAVE_SYS_UTSNAME_H -std=gnu11 -o CMakeFiles/cmTC_36aa6.dir/CurlTests.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c: In function ‘main’:
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c:409:32: error: ‘FIONBIO’ undeclared (first use in this function)
+         if(0 != ioctlsocket(0, FIONBIO, &flags))
+                                ^~~~~~~
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c:409:32: note: each undeclared identifier is reported only once for each function it appears in
+CMakeFiles/cmTC_36aa6.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_36aa6.dir/CurlTests.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_36aa6.dir/CurlTests.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_36aa6/fast' failed
+make: *** [cmTC_36aa6/fast] Error 2
+
+
+Performing Curl Test HAVE_SETSOCKOPT_SO_NONBLOCK failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_439b9/fast && make  -f CMakeFiles/cmTC_439b9.dir/build.make CMakeFiles/cmTC_439b9.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_439b9.dir/CurlTests.c.o
+/usr/bin/gcc   -w -DHAVE_SETSOCKOPT_SO_NONBLOCK  -DHAVE_STDIO_H -DHAVE_INTTYPES_H -DHAVE_SYS_IOCTL_H -DHAVE_SYS_PARAM_H -DHAVE_SYS_POLL_H -DHAVE_SYS_RESOURCE_H -DHAVE_SYS_SELECT_H -DHAVE_SYS_SOCKET_H -DHAVE_SYS_STAT_H -DHAVE_SYS_TIME_H -DHAVE_SYS_TYPES_H -DHAVE_SYS_UIO_H -DHAVE_SYS_UN_H -DHAVE_SYS_XATTR_H -DHAVE_ALLOCA_H -DHAVE_ARPA_INET_H -DHAVE_ARPA_TFTP_H -DHAVE_ASSERT_H -DHAVE_ERR_H -DHAVE_ERRNO_H -DHAVE_FCNTL_H -DHAVE_IFADDRS_H -DHAVE_LIBGEN_H -DHAVE_LOCALE_H -DHAVE_NET_IF_H -DHAVE_NETDB_H -DHAVE_NETINET_IN_H -DHAVE_NETINET_TCP_H -DHAVE_POLL_H -DHAVE_PWD_H -DHAVE_SETJMP_H -DHAVE_SGTTY_H -DHAVE_SIGNAL_H -DHAVE_STDBOOL_H -DHAVE_STDINT_H -DHAVE_STDIO_H -DHAVE_STDLIB_H -DHAVE_STRING_H -DHAVE_STRINGS_H -DHAVE_STROPTS_H -DHAVE_TERMIO_H -DHAVE_TERMIOS_H -DHAVE_TIME_H -DHAVE_UNISTD_H -DHAVE_UTIME_H -DHAVE_STDDEF_H -DHAVE_DLFCN_H -DHAVE_MALLOC_H -DHAVE_MEMORY_H -DHAVE_NETINET_IF_ETHER_H -DHAVE_STDINT_H -DHAVE_SYS_UTSNAME_H -std=gnu11 -o CMakeFiles/cmTC_439b9.dir/CurlTests.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c: In function ‘main’:
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c:505:43: error: ‘SO_NONBLOCK’ undeclared (first use in this function); did you mean ‘SOCK_NONBLOCK’?
+         if(0 != setsockopt(0, SOL_SOCKET, SO_NONBLOCK, 0, 0))
+                                           ^~~~~~~~~~~
+                                           SOCK_NONBLOCK
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c:505:43: note: each undeclared identifier is reported only once for each function it appears in
+CMakeFiles/cmTC_439b9.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_439b9.dir/CurlTests.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_439b9.dir/CurlTests.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_439b9/fast' failed
+make: *** [cmTC_439b9/fast] Error 2
+
+
+Performing Curl Test HAVE_O_NONBLOCK failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_50d4b/fast && make  -f CMakeFiles/cmTC_50d4b.dir/build.make CMakeFiles/cmTC_50d4b.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_50d4b.dir/CurlTests.c.o
+/usr/bin/gcc   -w -DHAVE_O_NONBLOCK  -DHAVE_STDIO_H -DHAVE_INTTYPES_H -DHAVE_SYS_IOCTL_H -DHAVE_SYS_PARAM_H -DHAVE_SYS_POLL_H -DHAVE_SYS_RESOURCE_H -DHAVE_SYS_SELECT_H -DHAVE_SYS_SOCKET_H -DHAVE_SYS_STAT_H -DHAVE_SYS_TIME_H -DHAVE_SYS_TYPES_H -DHAVE_SYS_UIO_H -DHAVE_SYS_UN_H -DHAVE_SYS_XATTR_H -DHAVE_ALLOCA_H -DHAVE_ARPA_INET_H -DHAVE_ARPA_TFTP_H -DHAVE_ASSERT_H -DHAVE_ERR_H -DHAVE_ERRNO_H -DHAVE_FCNTL_H -DHAVE_IFADDRS_H -DHAVE_LIBGEN_H -DHAVE_LOCALE_H -DHAVE_NET_IF_H -DHAVE_NETDB_H -DHAVE_NETINET_IN_H -DHAVE_NETINET_TCP_H -DHAVE_POLL_H -DHAVE_PWD_H -DHAVE_SETJMP_H -DHAVE_SGTTY_H -DHAVE_SIGNAL_H -DHAVE_STDBOOL_H -DHAVE_STDINT_H -DHAVE_STDIO_H -DHAVE_STDLIB_H -DHAVE_STRING_H -DHAVE_STRINGS_H -DHAVE_STROPTS_H -DHAVE_TERMIO_H -DHAVE_TERMIOS_H -DHAVE_TIME_H -DHAVE_UNISTD_H -DHAVE_UTIME_H -DHAVE_STDDEF_H -DHAVE_DLFCN_H -DHAVE_MALLOC_H -DHAVE_MEMORY_H -DHAVE_NETINET_IF_ETHER_H -DHAVE_STDINT_H -DHAVE_SYS_UTSNAME_H -std=gnu11 -o CMakeFiles/cmTC_50d4b.dir/CurlTests.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c
+Linking C executable cmTC_50d4b
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Bootstrap.cmk/cmake -E cmake_link_script CMakeFiles/cmTC_50d4b.dir/link.txt --verbose=1
+/usr/bin/gcc  -w -DHAVE_O_NONBLOCK  -DHAVE_STDIO_H -DHAVE_INTTYPES_H -DHAVE_SYS_IOCTL_H -DHAVE_SYS_PARAM_H -DHAVE_SYS_POLL_H -DHAVE_SYS_RESOURCE_H -DHAVE_SYS_SELECT_H -DHAVE_SYS_SOCKET_H -DHAVE_SYS_STAT_H -DHAVE_SYS_TIME_H -DHAVE_SYS_TYPES_H -DHAVE_SYS_UIO_H -DHAVE_SYS_UN_H -DHAVE_SYS_XATTR_H -DHAVE_ALLOCA_H -DHAVE_ARPA_INET_H -DHAVE_ARPA_TFTP_H -DHAVE_ASSERT_H -DHAVE_ERR_H -DHAVE_ERRNO_H -DHAVE_FCNTL_H -DHAVE_IFADDRS_H -DHAVE_LIBGEN_H -DHAVE_LOCALE_H -DHAVE_NET_IF_H -DHAVE_NETDB_H -DHAVE_NETINET_IN_H -DHAVE_NETINET_TCP_H -DHAVE_POLL_H -DHAVE_PWD_H -DHAVE_SETJMP_H -DHAVE_SGTTY_H -DHAVE_SIGNAL_H -DHAVE_STDBOOL_H -DHAVE_STDINT_H -DHAVE_STDIO_H -DHAVE_STDLIB_H -DHAVE_STRING_H -DHAVE_STRINGS_H -DHAVE_STROPTS_H -DHAVE_TERMIO_H -DHAVE_TERMIOS_H -DHAVE_TIME_H -DHAVE_UNISTD_H -DHAVE_UTIME_H -DHAVE_STDDEF_H -DHAVE_DLFCN_H -DHAVE_MALLOC_H -DHAVE_MEMORY_H -DHAVE_NETINET_IF_ETHER_H -DHAVE_STDINT_H -DHAVE_SYS_UTSNAME_H CMakeFiles/cmTC_50d4b.dir/CurlTests.c.o -o cmTC_50d4b 
+/usr/lib/gcc/x86_64-linux-gnu/7/../../../x86_64-linux-gnu/Scrt1.o：在函数‘_start’中：
+(.text+0x20)：对‘main’未定义的引用
+collect2: error: ld returned 1 exit status
+CMakeFiles/cmTC_50d4b.dir/build.make:98: recipe for target 'cmTC_50d4b' failed
+make[1]: *** [cmTC_50d4b] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_50d4b/fast' failed
+make: *** [cmTC_50d4b/fast] Error 2
+
+
+Performing Curl Test HAVE_GETHOSTBYADDR_R_5 failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_6b01e/fast && make  -f CMakeFiles/cmTC_6b01e.dir/build.make CMakeFiles/cmTC_6b01e.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_6b01e.dir/CurlTests.c.o
+/usr/bin/gcc   -w -DHAVE_GETHOSTBYADDR_R_5  -DHAVE_STDIO_H -DHAVE_INTTYPES_H -DHAVE_SYS_IOCTL_H -DHAVE_SYS_PARAM_H -DHAVE_SYS_POLL_H -DHAVE_SYS_RESOURCE_H -DHAVE_SYS_SELECT_H -DHAVE_SYS_SOCKET_H -DHAVE_SYS_STAT_H -DHAVE_SYS_TIME_H -DHAVE_SYS_TYPES_H -DHAVE_SYS_UIO_H -DHAVE_SYS_UN_H -DHAVE_SYS_XATTR_H -DHAVE_ALLOCA_H -DHAVE_ARPA_INET_H -DHAVE_ARPA_TFTP_H -DHAVE_ASSERT_H -DHAVE_ERR_H -DHAVE_ERRNO_H -DHAVE_FCNTL_H -DHAVE_IFADDRS_H -DHAVE_LIBGEN_H -DHAVE_LOCALE_H -DHAVE_NET_IF_H -DHAVE_NETDB_H -DHAVE_NETINET_IN_H -DHAVE_NETINET_TCP_H -DHAVE_POLL_H -DHAVE_PWD_H -DHAVE_SETJMP_H -DHAVE_SGTTY_H -DHAVE_SIGNAL_H -DHAVE_STDBOOL_H -DHAVE_STDINT_H -DHAVE_STDIO_H -DHAVE_STDLIB_H -DHAVE_STRING_H -DHAVE_STRINGS_H -DHAVE_STROPTS_H -DHAVE_TERMIO_H -DHAVE_TERMIOS_H -DHAVE_TIME_H -DHAVE_UNISTD_H -DHAVE_UTIME_H -DHAVE_STDDEF_H -DHAVE_DLFCN_H -DHAVE_MALLOC_H -DHAVE_MEMORY_H -DHAVE_NETINET_IF_ETHER_H -DHAVE_STDINT_H -DHAVE_SYS_UTSNAME_H -std=gnu11 -o CMakeFiles/cmTC_6b01e.dir/CurlTests.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c: In function ‘main’:
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c:106:23: error: storage size of ‘hdata’ isn’t known
+   struct hostent_data hdata;
+                       ^~~~~
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c:127:8: error: too few arguments to function ‘gethostbyaddr_r’
+   rc = gethostbyaddr_r(address, length, type, &h, &hdata);
+        ^~~~~~~~~~~~~~~
+In file included from /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c:93:0:
+/usr/include/netdb.h:170:12: note: declared here
+ extern int gethostbyaddr_r (const void *__restrict __addr, __socklen_t __len,
+            ^~~~~~~~~~~~~~~
+CMakeFiles/cmTC_6b01e.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_6b01e.dir/CurlTests.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_6b01e.dir/CurlTests.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_6b01e/fast' failed
+make: *** [cmTC_6b01e/fast] Error 2
+
+
+Performing Curl Test HAVE_GETHOSTBYADDR_R_7 failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_2f050/fast && make  -f CMakeFiles/cmTC_2f050.dir/build.make CMakeFiles/cmTC_2f050.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_2f050.dir/CurlTests.c.o
+/usr/bin/gcc   -w -DHAVE_GETHOSTBYADDR_R_7  -DHAVE_STDIO_H -DHAVE_INTTYPES_H -DHAVE_SYS_IOCTL_H -DHAVE_SYS_PARAM_H -DHAVE_SYS_POLL_H -DHAVE_SYS_RESOURCE_H -DHAVE_SYS_SELECT_H -DHAVE_SYS_SOCKET_H -DHAVE_SYS_STAT_H -DHAVE_SYS_TIME_H -DHAVE_SYS_TYPES_H -DHAVE_SYS_UIO_H -DHAVE_SYS_UN_H -DHAVE_SYS_XATTR_H -DHAVE_ALLOCA_H -DHAVE_ARPA_INET_H -DHAVE_ARPA_TFTP_H -DHAVE_ASSERT_H -DHAVE_ERR_H -DHAVE_ERRNO_H -DHAVE_FCNTL_H -DHAVE_IFADDRS_H -DHAVE_LIBGEN_H -DHAVE_LOCALE_H -DHAVE_NET_IF_H -DHAVE_NETDB_H -DHAVE_NETINET_IN_H -DHAVE_NETINET_TCP_H -DHAVE_POLL_H -DHAVE_PWD_H -DHAVE_SETJMP_H -DHAVE_SGTTY_H -DHAVE_SIGNAL_H -DHAVE_STDBOOL_H -DHAVE_STDINT_H -DHAVE_STDIO_H -DHAVE_STDLIB_H -DHAVE_STRING_H -DHAVE_STRINGS_H -DHAVE_STROPTS_H -DHAVE_TERMIO_H -DHAVE_TERMIOS_H -DHAVE_TIME_H -DHAVE_UNISTD_H -DHAVE_UTIME_H -DHAVE_STDDEF_H -DHAVE_DLFCN_H -DHAVE_MALLOC_H -DHAVE_MEMORY_H -DHAVE_NETINET_IF_ETHER_H -DHAVE_STDINT_H -DHAVE_SYS_UTSNAME_H -std=gnu11 -o CMakeFiles/cmTC_2f050.dir/CurlTests.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c: In function ‘main’:
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c:131:8: error: too few arguments to function ‘gethostbyaddr_r’
+   hp = gethostbyaddr_r(address, length, type, &h, buffer, 8192, &h_errnop);
+        ^~~~~~~~~~~~~~~
+In file included from /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c:93:0:
+/usr/include/netdb.h:170:12: note: declared here
+ extern int gethostbyaddr_r (const void *__restrict __addr, __socklen_t __len,
+            ^~~~~~~~~~~~~~~
+CMakeFiles/cmTC_2f050.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_2f050.dir/CurlTests.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_2f050.dir/CurlTests.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_2f050/fast' failed
+make: *** [cmTC_2f050/fast] Error 2
+
+
+Performing Curl Test HAVE_GETHOSTBYADDR_R_5_REENTRANT failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_d6435/fast && make  -f CMakeFiles/cmTC_d6435.dir/build.make CMakeFiles/cmTC_d6435.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_d6435.dir/CurlTests.c.o
+/usr/bin/gcc   -w -DHAVE_GETHOSTBYADDR_R_5_REENTRANT  -DHAVE_STDIO_H -DHAVE_INTTYPES_H -DHAVE_SYS_IOCTL_H -DHAVE_SYS_PARAM_H -DHAVE_SYS_POLL_H -DHAVE_SYS_RESOURCE_H -DHAVE_SYS_SELECT_H -DHAVE_SYS_SOCKET_H -DHAVE_SYS_STAT_H -DHAVE_SYS_TIME_H -DHAVE_SYS_TYPES_H -DHAVE_SYS_UIO_H -DHAVE_SYS_UN_H -DHAVE_SYS_XATTR_H -DHAVE_ALLOCA_H -DHAVE_ARPA_INET_H -DHAVE_ARPA_TFTP_H -DHAVE_ASSERT_H -DHAVE_ERR_H -DHAVE_ERRNO_H -DHAVE_FCNTL_H -DHAVE_IFADDRS_H -DHAVE_LIBGEN_H -DHAVE_LOCALE_H -DHAVE_NET_IF_H -DHAVE_NETDB_H -DHAVE_NETINET_IN_H -DHAVE_NETINET_TCP_H -DHAVE_POLL_H -DHAVE_PWD_H -DHAVE_SETJMP_H -DHAVE_SGTTY_H -DHAVE_SIGNAL_H -DHAVE_STDBOOL_H -DHAVE_STDINT_H -DHAVE_STDIO_H -DHAVE_STDLIB_H -DHAVE_STRING_H -DHAVE_STRINGS_H -DHAVE_STROPTS_H -DHAVE_TERMIO_H -DHAVE_TERMIOS_H -DHAVE_TIME_H -DHAVE_UNISTD_H -DHAVE_UTIME_H -DHAVE_STDDEF_H -DHAVE_DLFCN_H -DHAVE_MALLOC_H -DHAVE_MEMORY_H -DHAVE_NETINET_IF_ETHER_H -DHAVE_STDINT_H -DHAVE_SYS_UTSNAME_H -std=gnu11 -o CMakeFiles/cmTC_d6435.dir/CurlTests.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c: In function ‘main’:
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c:106:23: error: storage size of ‘hdata’ isn’t known
+   struct hostent_data hdata;
+                       ^~~~~
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c:127:8: error: too few arguments to function ‘gethostbyaddr_r’
+   rc = gethostbyaddr_r(address, length, type, &h, &hdata);
+        ^~~~~~~~~~~~~~~
+In file included from /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c:93:0:
+/usr/include/netdb.h:170:12: note: declared here
+ extern int gethostbyaddr_r (const void *__restrict __addr, __socklen_t __len,
+            ^~~~~~~~~~~~~~~
+CMakeFiles/cmTC_d6435.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_d6435.dir/CurlTests.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_d6435.dir/CurlTests.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_d6435/fast' failed
+make: *** [cmTC_d6435/fast] Error 2
+
+
+Performing Curl Test HAVE_GETHOSTBYADDR_R_7_REENTRANT failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_bed02/fast && make  -f CMakeFiles/cmTC_bed02.dir/build.make CMakeFiles/cmTC_bed02.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_bed02.dir/CurlTests.c.o
+/usr/bin/gcc   -w -DHAVE_GETHOSTBYADDR_R_7_REENTRANT  -DHAVE_STDIO_H -DHAVE_INTTYPES_H -DHAVE_SYS_IOCTL_H -DHAVE_SYS_PARAM_H -DHAVE_SYS_POLL_H -DHAVE_SYS_RESOURCE_H -DHAVE_SYS_SELECT_H -DHAVE_SYS_SOCKET_H -DHAVE_SYS_STAT_H -DHAVE_SYS_TIME_H -DHAVE_SYS_TYPES_H -DHAVE_SYS_UIO_H -DHAVE_SYS_UN_H -DHAVE_SYS_XATTR_H -DHAVE_ALLOCA_H -DHAVE_ARPA_INET_H -DHAVE_ARPA_TFTP_H -DHAVE_ASSERT_H -DHAVE_ERR_H -DHAVE_ERRNO_H -DHAVE_FCNTL_H -DHAVE_IFADDRS_H -DHAVE_LIBGEN_H -DHAVE_LOCALE_H -DHAVE_NET_IF_H -DHAVE_NETDB_H -DHAVE_NETINET_IN_H -DHAVE_NETINET_TCP_H -DHAVE_POLL_H -DHAVE_PWD_H -DHAVE_SETJMP_H -DHAVE_SGTTY_H -DHAVE_SIGNAL_H -DHAVE_STDBOOL_H -DHAVE_STDINT_H -DHAVE_STDIO_H -DHAVE_STDLIB_H -DHAVE_STRING_H -DHAVE_STRINGS_H -DHAVE_STROPTS_H -DHAVE_TERMIO_H -DHAVE_TERMIOS_H -DHAVE_TIME_H -DHAVE_UNISTD_H -DHAVE_UTIME_H -DHAVE_STDDEF_H -DHAVE_DLFCN_H -DHAVE_MALLOC_H -DHAVE_MEMORY_H -DHAVE_NETINET_IF_ETHER_H -DHAVE_STDINT_H -DHAVE_SYS_UTSNAME_H -std=gnu11 -o CMakeFiles/cmTC_bed02.dir/CurlTests.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c: In function ‘main’:
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c:131:8: error: too few arguments to function ‘gethostbyaddr_r’
+   hp = gethostbyaddr_r(address, length, type, &h, buffer, 8192, &h_errnop);
+        ^~~~~~~~~~~~~~~
+In file included from /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c:93:0:
+/usr/include/netdb.h:170:12: note: declared here
+ extern int gethostbyaddr_r (const void *__restrict __addr, __socklen_t __len,
+            ^~~~~~~~~~~~~~~
+CMakeFiles/cmTC_bed02.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_bed02.dir/CurlTests.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_bed02.dir/CurlTests.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_bed02/fast' failed
+make: *** [cmTC_bed02/fast] Error 2
+
+
+Performing Curl Test HAVE_GETHOSTBYNAME_R_3 failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_ca96c/fast && make  -f CMakeFiles/cmTC_ca96c.dir/build.make CMakeFiles/cmTC_ca96c.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_ca96c.dir/CurlTests.c.o
+/usr/bin/gcc   -w -DHAVE_GETHOSTBYNAME_R_3  -DHAVE_STDIO_H -DHAVE_INTTYPES_H -DHAVE_SYS_IOCTL_H -DHAVE_SYS_PARAM_H -DHAVE_SYS_POLL_H -DHAVE_SYS_RESOURCE_H -DHAVE_SYS_SELECT_H -DHAVE_SYS_SOCKET_H -DHAVE_SYS_STAT_H -DHAVE_SYS_TIME_H -DHAVE_SYS_TYPES_H -DHAVE_SYS_UIO_H -DHAVE_SYS_UN_H -DHAVE_SYS_XATTR_H -DHAVE_ALLOCA_H -DHAVE_ARPA_INET_H -DHAVE_ARPA_TFTP_H -DHAVE_ASSERT_H -DHAVE_ERR_H -DHAVE_ERRNO_H -DHAVE_FCNTL_H -DHAVE_IFADDRS_H -DHAVE_LIBGEN_H -DHAVE_LOCALE_H -DHAVE_NET_IF_H -DHAVE_NETDB_H -DHAVE_NETINET_IN_H -DHAVE_NETINET_TCP_H -DHAVE_POLL_H -DHAVE_PWD_H -DHAVE_SETJMP_H -DHAVE_SGTTY_H -DHAVE_SIGNAL_H -DHAVE_STDBOOL_H -DHAVE_STDINT_H -DHAVE_STDIO_H -DHAVE_STDLIB_H -DHAVE_STRING_H -DHAVE_STRINGS_H -DHAVE_STROPTS_H -DHAVE_TERMIO_H -DHAVE_TERMIOS_H -DHAVE_TIME_H -DHAVE_UNISTD_H -DHAVE_UTIME_H -DHAVE_STDDEF_H -DHAVE_DLFCN_H -DHAVE_MALLOC_H -DHAVE_MEMORY_H -DHAVE_NETINET_IF_ETHER_H -DHAVE_STDINT_H -DHAVE_SYS_UTSNAME_H -std=gnu11 -o CMakeFiles/cmTC_ca96c.dir/CurlTests.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c: In function ‘main’:
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c:106:23: error: storage size of ‘hdata’ isn’t known
+   struct hostent_data hdata;
+                       ^~~~~
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c:141:8: error: too few arguments to function ‘gethostbyname_r’
+   rc = gethostbyname_r(address, &h, &hdata);
+        ^~~~~~~~~~~~~~~
+In file included from /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c:93:0:
+/usr/include/netdb.h:177:12: note: declared here
+ extern int gethostbyname_r (const char *__restrict __name,
+            ^~~~~~~~~~~~~~~
+CMakeFiles/cmTC_ca96c.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_ca96c.dir/CurlTests.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_ca96c.dir/CurlTests.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_ca96c/fast' failed
+make: *** [cmTC_ca96c/fast] Error 2
+
+
+Performing Curl Test HAVE_GETHOSTBYNAME_R_5 failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_df3ee/fast && make  -f CMakeFiles/cmTC_df3ee.dir/build.make CMakeFiles/cmTC_df3ee.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_df3ee.dir/CurlTests.c.o
+/usr/bin/gcc   -w -DHAVE_GETHOSTBYNAME_R_5  -DHAVE_STDIO_H -DHAVE_INTTYPES_H -DHAVE_SYS_IOCTL_H -DHAVE_SYS_PARAM_H -DHAVE_SYS_POLL_H -DHAVE_SYS_RESOURCE_H -DHAVE_SYS_SELECT_H -DHAVE_SYS_SOCKET_H -DHAVE_SYS_STAT_H -DHAVE_SYS_TIME_H -DHAVE_SYS_TYPES_H -DHAVE_SYS_UIO_H -DHAVE_SYS_UN_H -DHAVE_SYS_XATTR_H -DHAVE_ALLOCA_H -DHAVE_ARPA_INET_H -DHAVE_ARPA_TFTP_H -DHAVE_ASSERT_H -DHAVE_ERR_H -DHAVE_ERRNO_H -DHAVE_FCNTL_H -DHAVE_IFADDRS_H -DHAVE_LIBGEN_H -DHAVE_LOCALE_H -DHAVE_NET_IF_H -DHAVE_NETDB_H -DHAVE_NETINET_IN_H -DHAVE_NETINET_TCP_H -DHAVE_POLL_H -DHAVE_PWD_H -DHAVE_SETJMP_H -DHAVE_SGTTY_H -DHAVE_SIGNAL_H -DHAVE_STDBOOL_H -DHAVE_STDINT_H -DHAVE_STDIO_H -DHAVE_STDLIB_H -DHAVE_STRING_H -DHAVE_STRINGS_H -DHAVE_STROPTS_H -DHAVE_TERMIO_H -DHAVE_TERMIOS_H -DHAVE_TIME_H -DHAVE_UNISTD_H -DHAVE_UTIME_H -DHAVE_STDDEF_H -DHAVE_DLFCN_H -DHAVE_MALLOC_H -DHAVE_MEMORY_H -DHAVE_NETINET_IF_ETHER_H -DHAVE_STDINT_H -DHAVE_SYS_UTSNAME_H -std=gnu11 -o CMakeFiles/cmTC_df3ee.dir/CurlTests.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c: In function ‘main’:
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c:144:8: error: too few arguments to function ‘gethostbyname_r’
+   rc = gethostbyname_r(address, &h, buffer, 8192, &h_errnop);
+        ^~~~~~~~~~~~~~~
+In file included from /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c:93:0:
+/usr/include/netdb.h:177:12: note: declared here
+ extern int gethostbyname_r (const char *__restrict __name,
+            ^~~~~~~~~~~~~~~
+CMakeFiles/cmTC_df3ee.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_df3ee.dir/CurlTests.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_df3ee.dir/CurlTests.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_df3ee/fast' failed
+make: *** [cmTC_df3ee/fast] Error 2
+
+
+Performing Curl Test HAVE_GETHOSTBYNAME_R_3_REENTRANT failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_c713a/fast && make  -f CMakeFiles/cmTC_c713a.dir/build.make CMakeFiles/cmTC_c713a.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_c713a.dir/CurlTests.c.o
+/usr/bin/gcc   -w -DHAVE_GETHOSTBYNAME_R_3_REENTRANT  -DHAVE_STDIO_H -DHAVE_INTTYPES_H -DHAVE_SYS_IOCTL_H -DHAVE_SYS_PARAM_H -DHAVE_SYS_POLL_H -DHAVE_SYS_RESOURCE_H -DHAVE_SYS_SELECT_H -DHAVE_SYS_SOCKET_H -DHAVE_SYS_STAT_H -DHAVE_SYS_TIME_H -DHAVE_SYS_TYPES_H -DHAVE_SYS_UIO_H -DHAVE_SYS_UN_H -DHAVE_SYS_XATTR_H -DHAVE_ALLOCA_H -DHAVE_ARPA_INET_H -DHAVE_ARPA_TFTP_H -DHAVE_ASSERT_H -DHAVE_ERR_H -DHAVE_ERRNO_H -DHAVE_FCNTL_H -DHAVE_IFADDRS_H -DHAVE_LIBGEN_H -DHAVE_LOCALE_H -DHAVE_NET_IF_H -DHAVE_NETDB_H -DHAVE_NETINET_IN_H -DHAVE_NETINET_TCP_H -DHAVE_POLL_H -DHAVE_PWD_H -DHAVE_SETJMP_H -DHAVE_SGTTY_H -DHAVE_SIGNAL_H -DHAVE_STDBOOL_H -DHAVE_STDINT_H -DHAVE_STDIO_H -DHAVE_STDLIB_H -DHAVE_STRING_H -DHAVE_STRINGS_H -DHAVE_STROPTS_H -DHAVE_TERMIO_H -DHAVE_TERMIOS_H -DHAVE_TIME_H -DHAVE_UNISTD_H -DHAVE_UTIME_H -DHAVE_STDDEF_H -DHAVE_DLFCN_H -DHAVE_MALLOC_H -DHAVE_MEMORY_H -DHAVE_NETINET_IF_ETHER_H -DHAVE_STDINT_H -DHAVE_SYS_UTSNAME_H -std=gnu11 -o CMakeFiles/cmTC_c713a.dir/CurlTests.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c: In function ‘main’:
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c:106:23: error: storage size of ‘hdata’ isn’t known
+   struct hostent_data hdata;
+                       ^~~~~
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c:141:8: error: too few arguments to function ‘gethostbyname_r’
+   rc = gethostbyname_r(address, &h, &hdata);
+        ^~~~~~~~~~~~~~~
+In file included from /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c:93:0:
+/usr/include/netdb.h:177:12: note: declared here
+ extern int gethostbyname_r (const char *__restrict __name,
+            ^~~~~~~~~~~~~~~
+CMakeFiles/cmTC_c713a.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_c713a.dir/CurlTests.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_c713a.dir/CurlTests.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_c713a/fast' failed
+make: *** [cmTC_c713a/fast] Error 2
+
+
+Performing Curl Test HAVE_GETHOSTBYNAME_R_5_REENTRANT failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_72b3d/fast && make  -f CMakeFiles/cmTC_72b3d.dir/build.make CMakeFiles/cmTC_72b3d.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_72b3d.dir/CurlTests.c.o
+/usr/bin/gcc   -w -DHAVE_GETHOSTBYNAME_R_5_REENTRANT  -DHAVE_STDIO_H -DHAVE_INTTYPES_H -DHAVE_SYS_IOCTL_H -DHAVE_SYS_PARAM_H -DHAVE_SYS_POLL_H -DHAVE_SYS_RESOURCE_H -DHAVE_SYS_SELECT_H -DHAVE_SYS_SOCKET_H -DHAVE_SYS_STAT_H -DHAVE_SYS_TIME_H -DHAVE_SYS_TYPES_H -DHAVE_SYS_UIO_H -DHAVE_SYS_UN_H -DHAVE_SYS_XATTR_H -DHAVE_ALLOCA_H -DHAVE_ARPA_INET_H -DHAVE_ARPA_TFTP_H -DHAVE_ASSERT_H -DHAVE_ERR_H -DHAVE_ERRNO_H -DHAVE_FCNTL_H -DHAVE_IFADDRS_H -DHAVE_LIBGEN_H -DHAVE_LOCALE_H -DHAVE_NET_IF_H -DHAVE_NETDB_H -DHAVE_NETINET_IN_H -DHAVE_NETINET_TCP_H -DHAVE_POLL_H -DHAVE_PWD_H -DHAVE_SETJMP_H -DHAVE_SGTTY_H -DHAVE_SIGNAL_H -DHAVE_STDBOOL_H -DHAVE_STDINT_H -DHAVE_STDIO_H -DHAVE_STDLIB_H -DHAVE_STRING_H -DHAVE_STRINGS_H -DHAVE_STROPTS_H -DHAVE_TERMIO_H -DHAVE_TERMIOS_H -DHAVE_TIME_H -DHAVE_UNISTD_H -DHAVE_UTIME_H -DHAVE_STDDEF_H -DHAVE_DLFCN_H -DHAVE_MALLOC_H -DHAVE_MEMORY_H -DHAVE_NETINET_IF_ETHER_H -DHAVE_STDINT_H -DHAVE_SYS_UTSNAME_H -std=gnu11 -o CMakeFiles/cmTC_72b3d.dir/CurlTests.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c: In function ‘main’:
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c:144:8: error: too few arguments to function ‘gethostbyname_r’
+   rc = gethostbyname_r(address, &h, buffer, 8192, &h_errnop);
+        ^~~~~~~~~~~~~~~
+In file included from /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c:93:0:
+/usr/include/netdb.h:177:12: note: declared here
+ extern int gethostbyname_r (const char *__restrict __name,
+            ^~~~~~~~~~~~~~~
+CMakeFiles/cmTC_72b3d.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_72b3d.dir/CurlTests.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_72b3d.dir/CurlTests.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_72b3d/fast' failed
+make: *** [cmTC_72b3d/fast] Error 2
+
+
+Performing Curl Test HAVE_INET_NTOA_R_DECL failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_7409f/fast && make  -f CMakeFiles/cmTC_7409f.dir/build.make CMakeFiles/cmTC_7409f.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_7409f.dir/CurlTests.c.o
+/usr/bin/gcc   -w -DHAVE_INET_NTOA_R_DECL  -DHAVE_STDIO_H -DHAVE_INTTYPES_H -DHAVE_SYS_IOCTL_H -DHAVE_SYS_PARAM_H -DHAVE_SYS_POLL_H -DHAVE_SYS_RESOURCE_H -DHAVE_SYS_SELECT_H -DHAVE_SYS_SOCKET_H -DHAVE_SYS_STAT_H -DHAVE_SYS_TIME_H -DHAVE_SYS_TYPES_H -DHAVE_SYS_UIO_H -DHAVE_SYS_UN_H -DHAVE_SYS_XATTR_H -DHAVE_ALLOCA_H -DHAVE_ARPA_INET_H -DHAVE_ARPA_TFTP_H -DHAVE_ASSERT_H -DHAVE_ERR_H -DHAVE_ERRNO_H -DHAVE_FCNTL_H -DHAVE_IFADDRS_H -DHAVE_LIBGEN_H -DHAVE_LOCALE_H -DHAVE_NET_IF_H -DHAVE_NETDB_H -DHAVE_NETINET_IN_H -DHAVE_NETINET_TCP_H -DHAVE_POLL_H -DHAVE_PWD_H -DHAVE_SETJMP_H -DHAVE_SGTTY_H -DHAVE_SIGNAL_H -DHAVE_STDBOOL_H -DHAVE_STDINT_H -DHAVE_STDIO_H -DHAVE_STDLIB_H -DHAVE_STRING_H -DHAVE_STRINGS_H -DHAVE_STROPTS_H -DHAVE_TERMIO_H -DHAVE_TERMIOS_H -DHAVE_TIME_H -DHAVE_UNISTD_H -DHAVE_UTIME_H -DHAVE_STDDEF_H -DHAVE_DLFCN_H -DHAVE_MALLOC_H -DHAVE_MEMORY_H -DHAVE_NETINET_IF_ETHER_H -DHAVE_STDINT_H -DHAVE_SYS_UTSNAME_H -std=gnu11 -o CMakeFiles/cmTC_7409f.dir/CurlTests.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c: In function ‘main’:
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c:244:21: error: ‘inet_ntoa_r’ undeclared (first use in this function); did you mean ‘inet_ntoa’?
+   func = (func_type)inet_ntoa_r;
+                     ^~~~~~~~~~~
+                     inet_ntoa
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c:244:21: note: each undeclared identifier is reported only once for each function it appears in
+CMakeFiles/cmTC_7409f.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_7409f.dir/CurlTests.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_7409f.dir/CurlTests.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_7409f/fast' failed
+make: *** [cmTC_7409f/fast] Error 2
+
+
+Performing Curl Test HAVE_INET_NTOA_R_DECL_REENTRANT failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_4d3b8/fast && make  -f CMakeFiles/cmTC_4d3b8.dir/build.make CMakeFiles/cmTC_4d3b8.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_4d3b8.dir/CurlTests.c.o
+/usr/bin/gcc   -w -DHAVE_INET_NTOA_R_DECL_REENTRANT  -DHAVE_STDIO_H -DHAVE_INTTYPES_H -DHAVE_SYS_IOCTL_H -DHAVE_SYS_PARAM_H -DHAVE_SYS_POLL_H -DHAVE_SYS_RESOURCE_H -DHAVE_SYS_SELECT_H -DHAVE_SYS_SOCKET_H -DHAVE_SYS_STAT_H -DHAVE_SYS_TIME_H -DHAVE_SYS_TYPES_H -DHAVE_SYS_UIO_H -DHAVE_SYS_UN_H -DHAVE_SYS_XATTR_H -DHAVE_ALLOCA_H -DHAVE_ARPA_INET_H -DHAVE_ARPA_TFTP_H -DHAVE_ASSERT_H -DHAVE_ERR_H -DHAVE_ERRNO_H -DHAVE_FCNTL_H -DHAVE_IFADDRS_H -DHAVE_LIBGEN_H -DHAVE_LOCALE_H -DHAVE_NET_IF_H -DHAVE_NETDB_H -DHAVE_NETINET_IN_H -DHAVE_NETINET_TCP_H -DHAVE_POLL_H -DHAVE_PWD_H -DHAVE_SETJMP_H -DHAVE_SGTTY_H -DHAVE_SIGNAL_H -DHAVE_STDBOOL_H -DHAVE_STDINT_H -DHAVE_STDIO_H -DHAVE_STDLIB_H -DHAVE_STRING_H -DHAVE_STRINGS_H -DHAVE_STROPTS_H -DHAVE_TERMIO_H -DHAVE_TERMIOS_H -DHAVE_TIME_H -DHAVE_UNISTD_H -DHAVE_UTIME_H -DHAVE_STDDEF_H -DHAVE_DLFCN_H -DHAVE_MALLOC_H -DHAVE_MEMORY_H -DHAVE_NETINET_IF_ETHER_H -DHAVE_STDINT_H -DHAVE_SYS_UTSNAME_H -std=gnu11 -o CMakeFiles/cmTC_4d3b8.dir/CurlTests.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c: In function ‘main’:
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c:260:22: error: ‘inet_ntoa_r’ undeclared (first use in this function); did you mean ‘inet_ntoa’?
+   func = (func_type)&inet_ntoa_r;
+                      ^~~~~~~~~~~
+                      inet_ntoa
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c:260:22: note: each undeclared identifier is reported only once for each function it appears in
+CMakeFiles/cmTC_4d3b8.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_4d3b8.dir/CurlTests.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_4d3b8.dir/CurlTests.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_4d3b8/fast' failed
+make: *** [cmTC_4d3b8/fast] Error 2
+
+
+Performing Curl Test HAVE_GLIBC_STRERROR_R failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_67e16/fast && make  -f CMakeFiles/cmTC_67e16.dir/build.make CMakeFiles/cmTC_67e16.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_67e16.dir/CurlTests.c.o
+/usr/bin/gcc   -w -DHAVE_GLIBC_STRERROR_R  -DHAVE_STDIO_H -DHAVE_INTTYPES_H -DHAVE_SYS_IOCTL_H -DHAVE_SYS_PARAM_H -DHAVE_SYS_POLL_H -DHAVE_SYS_RESOURCE_H -DHAVE_SYS_SELECT_H -DHAVE_SYS_SOCKET_H -DHAVE_SYS_STAT_H -DHAVE_SYS_TIME_H -DHAVE_SYS_TYPES_H -DHAVE_SYS_UIO_H -DHAVE_SYS_UN_H -DHAVE_SYS_XATTR_H -DHAVE_ALLOCA_H -DHAVE_ARPA_INET_H -DHAVE_ARPA_TFTP_H -DHAVE_ASSERT_H -DHAVE_ERR_H -DHAVE_ERRNO_H -DHAVE_FCNTL_H -DHAVE_IFADDRS_H -DHAVE_LIBGEN_H -DHAVE_LOCALE_H -DHAVE_NET_IF_H -DHAVE_NETDB_H -DHAVE_NETINET_IN_H -DHAVE_NETINET_TCP_H -DHAVE_POLL_H -DHAVE_PWD_H -DHAVE_SETJMP_H -DHAVE_SGTTY_H -DHAVE_SIGNAL_H -DHAVE_STDBOOL_H -DHAVE_STDINT_H -DHAVE_STDIO_H -DHAVE_STDLIB_H -DHAVE_STRING_H -DHAVE_STRINGS_H -DHAVE_STROPTS_H -DHAVE_TERMIO_H -DHAVE_TERMIOS_H -DHAVE_TIME_H -DHAVE_UNISTD_H -DHAVE_UTIME_H -DHAVE_STDDEF_H -DHAVE_DLFCN_H -DHAVE_MALLOC_H -DHAVE_MEMORY_H -DHAVE_NETINET_IF_ETHER_H -DHAVE_STDINT_H -DHAVE_SYS_UTSNAME_H -std=gnu11 -o CMakeFiles/cmTC_67e16.dir/CurlTests.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c: In function ‘main’:
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c:521:51: error: subscripted value is neither array nor pointer nor vector
+   check(strerror_r(EACCES, buffer, sizeof(buffer))[0]);
+                                                   ^
+CMakeFiles/cmTC_67e16.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_67e16.dir/CurlTests.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_67e16.dir/CurlTests.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_67e16/fast' failed
+make: *** [cmTC_67e16/fast] Error 2
+
+
+Performing Curl Test HAVE_BUILTIN_AVAILABLE failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_c0b7e/fast && make  -f CMakeFiles/cmTC_c0b7e.dir/build.make CMakeFiles/cmTC_c0b7e.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_c0b7e.dir/CurlTests.c.o
+/usr/bin/gcc   -w -DHAVE_BUILTIN_AVAILABLE  -DHAVE_STDIO_H -DHAVE_INTTYPES_H -DHAVE_SYS_IOCTL_H -DHAVE_SYS_PARAM_H -DHAVE_SYS_POLL_H -DHAVE_SYS_RESOURCE_H -DHAVE_SYS_SELECT_H -DHAVE_SYS_SOCKET_H -DHAVE_SYS_STAT_H -DHAVE_SYS_TIME_H -DHAVE_SYS_TYPES_H -DHAVE_SYS_UIO_H -DHAVE_SYS_UN_H -DHAVE_SYS_XATTR_H -DHAVE_ALLOCA_H -DHAVE_ARPA_INET_H -DHAVE_ARPA_TFTP_H -DHAVE_ASSERT_H -DHAVE_ERR_H -DHAVE_ERRNO_H -DHAVE_FCNTL_H -DHAVE_IFADDRS_H -DHAVE_LIBGEN_H -DHAVE_LOCALE_H -DHAVE_NET_IF_H -DHAVE_NETDB_H -DHAVE_NETINET_IN_H -DHAVE_NETINET_TCP_H -DHAVE_POLL_H -DHAVE_PWD_H -DHAVE_SETJMP_H -DHAVE_SGTTY_H -DHAVE_SIGNAL_H -DHAVE_STDBOOL_H -DHAVE_STDINT_H -DHAVE_STDIO_H -DHAVE_STDLIB_H -DHAVE_STRING_H -DHAVE_STRINGS_H -DHAVE_STROPTS_H -DHAVE_TERMIO_H -DHAVE_TERMIOS_H -DHAVE_TIME_H -DHAVE_UNISTD_H -DHAVE_UTIME_H -DHAVE_STDDEF_H -DHAVE_DLFCN_H -DHAVE_MALLOC_H -DHAVE_MEMORY_H -DHAVE_NETINET_IF_ETHER_H -DHAVE_STDINT_H -DHAVE_SYS_UTSNAME_H -std=gnu11 -o CMakeFiles/cmTC_c0b7e.dir/CurlTests.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c: In function ‘main’:
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c:568:26: error: ‘macOS’ undeclared (first use in this function)
+   if(__builtin_available(macOS 10.12, *)) {}
+                          ^~~~~
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c:568:26: note: each undeclared identifier is reported only once for each function it appears in
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmcurl/CMake/CurlTests.c:568:32: error: expected ‘)’ before numeric constant
+   if(__builtin_available(macOS 10.12, *)) {}
+                                ^~~~~
+CMakeFiles/cmTC_c0b7e.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_c0b7e.dir/CurlTests.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_c0b7e.dir/CurlTests.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_c0b7e/fast' failed
+make: *** [cmTC_c0b7e/fast] Error 2
+
+
+Determining if the arc4random_buf exist failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_b45b5/fast && make  -f CMakeFiles/cmTC_b45b5.dir/build.make CMakeFiles/cmTC_b45b5.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_b45b5.dir/CheckSymbolExists.c.o
+/usr/bin/gcc   -w  -std=gnu11 -o CMakeFiles/cmTC_b45b5.dir/CheckSymbolExists.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c: In function ‘main’:
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c:8:19: error: ‘arc4random_buf’ undeclared (first use in this function); did you mean ‘srandom_r’?
+   return ((int*)(&arc4random_buf))[argc];
+                   ^~~~~~~~~~~~~~
+                   srandom_r
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c:8:19: note: each undeclared identifier is reported only once for each function it appears in
+CMakeFiles/cmTC_b45b5.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_b45b5.dir/CheckSymbolExists.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_b45b5.dir/CheckSymbolExists.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_b45b5/fast' failed
+make: *** [cmTC_b45b5/fast] Error 2
+
+
+File /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <stdlib.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef arc4random_buf
+  return ((int*)(&arc4random_buf))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+Determining if the arc4random exist failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_0c8c7/fast && make  -f CMakeFiles/cmTC_0c8c7.dir/build.make CMakeFiles/cmTC_0c8c7.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_0c8c7.dir/CheckSymbolExists.c.o
+/usr/bin/gcc   -w  -std=gnu11 -o CMakeFiles/cmTC_0c8c7.dir/CheckSymbolExists.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c: In function ‘main’:
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c:8:19: error: ‘arc4random’ undeclared (first use in this function); did you mean ‘srandom’?
+   return ((int*)(&arc4random))[argc];
+                   ^~~~~~~~~~
+                   srandom
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c:8:19: note: each undeclared identifier is reported only once for each function it appears in
+CMakeFiles/cmTC_0c8c7.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_0c8c7.dir/CheckSymbolExists.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_0c8c7.dir/CheckSymbolExists.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_0c8c7/fast' failed
+make: *** [cmTC_0c8c7/fast] Error 2
+
+
+File /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <stdlib.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef arc4random
+  return ((int*)(&arc4random))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+Determining if files sys/types.h;ctype.h;copyfile.h exist failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_9e2b5/fast && make  -f CMakeFiles/cmTC_9e2b5.dir/build.make CMakeFiles/cmTC_9e2b5.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_9e2b5.dir/HAVE_COPYFILE_H.c.o
+/usr/bin/gcc   -w  -std=gnu11 -o CMakeFiles/cmTC_9e2b5.dir/HAVE_COPYFILE_H.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CheckIncludeFiles/HAVE_COPYFILE_H.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CheckIncludeFiles/HAVE_COPYFILE_H.c:4:10: fatal error: copyfile.h: 没有那个文件或目录
+ #include <copyfile.h>
+          ^~~~~~~~~~~~
+compilation terminated.
+CMakeFiles/cmTC_9e2b5.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_9e2b5.dir/HAVE_COPYFILE_H.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_9e2b5.dir/HAVE_COPYFILE_H.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_9e2b5/fast' failed
+make: *** [cmTC_9e2b5/fast] Error 2
+
+
+Source:
+/* */
+#include <sys/types.h>
+#include <ctype.h>
+#include <copyfile.h>
+
+
+int main(void){return 0;}
+
+Determining if files sys/types.h;ctype.h;direct.h exist failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_6feaf/fast && make  -f CMakeFiles/cmTC_6feaf.dir/build.make CMakeFiles/cmTC_6feaf.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_6feaf.dir/HAVE_DIRECT_H.c.o
+/usr/bin/gcc   -w  -std=gnu11 -o CMakeFiles/cmTC_6feaf.dir/HAVE_DIRECT_H.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CheckIncludeFiles/HAVE_DIRECT_H.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CheckIncludeFiles/HAVE_DIRECT_H.c:4:10: fatal error: direct.h: 没有那个文件或目录
+ #include <direct.h>
+          ^~~~~~~~~~
+compilation terminated.
+CMakeFiles/cmTC_6feaf.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_6feaf.dir/HAVE_DIRECT_H.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_6feaf.dir/HAVE_DIRECT_H.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_6feaf/fast' failed
+make: *** [cmTC_6feaf/fast] Error 2
+
+
+Source:
+/* */
+#include <sys/types.h>
+#include <ctype.h>
+#include <direct.h>
+
+
+int main(void){return 0;}
+
+Determining if files sys/types.h;ctype.h;dlfcn.h;errno.h;ext2fs/ext2_fs.h exist failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_b1cd9/fast && make  -f CMakeFiles/cmTC_b1cd9.dir/build.make CMakeFiles/cmTC_b1cd9.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_b1cd9.dir/HAVE_EXT2FS_EXT2_FS_H.c.o
+/usr/bin/gcc   -w  -std=gnu11 -o CMakeFiles/cmTC_b1cd9.dir/HAVE_EXT2FS_EXT2_FS_H.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CheckIncludeFiles/HAVE_EXT2FS_EXT2_FS_H.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CheckIncludeFiles/HAVE_EXT2FS_EXT2_FS_H.c:6:10: fatal error: ext2fs/ext2_fs.h: 没有那个文件或目录
+ #include <ext2fs/ext2_fs.h>
+          ^~~~~~~~~~~~~~~~~~
+compilation terminated.
+CMakeFiles/cmTC_b1cd9.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_b1cd9.dir/HAVE_EXT2FS_EXT2_FS_H.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_b1cd9.dir/HAVE_EXT2FS_EXT2_FS_H.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_b1cd9/fast' failed
+make: *** [cmTC_b1cd9/fast] Error 2
+
+
+Source:
+/* */
+#include <sys/types.h>
+#include <ctype.h>
+#include <dlfcn.h>
+#include <errno.h>
+#include <ext2fs/ext2_fs.h>
+
+
+int main(void){return 0;}
+
+Performing C SOURCE FILE Test HAVE_WORKING_EXT2_IOC_GETFLAGS failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_75b01/fast && make  -f CMakeFiles/cmTC_75b01.dir/build.make CMakeFiles/cmTC_75b01.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_75b01.dir/src.c.o
+/usr/bin/gcc -DHAVE_WORKING_EXT2_IOC_GETFLAGS  -w  -std=gnu11 -o CMakeFiles/cmTC_75b01.dir/src.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/src.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/src.c:2:10: fatal error: ext2fs/ext2_fs.h: 没有那个文件或目录
+ #include <ext2fs/ext2_fs.h>
+          ^~~~~~~~~~~~~~~~~~
+compilation terminated.
+CMakeFiles/cmTC_75b01.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_75b01.dir/src.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_75b01.dir/src.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_75b01/fast' failed
+make: *** [cmTC_75b01/fast] Error 2
+
+
+Source file was:
+#include <sys/ioctl.h>
+#include <ext2fs/ext2_fs.h>
+int main(void) { return EXT2_IOC_GETFLAGS; }
+Determining if files sys/types.h;ctype.h;dlfcn.h;errno.h;fcntl.h;grp.h;langinfo.h;limits.h;linux/types.h;linux/fiemap.h;linux/fs.h;linux/magic.h;locale.h;membership.h exist failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_59de5/fast && make  -f CMakeFiles/cmTC_59de5.dir/build.make CMakeFiles/cmTC_59de5.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_59de5.dir/HAVE_MEMBERSHIP_H.c.o
+/usr/bin/gcc   -w  -std=gnu11 -o CMakeFiles/cmTC_59de5.dir/HAVE_MEMBERSHIP_H.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CheckIncludeFiles/HAVE_MEMBERSHIP_H.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CheckIncludeFiles/HAVE_MEMBERSHIP_H.c:15:10: fatal error: membership.h: 没有那个文件或目录
+ #include <membership.h>
+          ^~~~~~~~~~~~~~
+compilation terminated.
+CMakeFiles/cmTC_59de5.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_59de5.dir/HAVE_MEMBERSHIP_H.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_59de5.dir/HAVE_MEMBERSHIP_H.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_59de5/fast' failed
+make: *** [cmTC_59de5/fast] Error 2
+
+
+Source:
+/* */
+#include <sys/types.h>
+#include <ctype.h>
+#include <dlfcn.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <grp.h>
+#include <langinfo.h>
+#include <limits.h>
+#include <linux/types.h>
+#include <linux/fiemap.h>
+#include <linux/fs.h>
+#include <linux/magic.h>
+#include <locale.h>
+#include <membership.h>
+
+
+int main(void){return 0;}
+
+Determining if files sys/types.h;ctype.h;dlfcn.h;errno.h;fcntl.h;grp.h;langinfo.h;limits.h;linux/types.h;linux/fiemap.h;linux/fs.h;linux/magic.h;locale.h;memory.h;paths.h;poll.h;pthread.h;pwd.h;readpassphrase.h exist failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_3612d/fast && make  -f CMakeFiles/cmTC_3612d.dir/build.make CMakeFiles/cmTC_3612d.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_3612d.dir/HAVE_READPASSPHRASE_H.c.o
+/usr/bin/gcc   -w  -std=gnu11 -o CMakeFiles/cmTC_3612d.dir/HAVE_READPASSPHRASE_H.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CheckIncludeFiles/HAVE_READPASSPHRASE_H.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CheckIncludeFiles/HAVE_READPASSPHRASE_H.c:20:10: fatal error: readpassphrase.h: 没有那个文件或目录
+ #include <readpassphrase.h>
+          ^~~~~~~~~~~~~~~~~~
+compilation terminated.
+CMakeFiles/cmTC_3612d.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_3612d.dir/HAVE_READPASSPHRASE_H.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_3612d.dir/HAVE_READPASSPHRASE_H.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_3612d/fast' failed
+make: *** [cmTC_3612d/fast] Error 2
+
+
+Source:
+/* */
+#include <sys/types.h>
+#include <ctype.h>
+#include <dlfcn.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <grp.h>
+#include <langinfo.h>
+#include <limits.h>
+#include <linux/types.h>
+#include <linux/fiemap.h>
+#include <linux/fs.h>
+#include <linux/magic.h>
+#include <locale.h>
+#include <memory.h>
+#include <paths.h>
+#include <poll.h>
+#include <pthread.h>
+#include <pwd.h>
+#include <readpassphrase.h>
+
+
+int main(void){return 0;}
+
+Determining if files sys/types.h;ctype.h;dlfcn.h;errno.h;fcntl.h;grp.h;langinfo.h;limits.h;linux/types.h;linux/fiemap.h;linux/fs.h;linux/magic.h;locale.h;memory.h;paths.h;poll.h;pthread.h;pwd.h;regex.h;signal.h;spawn.h;stdarg.h;stdlib.h;string.h;strings.h;sys/acl.h exist failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_0c675/fast && make  -f CMakeFiles/cmTC_0c675.dir/build.make CMakeFiles/cmTC_0c675.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_0c675.dir/HAVE_SYS_ACL_H.c.o
+/usr/bin/gcc   -w  -std=gnu11 -o CMakeFiles/cmTC_0c675.dir/HAVE_SYS_ACL_H.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CheckIncludeFiles/HAVE_SYS_ACL_H.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CheckIncludeFiles/HAVE_SYS_ACL_H.c:27:10: fatal error: sys/acl.h: 没有那个文件或目录
+ #include <sys/acl.h>
+          ^~~~~~~~~~~
+compilation terminated.
+CMakeFiles/cmTC_0c675.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_0c675.dir/HAVE_SYS_ACL_H.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_0c675.dir/HAVE_SYS_ACL_H.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_0c675/fast' failed
+make: *** [cmTC_0c675/fast] Error 2
+
+
+Source:
+/* */
+#include <sys/types.h>
+#include <ctype.h>
+#include <dlfcn.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <grp.h>
+#include <langinfo.h>
+#include <limits.h>
+#include <linux/types.h>
+#include <linux/fiemap.h>
+#include <linux/fs.h>
+#include <linux/magic.h>
+#include <locale.h>
+#include <memory.h>
+#include <paths.h>
+#include <poll.h>
+#include <pthread.h>
+#include <pwd.h>
+#include <regex.h>
+#include <signal.h>
+#include <spawn.h>
+#include <stdarg.h>
+#include <stdlib.h>
+#include <string.h>
+#include <strings.h>
+#include <sys/acl.h>
+
+
+int main(void){return 0;}
+
+Determining if files sys/types.h;ctype.h;dlfcn.h;errno.h;fcntl.h;grp.h;langinfo.h;limits.h;linux/types.h;linux/fiemap.h;linux/fs.h;linux/magic.h;locale.h;memory.h;paths.h;poll.h;pthread.h;pwd.h;regex.h;signal.h;spawn.h;stdarg.h;stdlib.h;string.h;strings.h;sys/cdefs.h;sys/extattr.h exist failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_83b6d/fast && make  -f CMakeFiles/cmTC_83b6d.dir/build.make CMakeFiles/cmTC_83b6d.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_83b6d.dir/HAVE_SYS_EXTATTR_H.c.o
+/usr/bin/gcc   -w  -std=gnu11 -o CMakeFiles/cmTC_83b6d.dir/HAVE_SYS_EXTATTR_H.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CheckIncludeFiles/HAVE_SYS_EXTATTR_H.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CheckIncludeFiles/HAVE_SYS_EXTATTR_H.c:28:10: fatal error: sys/extattr.h: 没有那个文件或目录
+ #include <sys/extattr.h>
+          ^~~~~~~~~~~~~~~
+compilation terminated.
+CMakeFiles/cmTC_83b6d.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_83b6d.dir/HAVE_SYS_EXTATTR_H.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_83b6d.dir/HAVE_SYS_EXTATTR_H.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_83b6d/fast' failed
+make: *** [cmTC_83b6d/fast] Error 2
+
+
+Source:
+/* */
+#include <sys/types.h>
+#include <ctype.h>
+#include <dlfcn.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <grp.h>
+#include <langinfo.h>
+#include <limits.h>
+#include <linux/types.h>
+#include <linux/fiemap.h>
+#include <linux/fs.h>
+#include <linux/magic.h>
+#include <locale.h>
+#include <memory.h>
+#include <paths.h>
+#include <poll.h>
+#include <pthread.h>
+#include <pwd.h>
+#include <regex.h>
+#include <signal.h>
+#include <spawn.h>
+#include <stdarg.h>
+#include <stdlib.h>
+#include <string.h>
+#include <strings.h>
+#include <sys/cdefs.h>
+#include <sys/extattr.h>
+
+
+int main(void){return 0;}
+
+Determining if files sys/types.h;ctype.h;dlfcn.h;errno.h;fcntl.h;grp.h;langinfo.h;limits.h;linux/types.h;linux/fiemap.h;linux/fs.h;linux/magic.h;locale.h;memory.h;paths.h;poll.h;pthread.h;pwd.h;regex.h;signal.h;spawn.h;stdarg.h;stdlib.h;string.h;strings.h;sys/cdefs.h;sys/ioctl.h;sys/mkdev.h exist failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_798dd/fast && make  -f CMakeFiles/cmTC_798dd.dir/build.make CMakeFiles/cmTC_798dd.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_798dd.dir/HAVE_SYS_MKDEV_H.c.o
+/usr/bin/gcc   -w  -std=gnu11 -o CMakeFiles/cmTC_798dd.dir/HAVE_SYS_MKDEV_H.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CheckIncludeFiles/HAVE_SYS_MKDEV_H.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CheckIncludeFiles/HAVE_SYS_MKDEV_H.c:29:10: fatal error: sys/mkdev.h: 没有那个文件或目录
+ #include <sys/mkdev.h>
+          ^~~~~~~~~~~~~
+compilation terminated.
+CMakeFiles/cmTC_798dd.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_798dd.dir/HAVE_SYS_MKDEV_H.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_798dd.dir/HAVE_SYS_MKDEV_H.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_798dd/fast' failed
+make: *** [cmTC_798dd/fast] Error 2
+
+
+Source:
+/* */
+#include <sys/types.h>
+#include <ctype.h>
+#include <dlfcn.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <grp.h>
+#include <langinfo.h>
+#include <limits.h>
+#include <linux/types.h>
+#include <linux/fiemap.h>
+#include <linux/fs.h>
+#include <linux/magic.h>
+#include <locale.h>
+#include <memory.h>
+#include <paths.h>
+#include <poll.h>
+#include <pthread.h>
+#include <pwd.h>
+#include <regex.h>
+#include <signal.h>
+#include <spawn.h>
+#include <stdarg.h>
+#include <stdlib.h>
+#include <string.h>
+#include <strings.h>
+#include <sys/cdefs.h>
+#include <sys/ioctl.h>
+#include <sys/mkdev.h>
+
+
+int main(void){return 0;}
+
+Determining if files sys/types.h;ctype.h;dlfcn.h;errno.h;fcntl.h;grp.h;langinfo.h;limits.h;linux/types.h;linux/fiemap.h;linux/fs.h;linux/magic.h;locale.h;memory.h;paths.h;poll.h;pthread.h;pwd.h;regex.h;signal.h;spawn.h;stdarg.h;stdlib.h;string.h;strings.h;sys/cdefs.h;sys/ioctl.h;sys/mount.h exist failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_797b8/fast && make  -f CMakeFiles/cmTC_797b8.dir/build.make CMakeFiles/cmTC_797b8.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_797b8.dir/HAVE_SYS_MOUNT_H.c.o
+/usr/bin/gcc   -w  -std=gnu11 -o CMakeFiles/cmTC_797b8.dir/HAVE_SYS_MOUNT_H.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CheckIncludeFiles/HAVE_SYS_MOUNT_H.c
+In file included from /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CheckIncludeFiles/HAVE_SYS_MOUNT_H.c:12:0:
+/usr/include/x86_64-linux-gnu/sys/mount.h:35:3: error: expected identifier before numeric constant
+   MS_RDONLY = 1,  /* Mount read-only.  */
+   ^
+CMakeFiles/cmTC_797b8.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_797b8.dir/HAVE_SYS_MOUNT_H.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_797b8.dir/HAVE_SYS_MOUNT_H.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_797b8/fast' failed
+make: *** [cmTC_797b8/fast] Error 2
+
+
+Source:
+/* */
+#include <sys/types.h>
+#include <ctype.h>
+#include <dlfcn.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <grp.h>
+#include <langinfo.h>
+#include <limits.h>
+#include <linux/types.h>
+#include <linux/fiemap.h>
+#include <linux/fs.h>
+#include <linux/magic.h>
+#include <locale.h>
+#include <memory.h>
+#include <paths.h>
+#include <poll.h>
+#include <pthread.h>
+#include <pwd.h>
+#include <regex.h>
+#include <signal.h>
+#include <spawn.h>
+#include <stdarg.h>
+#include <stdlib.h>
+#include <string.h>
+#include <strings.h>
+#include <sys/cdefs.h>
+#include <sys/ioctl.h>
+#include <sys/mount.h>
+
+
+int main(void){return 0;}
+
+Determining if files sys/types.h;ctype.h;dlfcn.h;errno.h;fcntl.h;grp.h;langinfo.h;limits.h;linux/types.h;linux/fiemap.h;linux/fs.h;linux/magic.h;locale.h;memory.h;paths.h;poll.h;pthread.h;pwd.h;regex.h;signal.h;spawn.h;stdarg.h;stdlib.h;string.h;strings.h;sys/cdefs.h;sys/ioctl.h;sys/param.h;sys/poll.h;sys/richacl.h exist failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_5345c/fast && make  -f CMakeFiles/cmTC_5345c.dir/build.make CMakeFiles/cmTC_5345c.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_5345c.dir/HAVE_SYS_RICHACL_H.c.o
+/usr/bin/gcc   -w  -std=gnu11 -o CMakeFiles/cmTC_5345c.dir/HAVE_SYS_RICHACL_H.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CheckIncludeFiles/HAVE_SYS_RICHACL_H.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CheckIncludeFiles/HAVE_SYS_RICHACL_H.c:31:10: fatal error: sys/richacl.h: 没有那个文件或目录
+ #include <sys/richacl.h>
+          ^~~~~~~~~~~~~~~
+compilation terminated.
+CMakeFiles/cmTC_5345c.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_5345c.dir/HAVE_SYS_RICHACL_H.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_5345c.dir/HAVE_SYS_RICHACL_H.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_5345c/fast' failed
+make: *** [cmTC_5345c/fast] Error 2
+
+
+Source:
+/* */
+#include <sys/types.h>
+#include <ctype.h>
+#include <dlfcn.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <grp.h>
+#include <langinfo.h>
+#include <limits.h>
+#include <linux/types.h>
+#include <linux/fiemap.h>
+#include <linux/fs.h>
+#include <linux/magic.h>
+#include <locale.h>
+#include <memory.h>
+#include <paths.h>
+#include <poll.h>
+#include <pthread.h>
+#include <pwd.h>
+#include <regex.h>
+#include <signal.h>
+#include <spawn.h>
+#include <stdarg.h>
+#include <stdlib.h>
+#include <string.h>
+#include <strings.h>
+#include <sys/cdefs.h>
+#include <sys/ioctl.h>
+#include <sys/param.h>
+#include <sys/poll.h>
+#include <sys/richacl.h>
+
+
+int main(void){return 0;}
+
+Determining if files sys/types.h;ctype.h;dlfcn.h;errno.h;fcntl.h;grp.h;langinfo.h;limits.h;linux/types.h;linux/fiemap.h;linux/fs.h;linux/magic.h;locale.h;memory.h;paths.h;poll.h;pthread.h;pwd.h;regex.h;signal.h;spawn.h;stdarg.h;stdlib.h;string.h;strings.h;sys/cdefs.h;sys/ioctl.h;sys/param.h;sys/poll.h;sys/select.h;sys/stat.h;sys/statfs.h;sys/statvfs.h;sys/sysmacros.h;sys/time.h;sys/utsname.h;sys/vfs.h;sys/wait.h;sys/xattr.h;time.h;unistd.h;utime.h;wchar.h;wctype.h;windows.h exist failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_6c575/fast && make  -f CMakeFiles/cmTC_6c575.dir/build.make CMakeFiles/cmTC_6c575.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_6c575.dir/HAVE_WINDOWS_H.c.o
+/usr/bin/gcc   -w  -std=gnu11 -o CMakeFiles/cmTC_6c575.dir/HAVE_WINDOWS_H.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CheckIncludeFiles/HAVE_WINDOWS_H.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CheckIncludeFiles/HAVE_WINDOWS_H.c:46:10: fatal error: windows.h: 没有那个文件或目录
+ #include <windows.h>
+          ^~~~~~~~~~~
+compilation terminated.
+CMakeFiles/cmTC_6c575.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_6c575.dir/HAVE_WINDOWS_H.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_6c575.dir/HAVE_WINDOWS_H.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_6c575/fast' failed
+make: *** [cmTC_6c575/fast] Error 2
+
+
+Source:
+/* */
+#include <sys/types.h>
+#include <ctype.h>
+#include <dlfcn.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <grp.h>
+#include <langinfo.h>
+#include <limits.h>
+#include <linux/types.h>
+#include <linux/fiemap.h>
+#include <linux/fs.h>
+#include <linux/magic.h>
+#include <locale.h>
+#include <memory.h>
+#include <paths.h>
+#include <poll.h>
+#include <pthread.h>
+#include <pwd.h>
+#include <regex.h>
+#include <signal.h>
+#include <spawn.h>
+#include <stdarg.h>
+#include <stdlib.h>
+#include <string.h>
+#include <strings.h>
+#include <sys/cdefs.h>
+#include <sys/ioctl.h>
+#include <sys/param.h>
+#include <sys/poll.h>
+#include <sys/select.h>
+#include <sys/stat.h>
+#include <sys/statfs.h>
+#include <sys/statvfs.h>
+#include <sys/sysmacros.h>
+#include <sys/time.h>
+#include <sys/utsname.h>
+#include <sys/vfs.h>
+#include <sys/wait.h>
+#include <sys/xattr.h>
+#include <time.h>
+#include <unistd.h>
+#include <utime.h>
+#include <wchar.h>
+#include <wctype.h>
+#include <windows.h>
+
+
+int main(void){return 0;}
+
+Determining if files sys/types.h;ctype.h;dlfcn.h;errno.h;fcntl.h;grp.h;langinfo.h;limits.h;linux/types.h;linux/fiemap.h;linux/fs.h;linux/magic.h;locale.h;memory.h;paths.h;poll.h;pthread.h;pwd.h;regex.h;signal.h;spawn.h;stdarg.h;stdlib.h;string.h;strings.h;sys/cdefs.h;sys/ioctl.h;sys/param.h;sys/poll.h;sys/select.h;sys/stat.h;sys/statfs.h;sys/statvfs.h;sys/sysmacros.h;sys/time.h;sys/utsname.h;sys/vfs.h;sys/wait.h;sys/xattr.h;time.h;unistd.h;utime.h;wchar.h;wctype.h;wincrypt.h exist failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_66dd9/fast && make  -f CMakeFiles/cmTC_66dd9.dir/build.make CMakeFiles/cmTC_66dd9.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_66dd9.dir/HAVE_WINCRYPT_H.c.o
+/usr/bin/gcc   -w  -std=gnu11 -o CMakeFiles/cmTC_66dd9.dir/HAVE_WINCRYPT_H.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CheckIncludeFiles/HAVE_WINCRYPT_H.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CheckIncludeFiles/HAVE_WINCRYPT_H.c:46:10: fatal error: wincrypt.h: 没有那个文件或目录
+ #include <wincrypt.h>
+          ^~~~~~~~~~~~
+compilation terminated.
+CMakeFiles/cmTC_66dd9.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_66dd9.dir/HAVE_WINCRYPT_H.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_66dd9.dir/HAVE_WINCRYPT_H.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_66dd9/fast' failed
+make: *** [cmTC_66dd9/fast] Error 2
+
+
+Source:
+/* */
+#include <sys/types.h>
+#include <ctype.h>
+#include <dlfcn.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <grp.h>
+#include <langinfo.h>
+#include <limits.h>
+#include <linux/types.h>
+#include <linux/fiemap.h>
+#include <linux/fs.h>
+#include <linux/magic.h>
+#include <locale.h>
+#include <memory.h>
+#include <paths.h>
+#include <poll.h>
+#include <pthread.h>
+#include <pwd.h>
+#include <regex.h>
+#include <signal.h>
+#include <spawn.h>
+#include <stdarg.h>
+#include <stdlib.h>
+#include <string.h>
+#include <strings.h>
+#include <sys/cdefs.h>
+#include <sys/ioctl.h>
+#include <sys/param.h>
+#include <sys/poll.h>
+#include <sys/select.h>
+#include <sys/stat.h>
+#include <sys/statfs.h>
+#include <sys/statvfs.h>
+#include <sys/sysmacros.h>
+#include <sys/time.h>
+#include <sys/utsname.h>
+#include <sys/vfs.h>
+#include <sys/wait.h>
+#include <sys/xattr.h>
+#include <time.h>
+#include <unistd.h>
+#include <utime.h>
+#include <wchar.h>
+#include <wctype.h>
+#include <wincrypt.h>
+
+
+int main(void){return 0;}
+
+Determining if files sys/types.h;ctype.h;dlfcn.h;errno.h;fcntl.h;grp.h;langinfo.h;limits.h;linux/types.h;linux/fiemap.h;linux/fs.h;linux/magic.h;locale.h;memory.h;paths.h;poll.h;pthread.h;pwd.h;regex.h;signal.h;spawn.h;stdarg.h;stdlib.h;string.h;strings.h;sys/cdefs.h;sys/ioctl.h;sys/param.h;sys/poll.h;sys/select.h;sys/stat.h;sys/statfs.h;sys/statvfs.h;sys/sysmacros.h;sys/time.h;sys/utsname.h;sys/vfs.h;sys/wait.h;sys/xattr.h;time.h;unistd.h;utime.h;wchar.h;wctype.h;winioctl.h exist failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_29a6d/fast && make  -f CMakeFiles/cmTC_29a6d.dir/build.make CMakeFiles/cmTC_29a6d.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_29a6d.dir/HAVE_WINIOCTL_H.c.o
+/usr/bin/gcc   -w  -std=gnu11 -o CMakeFiles/cmTC_29a6d.dir/HAVE_WINIOCTL_H.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CheckIncludeFiles/HAVE_WINIOCTL_H.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CheckIncludeFiles/HAVE_WINIOCTL_H.c:46:10: fatal error: winioctl.h: 没有那个文件或目录
+ #include <winioctl.h>
+          ^~~~~~~~~~~~
+compilation terminated.
+CMakeFiles/cmTC_29a6d.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_29a6d.dir/HAVE_WINIOCTL_H.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_29a6d.dir/HAVE_WINIOCTL_H.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_29a6d/fast' failed
+make: *** [cmTC_29a6d/fast] Error 2
+
+
+Source:
+/* */
+#include <sys/types.h>
+#include <ctype.h>
+#include <dlfcn.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <grp.h>
+#include <langinfo.h>
+#include <limits.h>
+#include <linux/types.h>
+#include <linux/fiemap.h>
+#include <linux/fs.h>
+#include <linux/magic.h>
+#include <locale.h>
+#include <memory.h>
+#include <paths.h>
+#include <poll.h>
+#include <pthread.h>
+#include <pwd.h>
+#include <regex.h>
+#include <signal.h>
+#include <spawn.h>
+#include <stdarg.h>
+#include <stdlib.h>
+#include <string.h>
+#include <strings.h>
+#include <sys/cdefs.h>
+#include <sys/ioctl.h>
+#include <sys/param.h>
+#include <sys/poll.h>
+#include <sys/select.h>
+#include <sys/stat.h>
+#include <sys/statfs.h>
+#include <sys/statvfs.h>
+#include <sys/sysmacros.h>
+#include <sys/time.h>
+#include <sys/utsname.h>
+#include <sys/vfs.h>
+#include <sys/wait.h>
+#include <sys/xattr.h>
+#include <time.h>
+#include <unistd.h>
+#include <utime.h>
+#include <wchar.h>
+#include <wctype.h>
+#include <winioctl.h>
+
+
+int main(void){return 0;}
+
+Determining if the function getvfsbyname exists failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_cdb68/fast && make  -f CMakeFiles/cmTC_cdb68.dir/build.make CMakeFiles/cmTC_cdb68.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_cdb68.dir/CheckFunctionExists.c.o
+/usr/bin/gcc   -w -DCHECK_FUNCTION_EXISTS=getvfsbyname  -fno-builtin -std=gnu11 -o CMakeFiles/cmTC_cdb68.dir/CheckFunctionExists.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Modules/CheckFunctionExists.c
+Linking C executable cmTC_cdb68
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Bootstrap.cmk/cmake -E cmake_link_script CMakeFiles/cmTC_cdb68.dir/link.txt --verbose=1
+/usr/bin/gcc  -w -DCHECK_FUNCTION_EXISTS=getvfsbyname  -fno-builtin CMakeFiles/cmTC_cdb68.dir/CheckFunctionExists.c.o -o cmTC_cdb68 
+CMakeFiles/cmTC_cdb68.dir/CheckFunctionExists.c.o：在函数‘main’中：
+CheckFunctionExists.c:(.text+0x10)：对‘getvfsbyname’未定义的引用
+collect2: error: ld returned 1 exit status
+CMakeFiles/cmTC_cdb68.dir/build.make:98: recipe for target 'cmTC_cdb68' failed
+make[1]: *** [cmTC_cdb68] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_cdb68/fast' failed
+make: *** [cmTC_cdb68/fast] Error 2
+
+
+
+Determining if the function lchflags exists failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_5c5e8/fast && make  -f CMakeFiles/cmTC_5c5e8.dir/build.make CMakeFiles/cmTC_5c5e8.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_5c5e8.dir/CheckFunctionExists.c.o
+/usr/bin/gcc   -w -DCHECK_FUNCTION_EXISTS=lchflags  -fno-builtin -std=gnu11 -o CMakeFiles/cmTC_5c5e8.dir/CheckFunctionExists.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Modules/CheckFunctionExists.c
+Linking C executable cmTC_5c5e8
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Bootstrap.cmk/cmake -E cmake_link_script CMakeFiles/cmTC_5c5e8.dir/link.txt --verbose=1
+/usr/bin/gcc  -w -DCHECK_FUNCTION_EXISTS=lchflags  -fno-builtin CMakeFiles/cmTC_5c5e8.dir/CheckFunctionExists.c.o -o cmTC_5c5e8 
+CMakeFiles/cmTC_5c5e8.dir/CheckFunctionExists.c.o：在函数‘main’中：
+CheckFunctionExists.c:(.text+0x10)：对‘lchflags’未定义的引用
+collect2: error: ld returned 1 exit status
+CMakeFiles/cmTC_5c5e8.dir/build.make:98: recipe for target 'cmTC_5c5e8' failed
+make[1]: *** [cmTC_5c5e8] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_5c5e8/fast' failed
+make: *** [cmTC_5c5e8/fast] Error 2
+
+
+
+Determining if the function readpassphrase exists failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_e0746/fast && make  -f CMakeFiles/cmTC_e0746.dir/build.make CMakeFiles/cmTC_e0746.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_e0746.dir/CheckFunctionExists.c.o
+/usr/bin/gcc   -w -DCHECK_FUNCTION_EXISTS=readpassphrase  -fno-builtin -std=gnu11 -o CMakeFiles/cmTC_e0746.dir/CheckFunctionExists.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Modules/CheckFunctionExists.c
+Linking C executable cmTC_e0746
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Bootstrap.cmk/cmake -E cmake_link_script CMakeFiles/cmTC_e0746.dir/link.txt --verbose=1
+/usr/bin/gcc  -w -DCHECK_FUNCTION_EXISTS=readpassphrase  -fno-builtin CMakeFiles/cmTC_e0746.dir/CheckFunctionExists.c.o -o cmTC_e0746 
+CMakeFiles/cmTC_e0746.dir/CheckFunctionExists.c.o：在函数‘main’中：
+CheckFunctionExists.c:(.text+0x10)：对‘readpassphrase’未定义的引用
+collect2: error: ld returned 1 exit status
+CMakeFiles/cmTC_e0746.dir/build.make:98: recipe for target 'cmTC_e0746' failed
+make[1]: *** [cmTC_e0746] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_e0746/fast' failed
+make: *** [cmTC_e0746/fast] Error 2
+
+
+
+Determining if the function strncpy_s exists failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_454e9/fast && make  -f CMakeFiles/cmTC_454e9.dir/build.make CMakeFiles/cmTC_454e9.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_454e9.dir/CheckFunctionExists.c.o
+/usr/bin/gcc   -w -DCHECK_FUNCTION_EXISTS=strncpy_s  -fno-builtin -std=gnu11 -o CMakeFiles/cmTC_454e9.dir/CheckFunctionExists.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Modules/CheckFunctionExists.c
+Linking C executable cmTC_454e9
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Bootstrap.cmk/cmake -E cmake_link_script CMakeFiles/cmTC_454e9.dir/link.txt --verbose=1
+/usr/bin/gcc  -w -DCHECK_FUNCTION_EXISTS=strncpy_s  -fno-builtin CMakeFiles/cmTC_454e9.dir/CheckFunctionExists.c.o -o cmTC_454e9 
+CMakeFiles/cmTC_454e9.dir/CheckFunctionExists.c.o：在函数‘main’中：
+CheckFunctionExists.c:(.text+0x10)：对‘strncpy_s’未定义的引用
+collect2: error: ld returned 1 exit status
+CMakeFiles/cmTC_454e9.dir/build.make:98: recipe for target 'cmTC_454e9' failed
+make[1]: *** [cmTC_454e9] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_454e9/fast' failed
+make: *** [cmTC_454e9/fast] Error 2
+
+
+
+Determining if the function _ctime64_s exists failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_ceec5/fast && make  -f CMakeFiles/cmTC_ceec5.dir/build.make CMakeFiles/cmTC_ceec5.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_ceec5.dir/CheckFunctionExists.c.o
+/usr/bin/gcc   -w -DCHECK_FUNCTION_EXISTS=_ctime64_s  -fno-builtin -std=gnu11 -o CMakeFiles/cmTC_ceec5.dir/CheckFunctionExists.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Modules/CheckFunctionExists.c
+Linking C executable cmTC_ceec5
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Bootstrap.cmk/cmake -E cmake_link_script CMakeFiles/cmTC_ceec5.dir/link.txt --verbose=1
+/usr/bin/gcc  -w -DCHECK_FUNCTION_EXISTS=_ctime64_s  -fno-builtin CMakeFiles/cmTC_ceec5.dir/CheckFunctionExists.c.o -o cmTC_ceec5 
+CMakeFiles/cmTC_ceec5.dir/CheckFunctionExists.c.o：在函数‘main’中：
+CheckFunctionExists.c:(.text+0x10)：对‘_ctime64_s’未定义的引用
+collect2: error: ld returned 1 exit status
+CMakeFiles/cmTC_ceec5.dir/build.make:98: recipe for target 'cmTC_ceec5' failed
+make[1]: *** [cmTC_ceec5] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_ceec5/fast' failed
+make: *** [cmTC_ceec5/fast] Error 2
+
+
+
+Determining if the function _fseeki64 exists failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_40c5c/fast && make  -f CMakeFiles/cmTC_40c5c.dir/build.make CMakeFiles/cmTC_40c5c.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_40c5c.dir/CheckFunctionExists.c.o
+/usr/bin/gcc   -w -DCHECK_FUNCTION_EXISTS=_fseeki64  -fno-builtin -std=gnu11 -o CMakeFiles/cmTC_40c5c.dir/CheckFunctionExists.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Modules/CheckFunctionExists.c
+Linking C executable cmTC_40c5c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Bootstrap.cmk/cmake -E cmake_link_script CMakeFiles/cmTC_40c5c.dir/link.txt --verbose=1
+/usr/bin/gcc  -w -DCHECK_FUNCTION_EXISTS=_fseeki64  -fno-builtin CMakeFiles/cmTC_40c5c.dir/CheckFunctionExists.c.o -o cmTC_40c5c 
+CMakeFiles/cmTC_40c5c.dir/CheckFunctionExists.c.o：在函数‘main’中：
+CheckFunctionExists.c:(.text+0x10)：对‘_fseeki64’未定义的引用
+collect2: error: ld returned 1 exit status
+CMakeFiles/cmTC_40c5c.dir/build.make:98: recipe for target 'cmTC_40c5c' failed
+make[1]: *** [cmTC_40c5c] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_40c5c/fast' failed
+make: *** [cmTC_40c5c/fast] Error 2
+
+
+
+Determining if the function _get_timezone exists failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_015c5/fast && make  -f CMakeFiles/cmTC_015c5.dir/build.make CMakeFiles/cmTC_015c5.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_015c5.dir/CheckFunctionExists.c.o
+/usr/bin/gcc   -w -DCHECK_FUNCTION_EXISTS=_get_timezone  -fno-builtin -std=gnu11 -o CMakeFiles/cmTC_015c5.dir/CheckFunctionExists.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Modules/CheckFunctionExists.c
+Linking C executable cmTC_015c5
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Bootstrap.cmk/cmake -E cmake_link_script CMakeFiles/cmTC_015c5.dir/link.txt --verbose=1
+/usr/bin/gcc  -w -DCHECK_FUNCTION_EXISTS=_get_timezone  -fno-builtin CMakeFiles/cmTC_015c5.dir/CheckFunctionExists.c.o -o cmTC_015c5 
+CMakeFiles/cmTC_015c5.dir/CheckFunctionExists.c.o：在函数‘main’中：
+CheckFunctionExists.c:(.text+0x10)：对‘_get_timezone’未定义的引用
+collect2: error: ld returned 1 exit status
+CMakeFiles/cmTC_015c5.dir/build.make:98: recipe for target 'cmTC_015c5' failed
+make[1]: *** [cmTC_015c5] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_015c5/fast' failed
+make: *** [cmTC_015c5/fast] Error 2
+
+
+
+Determining if the function _gmtime64_s exists failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_6b84d/fast && make  -f CMakeFiles/cmTC_6b84d.dir/build.make CMakeFiles/cmTC_6b84d.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_6b84d.dir/CheckFunctionExists.c.o
+/usr/bin/gcc   -w -DCHECK_FUNCTION_EXISTS=_gmtime64_s  -fno-builtin -std=gnu11 -o CMakeFiles/cmTC_6b84d.dir/CheckFunctionExists.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Modules/CheckFunctionExists.c
+Linking C executable cmTC_6b84d
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Bootstrap.cmk/cmake -E cmake_link_script CMakeFiles/cmTC_6b84d.dir/link.txt --verbose=1
+/usr/bin/gcc  -w -DCHECK_FUNCTION_EXISTS=_gmtime64_s  -fno-builtin CMakeFiles/cmTC_6b84d.dir/CheckFunctionExists.c.o -o cmTC_6b84d 
+CMakeFiles/cmTC_6b84d.dir/CheckFunctionExists.c.o：在函数‘main’中：
+CheckFunctionExists.c:(.text+0x10)：对‘_gmtime64_s’未定义的引用
+collect2: error: ld returned 1 exit status
+CMakeFiles/cmTC_6b84d.dir/build.make:98: recipe for target 'cmTC_6b84d' failed
+make[1]: *** [cmTC_6b84d] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_6b84d/fast' failed
+make: *** [cmTC_6b84d/fast] Error 2
+
+
+
+Determining if the function _localtime64_s exists failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_42081/fast && make  -f CMakeFiles/cmTC_42081.dir/build.make CMakeFiles/cmTC_42081.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_42081.dir/CheckFunctionExists.c.o
+/usr/bin/gcc   -w -DCHECK_FUNCTION_EXISTS=_localtime64_s  -fno-builtin -std=gnu11 -o CMakeFiles/cmTC_42081.dir/CheckFunctionExists.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Modules/CheckFunctionExists.c
+Linking C executable cmTC_42081
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Bootstrap.cmk/cmake -E cmake_link_script CMakeFiles/cmTC_42081.dir/link.txt --verbose=1
+/usr/bin/gcc  -w -DCHECK_FUNCTION_EXISTS=_localtime64_s  -fno-builtin CMakeFiles/cmTC_42081.dir/CheckFunctionExists.c.o -o cmTC_42081 
+CMakeFiles/cmTC_42081.dir/CheckFunctionExists.c.o：在函数‘main’中：
+CheckFunctionExists.c:(.text+0x10)：对‘_localtime64_s’未定义的引用
+collect2: error: ld returned 1 exit status
+CMakeFiles/cmTC_42081.dir/build.make:98: recipe for target 'cmTC_42081' failed
+make[1]: *** [cmTC_42081] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_42081/fast' failed
+make: *** [cmTC_42081/fast] Error 2
+
+
+
+Determining if the function _mkgmtime64 exists failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_ec1fe/fast && make  -f CMakeFiles/cmTC_ec1fe.dir/build.make CMakeFiles/cmTC_ec1fe.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_ec1fe.dir/CheckFunctionExists.c.o
+/usr/bin/gcc   -w -DCHECK_FUNCTION_EXISTS=_mkgmtime64  -fno-builtin -std=gnu11 -o CMakeFiles/cmTC_ec1fe.dir/CheckFunctionExists.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Modules/CheckFunctionExists.c
+Linking C executable cmTC_ec1fe
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Bootstrap.cmk/cmake -E cmake_link_script CMakeFiles/cmTC_ec1fe.dir/link.txt --verbose=1
+/usr/bin/gcc  -w -DCHECK_FUNCTION_EXISTS=_mkgmtime64  -fno-builtin CMakeFiles/cmTC_ec1fe.dir/CheckFunctionExists.c.o -o cmTC_ec1fe 
+CMakeFiles/cmTC_ec1fe.dir/CheckFunctionExists.c.o：在函数‘main’中：
+CheckFunctionExists.c:(.text+0x10)：对‘_mkgmtime64’未定义的引用
+collect2: error: ld returned 1 exit status
+CMakeFiles/cmTC_ec1fe.dir/build.make:98: recipe for target 'cmTC_ec1fe' failed
+make[1]: *** [cmTC_ec1fe] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_ec1fe/fast' failed
+make: *** [cmTC_ec1fe/fast] Error 2
+
+
+
+Determining if the function cygwin_conv_path exists failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_bd59a/fast && make  -f CMakeFiles/cmTC_bd59a.dir/build.make CMakeFiles/cmTC_bd59a.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_bd59a.dir/CheckFunctionExists.c.o
+/usr/bin/gcc   -w -DCHECK_FUNCTION_EXISTS=cygwin_conv_path  -fno-builtin -std=gnu11 -o CMakeFiles/cmTC_bd59a.dir/CheckFunctionExists.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Modules/CheckFunctionExists.c
+Linking C executable cmTC_bd59a
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Bootstrap.cmk/cmake -E cmake_link_script CMakeFiles/cmTC_bd59a.dir/link.txt --verbose=1
+/usr/bin/gcc  -w -DCHECK_FUNCTION_EXISTS=cygwin_conv_path  -fno-builtin CMakeFiles/cmTC_bd59a.dir/CheckFunctionExists.c.o -o cmTC_bd59a 
+CMakeFiles/cmTC_bd59a.dir/CheckFunctionExists.c.o：在函数‘main’中：
+CheckFunctionExists.c:(.text+0x10)：对‘cygwin_conv_path’未定义的引用
+collect2: error: ld returned 1 exit status
+CMakeFiles/cmTC_bd59a.dir/build.make:98: recipe for target 'cmTC_bd59a' failed
+make[1]: *** [cmTC_bd59a] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_bd59a/fast' failed
+make: *** [cmTC_bd59a/fast] Error 2
+
+
+
+Performing C SOURCE FILE Test HAVE_STRUCT_VFSCONF failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_85211/fast && make  -f CMakeFiles/cmTC_85211.dir/build.make CMakeFiles/cmTC_85211.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_85211.dir/src.c.o
+/usr/bin/gcc -DHAVE_STRUCT_VFSCONF  -w  -std=gnu11 -o CMakeFiles/cmTC_85211.dir/src.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/src.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/src.c: In function ‘main’:
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/src.c:3:33: error: storage size of ‘v’ isn’t known
+ int main(void) { struct vfsconf v; return sizeof(v);}
+                                 ^
+CMakeFiles/cmTC_85211.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_85211.dir/src.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_85211.dir/src.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_85211/fast' failed
+make: *** [cmTC_85211/fast] Error 2
+
+
+Source file was:
+#include <sys/types.h>
+#include <sys/mount.h>
+int main(void) { struct vfsconf v; return sizeof(v);}
+Performing C SOURCE FILE Test HAVE_STRUCT_XVFSCONF failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_7516e/fast && make  -f CMakeFiles/cmTC_7516e.dir/build.make CMakeFiles/cmTC_7516e.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_7516e.dir/src.c.o
+/usr/bin/gcc -DHAVE_STRUCT_XVFSCONF  -w  -std=gnu11 -o CMakeFiles/cmTC_7516e.dir/src.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/src.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/src.c: In function ‘main’:
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/src.c:3:34: error: storage size of ‘v’ isn’t known
+ int main(void) { struct xvfsconf v; return sizeof(v);}
+                                  ^
+CMakeFiles/cmTC_7516e.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_7516e.dir/src.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_7516e.dir/src.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_7516e/fast' failed
+make: *** [cmTC_7516e/fast] Error 2
+
+
+Source file was:
+#include <sys/types.h>
+#include <sys/mount.h>
+int main(void) { struct xvfsconf v; return sizeof(v);}
+Performing C SOURCE FILE Test MAJOR_IN_MKDEV failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_b0630/fast && make  -f CMakeFiles/cmTC_b0630.dir/build.make CMakeFiles/cmTC_b0630.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_b0630.dir/src.c.o
+/usr/bin/gcc -DMAJOR_IN_MKDEV  -w  -std=gnu11 -o CMakeFiles/cmTC_b0630.dir/src.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/src.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/src.c:1:10: fatal error: sys/mkdev.h: 没有那个文件或目录
+ #include <sys/mkdev.h>
+          ^~~~~~~~~~~~~
+compilation terminated.
+CMakeFiles/cmTC_b0630.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_b0630.dir/src.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_b0630.dir/src.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_b0630/fast' failed
+make: *** [cmTC_b0630/fast] Error 2
+
+
+Source file was:
+#include <sys/mkdev.h>
+int main() { return major(256); }
+Performing C SOURCE FILE Test HAVE_LZMA_STREAM_ENCODER_MT failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_f438a/fast && make  -f CMakeFiles/cmTC_f438a.dir/build.make CMakeFiles/cmTC_f438a.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_f438a.dir/src.c.o
+/usr/bin/gcc -DHAVE_LZMA_STREAM_ENCODER_MT -I/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Utilities/cmliblzma/liblzma/api -w  -std=gnu11 -o CMakeFiles/cmTC_f438a.dir/src.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/src.c
+Linking C executable cmTC_f438a
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Bootstrap.cmk/cmake -E cmake_link_script CMakeFiles/cmTC_f438a.dir/link.txt --verbose=1
+/usr/bin/gcc  -w  CMakeFiles/cmTC_f438a.dir/src.c.o -o cmTC_f438a  -lcmliblzma 
+/usr/bin/ld: 找不到 -lcmliblzma
+collect2: error: ld returned 1 exit status
+CMakeFiles/cmTC_f438a.dir/build.make:98: recipe for target 'cmTC_f438a' failed
+make[1]: *** [cmTC_f438a] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_f438a/fast' failed
+make: *** [cmTC_f438a/fast] Error 2
+
+
+Source file was:
+#include <lzma.h>
+#if LZMA_VERSION < 50020000
+#error unsupported
+#endif
+int main(void){lzma_stream_encoder_mt(0, 0); return 0;}
+Determining if the EFTYPE exist failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_898e7/fast && make  -f CMakeFiles/cmTC_898e7.dir/build.make CMakeFiles/cmTC_898e7.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_898e7.dir/CheckSymbolExists.c.o
+/usr/bin/gcc   -w  -std=gnu11 -o CMakeFiles/cmTC_898e7.dir/CheckSymbolExists.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c: In function ‘main’:
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c:8:19: error: ‘EFTYPE’ undeclared (first use in this function); did you mean ‘ESPIPE’?
+   return ((int*)(&EFTYPE))[argc];
+                   ^~~~~~
+                   ESPIPE
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c:8:19: note: each undeclared identifier is reported only once for each function it appears in
+CMakeFiles/cmTC_898e7.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_898e7.dir/CheckSymbolExists.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_898e7.dir/CheckSymbolExists.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_898e7/fast' failed
+make: *** [cmTC_898e7/fast] Error 2
+
+
+File /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <errno.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef EFTYPE
+  return ((int*)(&EFTYPE))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+Determining if the D_MD_ORDER exist failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_9ea1e/fast && make  -f CMakeFiles/cmTC_9ea1e.dir/build.make CMakeFiles/cmTC_9ea1e.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_9ea1e.dir/CheckSymbolExists.c.o
+/usr/bin/gcc   -w  -std=gnu11 -o CMakeFiles/cmTC_9ea1e.dir/CheckSymbolExists.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c: In function ‘main’:
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c:8:19: error: ‘D_MD_ORDER’ undeclared (first use in this function)
+   return ((int*)(&D_MD_ORDER))[argc];
+                   ^~~~~~~~~~
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c:8:19: note: each undeclared identifier is reported only once for each function it appears in
+CMakeFiles/cmTC_9ea1e.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_9ea1e.dir/CheckSymbolExists.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_9ea1e.dir/CheckSymbolExists.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_9ea1e/fast' failed
+make: *** [cmTC_9ea1e/fast] Error 2
+
+
+File /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <langinfo.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef D_MD_ORDER
+  return ((int*)(&D_MD_ORDER))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+Performing C SOURCE FILE Test HAVE_STRUCT_TM___TM_GMTOFF failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_6ac8f/fast && make  -f CMakeFiles/cmTC_6ac8f.dir/build.make CMakeFiles/cmTC_6ac8f.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_6ac8f.dir/src.c.o
+/usr/bin/gcc -DHAVE_STRUCT_TM___TM_GMTOFF  -w  -std=gnu11 -o CMakeFiles/cmTC_6ac8f.dir/src.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/src.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/src.c: In function ‘main’:
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/src.c:6:34: error: ‘struct tm’ has no member named ‘__tm_gmtoff’; did you mean ‘tm_gmtoff’?
+   (void)sizeof(((struct tm *)0)->__tm_gmtoff);
+                                  ^~~~~~~~~~~
+                                  tm_gmtoff
+CMakeFiles/cmTC_6ac8f.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_6ac8f.dir/src.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_6ac8f.dir/src.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_6ac8f/fast' failed
+make: *** [cmTC_6ac8f/fast] Error 2
+
+
+Source file was:
+
+#include <time.h>
+
+int main()
+{
+  (void)sizeof(((struct tm *)0)->__tm_gmtoff);
+  return 0;
+}
+
+Performing C SOURCE FILE Test HAVE_STRUCT_STATFS_F_NAMEMAX failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_c56c4/fast && make  -f CMakeFiles/cmTC_c56c4.dir/build.make CMakeFiles/cmTC_c56c4.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_c56c4.dir/src.c.o
+/usr/bin/gcc -DHAVE_STRUCT_STATFS_F_NAMEMAX  -w  -std=gnu11 -o CMakeFiles/cmTC_c56c4.dir/src.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/src.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/src.c: In function ‘main’:
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/src.c:7:36: error: dereferencing pointer to incomplete type ‘struct statfs’
+   (void)sizeof(((struct statfs *)0)->f_namemax);
+                                    ^~
+CMakeFiles/cmTC_c56c4.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_c56c4.dir/src.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_c56c4.dir/src.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_c56c4/fast' failed
+make: *** [cmTC_c56c4/fast] Error 2
+
+
+Source file was:
+
+#include <sys/param.h>
+#include <sys/mount.h>
+
+int main()
+{
+  (void)sizeof(((struct statfs *)0)->f_namemax);
+  return 0;
+}
+
+Performing C SOURCE FILE Test HAVE_STRUCT_STAT_ST_BIRTHTIME failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_6895c/fast && make  -f CMakeFiles/cmTC_6895c.dir/build.make CMakeFiles/cmTC_6895c.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_6895c.dir/src.c.o
+/usr/bin/gcc -DHAVE_STRUCT_STAT_ST_BIRTHTIME  -w  -std=gnu11 -o CMakeFiles/cmTC_6895c.dir/src.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/src.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/src.c: In function ‘main’:
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/src.c:7:36: error: ‘struct stat’ has no member named ‘st_birthtime’; did you mean ‘st_blksize’?
+   (void)sizeof(((struct stat *)0)->st_birthtime);
+                                    ^~~~~~~~~~~~
+                                    st_blksize
+CMakeFiles/cmTC_6895c.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_6895c.dir/src.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_6895c.dir/src.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_6895c/fast' failed
+make: *** [cmTC_6895c/fast] Error 2
+
+
+Source file was:
+
+#include <sys/types.h>
+#include <sys/stat.h>
+
+int main()
+{
+  (void)sizeof(((struct stat *)0)->st_birthtime);
+  return 0;
+}
+
+Performing C SOURCE FILE Test HAVE_STRUCT_STAT_ST_BIRTHTIMESPEC_TV_NSEC failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_fa53c/fast && make  -f CMakeFiles/cmTC_fa53c.dir/build.make CMakeFiles/cmTC_fa53c.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_fa53c.dir/src.c.o
+/usr/bin/gcc -DHAVE_STRUCT_STAT_ST_BIRTHTIMESPEC_TV_NSEC  -w  -std=gnu11 -o CMakeFiles/cmTC_fa53c.dir/src.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/src.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/src.c: In function ‘main’:
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/src.c:7:34: error: ‘struct stat’ has no member named ‘st_birthtimespec’
+   (void)sizeof(((struct stat *)0)->st_birthtimespec.tv_nsec);
+                                  ^~
+CMakeFiles/cmTC_fa53c.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_fa53c.dir/src.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_fa53c.dir/src.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_fa53c/fast' failed
+make: *** [cmTC_fa53c/fast] Error 2
+
+
+Source file was:
+
+#include <sys/types.h>
+#include <sys/stat.h>
+
+int main()
+{
+  (void)sizeof(((struct stat *)0)->st_birthtimespec.tv_nsec);
+  return 0;
+}
+
+Performing C SOURCE FILE Test HAVE_STRUCT_STAT_ST_MTIMESPEC_TV_NSEC failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_ec3c2/fast && make  -f CMakeFiles/cmTC_ec3c2.dir/build.make CMakeFiles/cmTC_ec3c2.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_ec3c2.dir/src.c.o
+/usr/bin/gcc -DHAVE_STRUCT_STAT_ST_MTIMESPEC_TV_NSEC  -w  -std=gnu11 -o CMakeFiles/cmTC_ec3c2.dir/src.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/src.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/src.c: In function ‘main’:
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/src.c:7:36: error: ‘struct stat’ has no member named ‘st_mtimespec’; did you mean ‘st_mtim’?
+   (void)sizeof(((struct stat *)0)->st_mtimespec.tv_nsec);
+                                    ^~~~~~~~~~~~
+                                    st_mtim
+CMakeFiles/cmTC_ec3c2.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_ec3c2.dir/src.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_ec3c2.dir/src.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_ec3c2/fast' failed
+make: *** [cmTC_ec3c2/fast] Error 2
+
+
+Source file was:
+
+#include <sys/types.h>
+#include <sys/stat.h>
+
+int main()
+{
+  (void)sizeof(((struct stat *)0)->st_mtimespec.tv_nsec);
+  return 0;
+}
+
+Performing C SOURCE FILE Test HAVE_STRUCT_STAT_ST_MTIME_N failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_5754b/fast && make  -f CMakeFiles/cmTC_5754b.dir/build.make CMakeFiles/cmTC_5754b.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_5754b.dir/src.c.o
+/usr/bin/gcc -DHAVE_STRUCT_STAT_ST_MTIME_N  -w  -std=gnu11 -o CMakeFiles/cmTC_5754b.dir/src.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/src.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/src.c: In function ‘main’:
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/src.c:7:36: error: ‘struct stat’ has no member named ‘st_mtime_n’; did you mean ‘st_mtim’?
+   (void)sizeof(((struct stat *)0)->st_mtime_n);
+                                    ^~~~~~~~~~
+                                    st_mtim
+CMakeFiles/cmTC_5754b.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_5754b.dir/src.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_5754b.dir/src.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_5754b/fast' failed
+make: *** [cmTC_5754b/fast] Error 2
+
+
+Source file was:
+
+#include <sys/types.h>
+#include <sys/stat.h>
+
+int main()
+{
+  (void)sizeof(((struct stat *)0)->st_mtime_n);
+  return 0;
+}
+
+Performing C SOURCE FILE Test HAVE_STRUCT_STAT_ST_UMTIME failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_d514e/fast && make  -f CMakeFiles/cmTC_d514e.dir/build.make CMakeFiles/cmTC_d514e.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_d514e.dir/src.c.o
+/usr/bin/gcc -DHAVE_STRUCT_STAT_ST_UMTIME  -w  -std=gnu11 -o CMakeFiles/cmTC_d514e.dir/src.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/src.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/src.c: In function ‘main’:
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/src.c:7:36: error: ‘struct stat’ has no member named ‘st_umtime’; did you mean ‘st_mtim’?
+   (void)sizeof(((struct stat *)0)->st_umtime);
+                                    ^~~~~~~~~
+                                    st_mtim
+CMakeFiles/cmTC_d514e.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_d514e.dir/src.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_d514e.dir/src.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_d514e/fast' failed
+make: *** [cmTC_d514e/fast] Error 2
+
+
+Source file was:
+
+#include <sys/types.h>
+#include <sys/stat.h>
+
+int main()
+{
+  (void)sizeof(((struct stat *)0)->st_umtime);
+  return 0;
+}
+
+Performing C SOURCE FILE Test HAVE_STRUCT_STAT_ST_MTIME_USEC failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_c17cf/fast && make  -f CMakeFiles/cmTC_c17cf.dir/build.make CMakeFiles/cmTC_c17cf.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_c17cf.dir/src.c.o
+/usr/bin/gcc -DHAVE_STRUCT_STAT_ST_MTIME_USEC  -w  -std=gnu11 -o CMakeFiles/cmTC_c17cf.dir/src.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/src.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/src.c: In function ‘main’:
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/src.c:7:36: error: ‘struct stat’ has no member named ‘st_mtime_usec’; did you mean ‘st_mtim’?
+   (void)sizeof(((struct stat *)0)->st_mtime_usec);
+                                    ^~~~~~~~~~~~~
+                                    st_mtim
+CMakeFiles/cmTC_c17cf.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_c17cf.dir/src.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_c17cf.dir/src.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_c17cf/fast' failed
+make: *** [cmTC_c17cf/fast] Error 2
+
+
+Source file was:
+
+#include <sys/types.h>
+#include <sys/stat.h>
+
+int main()
+{
+  (void)sizeof(((struct stat *)0)->st_mtime_usec);
+  return 0;
+}
+
+Performing C SOURCE FILE Test HAVE_STRUCT_STAT_ST_FLAGS failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_6370a/fast && make  -f CMakeFiles/cmTC_6370a.dir/build.make CMakeFiles/cmTC_6370a.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_6370a.dir/src.c.o
+/usr/bin/gcc -DHAVE_STRUCT_STAT_ST_FLAGS  -w  -std=gnu11 -o CMakeFiles/cmTC_6370a.dir/src.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/src.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/src.c: In function ‘main’:
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/src.c:7:36: error: ‘struct stat’ has no member named ‘st_flags’; did you mean ‘st_nlink’?
+   (void)sizeof(((struct stat *)0)->st_flags);
+                                    ^~~~~~~~
+                                    st_nlink
+CMakeFiles/cmTC_6370a.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_6370a.dir/src.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_6370a.dir/src.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_6370a/fast' failed
+make: *** [cmTC_6370a/fast] Error 2
+
+
+Source file was:
+
+#include <sys/types.h>
+#include <sys/stat.h>
+
+int main()
+{
+  (void)sizeof(((struct stat *)0)->st_flags);
+  return 0;
+}
+
+Performing C SOURCE FILE Test HAVE_STRUCT_STATVFS_F_IOSIZE failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_425f8/fast && make  -f CMakeFiles/cmTC_425f8.dir/build.make CMakeFiles/cmTC_425f8.dir/build
+make[1]: 进入目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Building C object CMakeFiles/cmTC_425f8.dir/src.c.o
+/usr/bin/gcc -DHAVE_STRUCT_STATVFS_F_IOSIZE  -w  -std=gnu11 -o CMakeFiles/cmTC_425f8.dir/src.c.o -c /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/src.c
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/src.c: In function ‘main’:
+/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp/src.c:7:39: error: ‘struct statvfs’ has no member named ‘f_iosize’; did you mean ‘f_bsize’?
+   (void)sizeof(((struct statvfs *)0)->f_iosize);
+                                       ^~~~~~~~
+                                       f_bsize
+CMakeFiles/cmTC_425f8.dir/build.make:77: recipe for target 'CMakeFiles/cmTC_425f8.dir/src.c.o' failed
+make[1]: *** [CMakeFiles/cmTC_425f8.dir/src.c.o] Error 1
+make[1]: 离开目录“/home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/CMakeFiles/CMakeTmp”
+Makefile:127: recipe for target 'cmTC_425f8/fast' failed
+make: *** [cmTC_425f8/fast] Error 2
+
+
+Source file was:
+
+#include <sys/types.h>
+#include <sys/statvfs.h>
+
+int main()
+{
+  (void)sizeof(((struct statvfs *)0)->f_iosize);
+  return 0;
+}
+
+Checking for curses support failed with the following output:
+Change Dir: /home/wangliwen/Git_shuo/Carla_RL_MPC/cmake-3.20.2/Source/Checks/Curses-build
+
+Run Build Command(s):/usr/bin/make -f Makefile CheckCurses && make: *** 没有规则可制作目标“CheckCurses”。 停止。
+
+
+

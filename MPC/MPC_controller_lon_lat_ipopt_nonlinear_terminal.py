@@ -318,17 +318,16 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
             self.lbx.append(-np.inf)
             self.lbx.append(y_min)
             self.lbx.append(-np.inf)
-            # if obj_info['Ego_preceding'][0] != None:  # if no vehicle_ahead
-            #     obj_preceding_x = obj_info['Ego_preceding'][2][0]
-            #     obj_preceding_y = obj_info['Ego_preceding'][2][1]
-            #     obj_preceding_phi = obj_info['Ego_preceding'][2][4]
-            #     obj_preceding_speed = obj_info['Ego_preceding'][2][5]
-            #     obj_preceding_delta_f = obj_info['Ego_preceding'][2][6]
-            #     obj_preceding_x_ref = obj_preceding_x + obj_preceding_speed * np.cos(obj_preceding_phi) * self.T * i
-            #     self.ubx.append(obj_preceding_x_ref - self.stop_line)
-            # else:
-            #     self.ubx.append(np.inf)
-            self.ubx.append(np.inf)
+            if obj_info['Ego_preceding'][0] != None:  # if no vehicle_ahead
+                obj_preceding_x = obj_info['Ego_preceding'][2][0]
+                obj_preceding_y = obj_info['Ego_preceding'][2][1]
+                obj_preceding_phi = obj_info['Ego_preceding'][2][4]
+                obj_preceding_speed = obj_info['Ego_preceding'][2][5]
+                obj_preceding_delta_f = obj_info['Ego_preceding'][2][6]
+                obj_preceding_x_ref = obj_preceding_x + obj_preceding_speed * np.cos(obj_preceding_phi) * self.T * i
+                self.ubx.append(obj_preceding_x_ref - self.stop_line)
+            else:
+                self.ubx.append(np.inf)
             self.ubx.append(y_max)
             self.ubx.append(np.inf)
 

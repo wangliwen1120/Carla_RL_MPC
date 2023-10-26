@@ -298,10 +298,12 @@ class CarlagymEnv(gym.Env):
         Cartesian:  [x, y, v_x, v_y, phi, speed, delta_f]
         """
         obj_info = {}
+        # obj_actor = [0 for _ in range(self.N_SPAWN_CARS)]
+        # obj_frenet = [0 for _ in range(self.N_SPAWN_CARS)]
+        # obj_cartesian = [0 for _ in range(self.N_SPAWN_CARS)]
         obj_actor = [0 for _ in range(self.N_SPAWN_CARS)]
         obj_frenet = [0 for _ in range(self.N_SPAWN_CARS)]
         obj_cartesian = [0 for _ in range(self.N_SPAWN_CARS)]
-
         for i, actor in enumerate(self.traffic_module.actors_batch):
             obj_idx = i
             obj_actor[obj_idx] = actor['Actor']
@@ -352,9 +354,15 @@ class CarlagymEnv(gym.Env):
         self.left_lane_idx = 0
         self.left_lane_preceding_idx = 0
         self.left_lane_following_idx = 0
+        self.left_left_lane_idx = 0
+        self.left_left_lane_preceding_idx = 0
+        self.left_left_lane_following_idx = 0
         self.right_lane_idx = 0
         self.right_lane_preceding_idx = 0
         self.right_lane_following_idx = 0
+        self.right__rightlane_idx = 0
+        self.right_right_lane_preceding_idx = 0
+        self.right_right_lane_following_idx = 0
 
         others_id = [0 for _ in range(self.N_SPAWN_CARS)]
         for i in range(self.N_SPAWN_CARS):
@@ -369,12 +377,24 @@ class CarlagymEnv(gym.Env):
                 self.left_lane_preceding_idx = i + 1
             elif others_id[i] == self.actor_enumeration[4]:
                 self.left_lane_following_idx = i + 1
+            elif others_id[i] == self.actor_enumeration[5]:
+                self.left_left_lane_idx = i + 1
+            elif others_id[i] == self.actor_enumeration[6]:
+                self.left_left_lane_preceding_idx = i + 1
+            elif others_id[i] == self.actor_enumeration[7]:
+                self.left_left_lane_following_idx = i + 1
             elif others_id[i] == self.actor_enumeration[8]:
                 self.right_lane_idx = i + 1
             elif others_id[i] == self.actor_enumeration[9]:
                 self.right_lane_preceding_idx = i + 1
             elif others_id[i] == self.actor_enumeration[10]:
                 self.right_lane_following_idx = i + 1
+            elif others_id[i] == self.actor_enumeration[11]:
+                self.right_right_lane_idx = i + 1
+            elif others_id[i] == self.actor_enumeration[12]:
+                self.right_right_lane_preceding_idx = i + 1
+            elif others_id[i] == self.actor_enumeration[13]:
+                self.right_right_lane_following_idx = i + 1
             else:
                 pass
 
@@ -406,10 +426,20 @@ class CarlagymEnv(gym.Env):
             left_preceding_actor_frenet = None
             left_preceding_actor_cartesian = None
 
+        if self.left_left_lane_preceding_idx != 0:
+            left_left_preceding_actor = obj_actor[self.left_left_lane_preceding_idx - 1]
+            left_left_preceding_actor_frenet = obj_frenet[self.left_left_lane_preceding_idx - 1]
+            left_left_preceding_actor_cartesian = obj_cartesian[self.left_left_lane_preceding_idx - 1]
+        else:
+            left_left_preceding_actor = None
+            left_left_preceding_actor_frenet = None
+            left_left_preceding_actor_cartesian = None
+
         if self.left_lane_following_idx != 0:
             left_following_actor = obj_actor[self.left_lane_following_idx - 1]
             left_following_actor_frenet = obj_frenet[self.left_lane_following_idx - 1]
             left_following_actor_cartesian = obj_cartesian[self.left_lane_following_idx - 1]
+
         else:
             left_following_actor = None
             left_following_actor_frenet = None
@@ -423,6 +453,15 @@ class CarlagymEnv(gym.Env):
             right_preceding_actor = None
             right_preceding_actor_frenet = None
             right_preceding_actor_cartesian = None
+
+        if self.right_right_lane_preceding_idx != 0:
+            right_right_preceding_actor = obj_actor[self.right_right_lane_preceding_idx - 1]
+            right_right_preceding_actor_frenet = obj_frenet[self.right_right_lane_preceding_idx - 1]
+            right_right_preceding_actor_cartesian = obj_cartesian[self.right_right_lane_preceding_idx - 1]
+        else:
+            right_right_preceding_actor = None
+            right_right_preceding_actor_frenet = None
+            right_right_preceding_actor_cartesian = None
 
         if self.right_lane_following_idx != 0:
             right_following_actor = obj_actor[self.right_lane_following_idx - 1]
@@ -458,10 +497,14 @@ class CarlagymEnv(gym.Env):
                                        ego_following_actor_cartesian],
                      'Left_preceding': [left_preceding_actor, left_preceding_actor_frenet,
                                         left_preceding_actor_cartesian],
+                     'Left_Left_preceding': [left_left_preceding_actor, left_left_preceding_actor_frenet,
+                                             left_left_preceding_actor_cartesian],
                      'Left_following': [left_following_actor, left_following_actor_frenet,
                                         left_following_actor_cartesian],
                      'Right_preceding': [right_preceding_actor, right_preceding_actor_frenet,
                                          right_preceding_actor_cartesian],
+                     'Right_Right_preceding': [right_right_preceding_actor, right_right_preceding_actor_frenet,
+                                               right_right_preceding_actor_cartesian],
                      'Right_following': [right_following_actor, right_following_actor_frenet,
                                          right_following_actor_cartesian],
                      'Left': [left_actor, left_actor_frenet, left_actor_cartesian],
@@ -482,12 +525,13 @@ class CarlagymEnv(gym.Env):
         ego_s = self.actor_enumerated_dict['EGO']['S'][-1]
         ego_d = self.actor_enumerated_dict['EGO']['D'][-1]
 
-        others_s = [0 for _ in range(self.N_SPAWN_CARS)]
-        others_d = [0 for _ in range(self.N_SPAWN_CARS)]
-        others_id = [0 for _ in range(self.N_SPAWN_CARS)]
+        others_s = [0 for _ in range(len(self.traffic_module.actors_batch))]
+        others_d = [0 for _ in range(len(self.traffic_module.actors_batch))]
+        others_id = [0 for _ in range(len(self.traffic_module.actors_batch))]
         for i, actor in enumerate(self.traffic_module.actors_batch):
-            act_s, act_d = actor['Frenet State']
-            others_s[i] = act_s[-1]
+            act_s = actor['Obj_Frenet_state'][0]
+            act_d = actor['Obj_Frenet_state'][1]
+            others_s[i] = act_s
             others_d[i] = act_d
             others_id[i] = actor['Actor'].id
 
@@ -514,7 +558,7 @@ class CarlagymEnv(gym.Env):
                     any(sorted_s_idx[:, 1][sorted_s_idx[:, 1] < 0] < -self.side_window)) else -1)
 
         # --------------------------------------------- ego lane -------------------------------------------------
-        same_lane_d_idx = np.where(abs(np.array(others_d) - ego_d) <= 0.9)[0]
+        same_lane_d_idx = np.where(abs(np.array(others_d) - ego_d) <= 1.75)[0]
         if len(same_lane_d_idx) == 0:
             self.actor_enumeration.append(-2)
             self.actor_enumeration.append(-2)
@@ -531,7 +575,7 @@ class CarlagymEnv(gym.Env):
                                           if (any(sorted_same_s_idx[:, 1] < 0)) else -1)
 
         # --------------------------------------------- left lane -------------------------------------------------
-        left_lane_d_idx = np.where(((np.array(others_d) - ego_d) < -0.9) * ((np.array(others_d) - ego_d) > -4))[0]
+        left_lane_d_idx = np.where(((np.array(others_d) - ego_d) < -1.75) * ((np.array(others_d) - ego_d) > -5.25))[0]
         if ego_d < -1.75:
             self.actor_enumeration += [-2, -2, -2]
 
@@ -542,7 +586,7 @@ class CarlagymEnv(gym.Env):
             append_actor(left_lane_d_idx)
 
         # ------------------------------------------- two left lane -----------------------------------------------
-        lleft_lane_d_idx = np.where(((np.array(others_d) - ego_d) < -6.5) * ((np.array(others_d) - ego_d) > -7.5))[0]
+        lleft_lane_d_idx = np.where(((np.array(others_d) - ego_d) > -8.75) * ((np.array(others_d) - ego_d) < -5.25))[0]
 
         if ego_d < 1.75:
             self.actor_enumeration += [-2, -2, -2]
@@ -554,7 +598,7 @@ class CarlagymEnv(gym.Env):
             append_actor(lleft_lane_d_idx)
 
             # ---------------------------------------------- rigth lane --------------------------------------------------
-        right_lane_d_idx = np.where(((np.array(others_d) - ego_d) > 0.9) * ((np.array(others_d) - ego_d) < 4))[0]
+        right_lane_d_idx = np.where(((np.array(others_d) - ego_d) > 1.75) * ((np.array(others_d) - ego_d) < 5.25))[0]
         if ego_d > 5.25:
             self.actor_enumeration += [-2, -2, -2]
 
@@ -565,7 +609,7 @@ class CarlagymEnv(gym.Env):
             append_actor(right_lane_d_idx)
 
         # ------------------------------------------- two rigth lane --------------------------------------------------
-        rright_lane_d_idx = np.where(((np.array(others_d) - ego_d) > 6.5) * ((np.array(others_d) - ego_d) < 7.5))[0]
+        rright_lane_d_idx = np.where(((np.array(others_d) - ego_d) > 5.25) * ((np.array(others_d) - ego_d) < 8.75))[0]
         if ego_d > 1.75:
             self.actor_enumeration += [-2, -2, -2]
 
@@ -722,10 +766,21 @@ class CarlagymEnv(gym.Env):
         self.n_step += 1
         self.actor_enumerated_dict['EGO'] = {'NORM_S': [], 'NORM_D': [], 'S': [], 'D': [], 'SPEED': []}
         # normalized
-        if self.n_step<=100:
-            action = action[0]
-        action = (action + 1.0) * 0.5
-
+        action = np.array(action)
+        if len(action.shape) == 1:
+            for i in action:
+                q = i
+                pass
+        elif len(action.shape) == 2:
+            for i in range(action.shape[0]):
+                for j in range(action.shape[1]):
+                    q = action[i][j]
+                    pass
+        else:
+            print("Array dimensions greater than 2 are not handled.")
+        q = (q + 1.0) * 0.5
+        # print(self.n_step)
+        # print(action)
         # birds-eye view
         spectator = self.world_module.world.get_spectator()
         transform = self.ego.get_transform()
@@ -799,7 +854,7 @@ class CarlagymEnv(gym.Env):
                 [self.fpath.x[29], self.fpath.y[29], self.fpath.yaw[29], self.fpath.s[29], self.fpath.d[29]]),
             ref_left=np.array([ref_left[0], ref_left[1], ref_left[3]]),
             u_last=self.u_last, csp=self.motionPlanner.csp, fpath=fpath,
-            q=action[0], ru=1, rdu=1)
+            q=q, ru=1, rdu=1)
 
         self.u_last = self.Input
         self.x_m = x_m
