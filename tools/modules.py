@@ -1892,8 +1892,9 @@ class TrafficManager:
         # re-spawn N_INIT_CARS of actors
         ego_lane = int(ego_d / self.LANE_WIDTH)
         ego_grid_n = ego_lane + 9  # in Grid world (see notes above), ego is in column 2 so its grid number will be based on its lane number
-        grid_choices = np.arange(16, 60)
+        grid_choices = np.arange(16, 40)
         # grid_choices = np.arange(21, 38, 4)
+        grid_choices = [36,37]
         # grid_choices = [29,36,45,52,61]  ## 40:25  50:29  60:33
         # grid_choices = [21,41,53,24,32]  ## 40:25  50:29  60:33
         # grid_choices = [21,25,29,33,37,41,45,49,53,57,61,65,69,20,24,28,32,36,40,44,48,52,56,60,64,68]
@@ -1906,7 +1907,8 @@ class TrafficManager:
             lane = idx - col * 4 - 1  # lane number [-1, 2]
             s = ego_s + col * 10 - 20  # -20 bc ego is on second column
             # targetSpeed = random.uniform(self.min_speed, self.max_speed)  # m/s
-            targetSpeed = idx/3 + (idx/15)*(-1)**idx  # m/s
+            # targetSpeed = idx/3 + (idx/15)*(-1)**idx  # m/s
+            targetSpeed = 10
             i = '1'
             # i=np.array(['0','1'])[1 if idx%rnd_indices[0]==0 else 0]
             data = xlrd.open_workbook(os.path.abspath('.') + '/tools/ob_v_data_' + i + '.xlsx')

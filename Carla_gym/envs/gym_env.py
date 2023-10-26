@@ -721,9 +721,10 @@ class CarlagymEnv(gym.Env):
     def step(self, action):
         self.n_step += 1
         self.actor_enumerated_dict['EGO'] = {'NORM_S': [], 'NORM_D': [], 'S': [], 'D': [], 'SPEED': []}
-
-        action[0] = (action[0] + 1.0) * 0.5
         # normalized
+        if self.n_step<=100:
+            action = action[0]
+        action = (action + 1.0) * 0.5
 
         # birds-eye view
         spectator = self.world_module.world.get_spectator()
@@ -792,8 +793,6 @@ class CarlagymEnv(gym.Env):
 
         # terminal
         self.Input, MPC_unsolved, x_m = self.lon_lat_controller_ipopt.calc_input(
-
-        # self.Input, MPC_unsolved, x_m = self.lon_lat_controller_acados.calc_input(
             x_current=[ego_state[0],ego_state[1], ego_state[2]],
             obj_info=obj_info,
             ref=np.array(

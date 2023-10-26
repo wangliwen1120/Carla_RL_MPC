@@ -45,7 +45,7 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
         self.Cy = self.param.mpc_Cy
         self.Lane = self.param.lanewidth
         self.stop_line = self.param.dstop
-        self.vehicle_nums = 5
+        self.vehicle_nums = 2
 
         # 横纵向约束
         self.v_min = 0.0
@@ -190,7 +190,7 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
         self.q = C_R[0]
         self.ru = 0
         self.rdu = 0.3
-        self.S = 0.1  # Obstacle avoidance function coefficient
+        self.S = 0.0  # Obstacle avoidance function coefficient
         self.Q1 = self.q * np.eye(self.Nx)  # ego_lane: lane_2
         self.Q2 = (1 - self.q) * np.eye(self.Nx)  # left_lane: lane_1
         self.Ru = self.ru * np.eye(self.Nu)
@@ -296,7 +296,7 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
                 ego_x_rr = current_x_list[j] + self.Width / 2 * np.sin(current_phi_list[j]) - self.Length / 2 * np.cos(current_phi_list[j])
                 ego_f = max(ego_x_fl, ego_x_fr)
                 ego_r = min(ego_x_rl, ego_x_rr)
-                obs_list.append(0 if ego_f > obj_Mux[i][0][j] and ego_r < (obj_Mux[i][0][j] + self.Length) else -1e5)
+                obs_list.append(0 if ego_f+10 > obj_Mux[i][0][j] and ego_r < (obj_Mux[i][0][j] + self.Length+10) else -1e5)
 
         # 初始化优化参数
         C_R = np.concatenate(([q,u_last[0],u_last[1]],x_current,ref[:3],ref_left[:3],obs_list))

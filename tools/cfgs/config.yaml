@@ -53,7 +53,7 @@ LOCAL_PLANNER:
   MAX_SPEED: 17                                              # Allowed max speed for ego vehicle; RL's 1 action maps to this value
 
 TRAFFIC_MANAGER:
-  N_SPAWN_CARS: 5                                             # number of cars spawned at each episode
+  N_SPAWN_CARS: 2                                            # number of cars spawned at each episode
   MIN_SPEED: 6                                              # Min speed for actors in random traffic
   MAX_SPEED: 15                                              # Max speed for actors in random traffic
   MAX_ACC: 2
