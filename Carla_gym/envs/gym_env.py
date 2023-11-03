@@ -169,6 +169,7 @@ class CarlagymEnv(gym.Env):
         self.N_SPAWN_CARS = int(cfg.TRAFFIC_MANAGER.N_SPAWN_CARS)
         self.N_SPAWN_PEDESTRAINS = int(cfg.TRAFFIC_MANAGER.N_SPAWN_PEDESTRAINS)
         self.obj_max_vs = int(cfg.TRAFFIC_MANAGER.MAX_SPEED)
+        self.walker_max_vd = int(cfg.TRAFFIC_MANAGER.Walker_MAX_SPEED)
         self.d_max_s = int(cfg.CARLA.D_MAX_S)
 
         # frenet
@@ -227,7 +228,7 @@ class CarlagymEnv(gym.Env):
         action_high = 1
         self.acton_dim = (1, 1)
         self.action_space = spaces.Box(action_low, action_high, shape=self.acton_dim, dtype='float32')
-        self.obs_dim = (1, (self.N_SPAWN_CARS + 1) * 4)
+        self.obs_dim = (1, (self.N_SPAWN_CARS + self.N_SPAWN_PEDESTRAINS + 1) * 4)
         self.observation_space = spaces.Box(-np.inf, np.inf, shape=self.obs_dim, dtype='float32')
         self.state = np.zeros_like(self.observation_space.sample())
         # data_record
@@ -763,7 +764,7 @@ class CarlagymEnv(gym.Env):
 
     def state_input_vector(self, v_S, ego_s, ego_d):
         # Paper: Automated Speed and Lane Change Decision Making using Deep Reinforcement Learning
-        state_vector = np.zeros(4 * (1 + self.N_SPAWN_CARS))
+        state_vector = np.zeros(4 * (1 + self.N_SPAWN_CARS + self.N_SPAWN_PEDESTRAINS))
         state_vector[0] = v_S / self.maxSpeed
 
         df_ego = closest([self.LANE_WIDTH * lane_n for lane_n in range(-1, 3)], ego_d)
@@ -794,6 +795,19 @@ class CarlagymEnv(gym.Env):
             df_obj = closest([self.LANE_WIDTH * lane_n for lane_n in range(-1, 3)], obj_mat_surr[1][i])
             state_vector[(i + 1) * 4 + 2] = (df_obj - df_ego) / 3.5  # * (1 / 3)
             state_vector[(i + 1) * 4 + 3] = obj_mat_surr[1][i]
+
+        walker_mat = self.walker_info_simple()[1]
+
+        walker_mat[0, :] = walker_mat[0, :] - ego_s
+        walker_sorted_id = np.argsort(abs(walker_mat[0, :]))
+        walker_mat_surr = walker_mat[:, walker_sorted_id][:, 0:8]
+
+        for i in range(np.shape(walker_mat_surr)[1]):
+            state_vector[(i + 1 + self.N_SPAWN_CARS) * 4] = walker_mat_surr[0][i] / self.d_max_s
+            state_vector[(i + 1 + self.N_SPAWN_CARS) * 4 + 1] = walker_mat_surr[3][i] / self.walker_max_vd
+            df_walker = closest([self.LANE_WIDTH * lane_n for lane_n in range(-1, 3)], walker_mat_surr[1][i])
+            state_vector[(i + 1 + self.N_SPAWN_CARS) * 4 + 2] = (df_walker - df_ego) / 3.5  # * (1 / 3)
+            state_vector[(i + 1 + self.N_SPAWN_CARS) * 4 + 3] = walker_mat_surr[1][i]
 
         return state_vector
 

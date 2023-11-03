@@ -56,6 +56,11 @@ TRAFFIC_MANAGER:
   N_SPAWN_CARS: 5                                            # number of cars spawned at each episode
   N_SPAWN_PEDESTRAINS: 5
   MIN_SPEED: 6                                              # Min speed for actors in random traffic
-  MAX_SPEED: 15                                              # Max speed for actors in random traffic
+  MAX_SPEED: 16                                              # Max speed for actors in random traffic
+  MIN_SPEED_2: 8.33
+  MAX_SPEED_2: 11.11
   MAX_ACC: 2
   MIN_ACC: -1.5
+  SPEED_DIFFERENCE: [ 20,25,30,35,40 ]                           # 周车车速与限速的差别
+  AUTO_LANE_CHANGE: True
+  Walker_MAX_SPEED: 2.5

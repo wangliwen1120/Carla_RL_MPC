@@ -67,7 +67,7 @@ class Simulation:
                 next_state, reward, done, info = env.step([self.q])
 
 if __name__ == '__main__':
-    train = False
+    train = True
     args, cfg = parse_args_cfgs()
     print('Env is starting')
     env = gym.make("gym_env-v0")
@@ -88,7 +88,7 @@ if __name__ == '__main__':
         model = SAC.load("sb3_SAC_model")
         obs = env.reset()
         while True:
-            action, _states = model.predict(obs.reshape(1, 4*(5+1)), deterministic=True)
+            action, _states = model.predict(obs.reshape(1, 4*(5+5+1)), deterministic=True)
             # action = np.array([1])
             obs, reward, done, info = env.step(action)
             if done:

@@ -1078,7 +1078,9 @@ class ModuleWorld:
         try:
             self.client = carla.Client(self.args.carla_host, self.args.carla_port)
             self.client.set_timeout(self.timeout)
+            self.traffic_manager = self.client.get_trafficmanager(self.args.tm_port)
             self.tm_port = self.client.get_trafficmanager(self.args.tm_port).get_port()
+            self.traffic_manager.set_synchronous_mode(True)
             # world = self.client.get_world()
             world = self.client.load_world('Town04')
             world.set_weather(getattr(carla.WeatherParameters, 'ClearNoon'))
@@ -1861,6 +1863,84 @@ class TrafficManager:
                                           , psi, speed, delta_f, targetSpeed]})
         return otherActor
 
+    def spawn_one_actor_TM(self, s, lane, targetSpeed):
+        """
+        Spawn an actor on the main road based on the frenet s and d values
+        """
+        if self.global_csp is None:
+            return
+
+        d = lane * self.LANE_WIDTH
+        x, y, z, yaw = frenet_to_inertial(s, d, self.global_csp)
+
+        blueprint = random.choice(self.vehicle_blueprints)
+        if blueprint.has_attribute('color'):
+            color = random.choice(blueprint.get_attribute('color').recommended_values)
+            blueprint.set_attribute('color', color)
+
+        transform = carla.Transform(location=carla.Location(x=x, y=y, z=z + 0.3),
+                                    rotation=carla.Rotation(pitch=0.0, yaw=math.degrees(yaw), roll=0.0))
+
+        otherActor = self.world.try_spawn_actor(blueprint, transform)
+
+        # otherActor.set_transform(transform)
+        if otherActor is not None:
+            # create a line of sight sensor attached to the vehicle
+            los_sensor = LineOfSightSensor(otherActor)
+            otherActor.set_autopilot(True, self.tm_port)
+            otherActor.set_target_velocity(carla.Vector3D(x=0, y=0, z=0))
+            otherActor.set_target_angular_velocity(carla.Vector3D(x=0, y=0, z=0))
+
+            # 下面是对traffic_manager的操作
+            self.traffic_manager.auto_lane_change(otherActor, True)
+            # 车辆忽略红路灯的概率
+            self.traffic_manager.ignore_lights_percentage(otherActor, 100)
+            # 车辆忽略交通贵规则的概率
+            self.traffic_manager.ignore_signs_percentage(otherActor, 0)
+            # 碰撞检测忽略其他车辆碰撞的几率
+            self.traffic_manager.ignore_vehicles_percentage(otherActor, 0)
+            # 与其他车辆必须保持的最小距离
+            self.traffic_manager.distance_to_leading_vehicle(otherActor, 0)
+            # 实际车速与限速的差值比例
+            difference = int(np.random.choice(cfg.TRAFFIC_MANAGER.SPEED_DIFFERENCE, 1))  # 从给定范围内随机采样一个数值作为差值
+            self.traffic_manager.vehicle_percentage_speed_difference(otherActor, difference)
+            # 强制换道，True是强制右，False是强制左
+            # self.traffic_manager.force_lane_change(otherActor,True)
+            # 车辆距离车道中心线的车道偏移量
+            # self.traffic_manager.vehicle_lane_offset(otherActor, 0)
+            # 将车辆的速度设置为定值
+            # self.traffic_manager.set_desired_speed(otherActor, 20)
+            # 设置混合物理模式，距离自车一定半径的车辆将会被禁用物理特性
+            # self.traffic_manager.set_hybrid_physics_mode(otherActor, enabled=False)
+            # 在混合物理模式启动的情况下，更改物理的影响区域的半径
+            # self.traffic_manager.set_hybrid_physics_radius(otherActor, r=50.0)
+            # 设置车辆在Traffic Manager控制时需要遵循的位置列表
+            # self.traffic_manager.set_path(self.hero_actor, path)
+            # 设置车辆在Traffic Manager控制时需要遵循的路线列表
+            # self.traffic_manager.set_route(self.hero_actor, path)
+
+            # keep actors and sensors to destroy them when an episode is finished
+            cruiseControl = CruiseControl(otherActor, los_sensor, s, d, lane, self.module_manager,
+                                          targetSpeed=targetSpeed)
+
+            deq_s = deque([s], maxlen=50)
+            v_S, v_D = velocity_inertial_to_frenet(s, otherActor.get_velocity().x, otherActor.get_velocity().y,
+                                                   self.global_csp)
+            psi = math.radians(otherActor.get_transform().rotation.yaw)
+            psi_Frenet = get_obj_S_yaw(psi, s, self.global_csp)
+            K_Frenet = get_calc_curvature(s, self.global_csp)
+            delta_f = cruiseControl.tick()[7] * 35 / np.pi
+            speed = get_speed(otherActor)
+
+            self.actors_batch.append({'Actor': otherActor, 'Sensor': los_sensor, 'Cruise Control': cruiseControl,
+                                      'Frenet State': [deq_s, d],
+                                      'Obj_Frenet_state': [s, d, v_S, v_D, psi_Frenet, K_Frenet],
+                                      'Obj_Cartesian_state': [x, y, otherActor.get_velocity().x,
+                                                              otherActor.get_velocity().y
+                                          , psi, speed, delta_f, targetSpeed]})
+        return otherActor
+
+
     def spawn_one_walker(self, s, targetSpeed):
         d = -6
         x, y, z, yaw = frenet_to_inertial(s, d, self.global_csp)
@@ -1917,6 +1997,7 @@ class TrafficManager:
         self.world_module = self.module_manager.get_module(MODULE_WORLD)
         self.world = self.world_module.world
         self.tm_port = self.world_module.tm_port
+        self.traffic_manager = self.world_module.traffic_manager
 
         vehicle_blueprints = self.world.get_blueprint_library().filter('vehicle.mercedes-benz.coupe')
         self.vehicle_blueprints = [bp for bp in vehicle_blueprints if int(bp.get_attribute('number_of_wheels')) == 4]
@@ -1957,23 +2038,43 @@ class TrafficManager:
         ego_lane = int(ego_d / self.LANE_WIDTH)
         ego_grid_n = ego_lane + 9  # in Grid world (see notes above), ego is in column 2 so its grid number will be based on its lane number
         grid_choices = np.arange(16, 80)
-        # 通过设置grid_choices可以设置其可能出现的初始位置，可以看上面的Grid world indices示意图。
-        # 设置self.N_SPAWN_CARS为需要的障碍车个数
+
+        # first_confirmed
+        # grid_choices = [21, 24, 29, 32, 45, 68, 57, 60]
+
+        # static obstacle confirmed
+        # grid_choices = [21, 28, 41, 52, 61, 64, 65, 70]
+
+        # for train
+        # grid_choices = [21, 25, 29, 33, 37, 41, 45, 49, 53, 57, 61, 20, 24, 28, 32, 36, 40, 44, 48, 52, 56, 60]
+
+        # for train three lane
+        # grid_choices = np.arange(20, 60, 8)
+
         rnd_indices = np.random.choice(grid_choices, self.N_SPAWN_CARS, replace=False)
 
         for idx in rnd_indices:
             col = idx // 4  # col number [0, 19]
             lane = idx - col * 4 - 1  # lane number [-1, 2]
             s = ego_s + col * 10 - 20  # -20 bc ego is on second column
-            # targetSpeed = random.uniform(self.min_speed, self.max_speed)  # m/s
-            targetSpeed = idx/3 + (idx/15)*(-1)**idx  # m/s
+
+            # # first_version
+            # # targetSpeed = random.uniform(self.min_speed, self.max_speed)  # m/s
+            # targetSpeed = idx/3 + (idx/15)*(-1)**idx  # m/s
+
+            # # second_version
             # i = '1'
-            i=np.array(['0','1'])[1 if idx%rnd_indices[0]==0 else 0]
-            data = xlrd.open_workbook(os.path.abspath('.') + '/tools/ob_v_data_' + i + '.xlsx')
-            table = data.sheets()[0]
-            velocity_curve_0 = table.row_values(0)
-            velocity_curve = velocity_curve_0 + np.array(random.random())
-            self.spawn_one_actor(s, lane, targetSpeed, velocity_curve)
+            # i=np.array(['0','1'])[1 if idx%rnd_indices[0]==0 else 0]
+            # data = xlrd.open_workbook(os.path.abspath('.') + '/tools/ob_v_data_' + i + '.xlsx')
+            # table = data.sheets()[0]
+            # velocity_curve_0 = table.row_values(0)
+            # velocity_curve = velocity_curve_0 + np.array(random.random())
+
+            # self.spawn_one_actor(s, lane, targetSpeed, velocity_curve)
+
+            # # third_version
+            targetSpeed = random.uniform(self.min_speed, self.max_speed)  # m/s
+            self.spawn_one_actor_TM(s, lane, targetSpeed)
 
         grid_choices_workers = np.arange(16, 49, 4)
         walker_pos_indices = np.random.choice(grid_choices_workers, self.N_SPAWN_PEDESTRAINS, replace=False)
@@ -2184,7 +2285,13 @@ class CruiseControl:
 
         control = self.vehicleController.run_step(cmdSpeed, targetWP)
 
-        self.vehicle.apply_control(control)
+        if cfg.TRAFFIC_MANAGER.AUTO_LANE_CHANGE:
+            # Traffic manager
+            pass
+        else:
+            self.vehicle.apply_control(control)
+            # IDM model
+        var_steer = self.vehicle.get_control().steer
         self.steps += 1
         return [self.location.x, self.location.y, self.location.z, self.speed, self.acceleration, self.yaw,
-                self.velocity, control.steer, targetSpeed]
+                self.velocity, var_steer, targetSpeed]
