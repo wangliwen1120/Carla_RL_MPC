@@ -167,6 +167,7 @@ class CarlagymEnv(gym.Env):
         self.minSpeed = float(cfg.GYM_ENV.MIN_SPEED)
         self.LANE_WIDTH = float(cfg.CARLA.LANE_WIDTH)
         self.N_SPAWN_CARS = int(cfg.TRAFFIC_MANAGER.N_SPAWN_CARS)
+        self.N_SPAWN_PEDESTRAINS = int(cfg.TRAFFIC_MANAGER.N_SPAWN_PEDESTRAINS)
         self.obj_max_vs = int(cfg.TRAFFIC_MANAGER.MAX_SPEED)
         self.d_max_s = int(cfg.CARLA.D_MAX_S)
 
@@ -718,6 +719,40 @@ class CarlagymEnv(gym.Env):
         else:
             self.actor_enumerated_dict['RRIGHT_DOWN'] = {'S': [emp_ln_min] if norm_s[13] == -1 else [no_ln_down]}
 
+    def walker_info_simple(self):
+        """
+        Actor:  [actor_id]
+        Frenet:  [s,d,v_s, v_d, phi_Frenet]
+        Cartesian:  [x, y, v_x, v_y, phi, speed, delta_f]
+        """
+        walker_info = {}
+        walker_actor = [0 for _ in range(self.N_SPAWN_PEDESTRAINS)]
+        walker_frenet = [0 for _ in range(self.N_SPAWN_PEDESTRAINS)]
+        walker_cartesian = [0 for _ in range(self.N_SPAWN_PEDESTRAINS)]
+        for i, walker in enumerate(self.traffic_module.walkers_batch):
+            walker_idx = i
+            walker_actor[walker_idx] = walker['Actor']
+            walker_frenet[walker_idx] = walker['Walker_Frenet_state']
+            walker_cartesian[walker_idx] = walker['Walker_Cartesian_state']
+        walker_dict = ({'Walker_actor': walker_actor, 'Walker_frenet': walker_frenet, 'Walker_cartesian': walker_cartesian})
+
+        others_s = np.zeros(self.N_SPAWN_PEDESTRAINS)
+        others_d = np.zeros(self.N_SPAWN_PEDESTRAINS)
+        others_v_S = np.zeros(self.N_SPAWN_PEDESTRAINS)
+        others_v_D = np.zeros(self.N_SPAWN_PEDESTRAINS)
+        others_phi_Frenet = np.zeros(self.N_SPAWN_PEDESTRAINS)
+
+        for i, walker in enumerate(self.traffic_module.walkers_batch):
+            act_s, act_d, act_v_S, act_v_D, act_psi_Frenet = walker['Walker_Frenet_state']
+            others_s[i] = act_s
+            others_d[i] = act_d
+            others_v_S[i] = act_v_S
+            others_v_D[i] = act_v_D
+            others_phi_Frenet[i] = act_psi_Frenet
+        walker_info_Mux = np.vstack((others_s, others_d, others_v_S, others_v_D, others_phi_Frenet))
+
+        return walker_dict, walker_info_Mux
+
     def not_zero(self, x, eps: float = 1e-2) -> float:
         if abs(x) > eps:
             return x
@@ -778,9 +813,7 @@ class CarlagymEnv(gym.Env):
                     pass
         else:
             print("Array dimensions greater than 2 are not handled.")
-        q = (q + 1.0) * 0.5
-        # print(self.n_step)
-        # print(action)
+        # q = (q + 1.0) * 0.5
         # birds-eye view
         spectator = self.world_module.world.get_spectator()
         transform = self.ego.get_transform()
@@ -840,9 +873,9 @@ class CarlagymEnv(gym.Env):
         self.actor_enumerated_dict['EGO'] = {'NORM_S': [0], 'NORM_D': [norm_d], 'S': ego_s_list, 'D': ego_d_list,
                                              'SPEED': [speed]}
         obj_info = self.obj_info()
-
-        if self.n_step == 180:
-            print("180")
+        walker_dict, walker_info_Mux = self.walker_info_simple()
+        # if self.n_step == 180:
+        #     print("180")
         # print(self.n_step)
         ref_left = frenet_to_inertial(self.fpath.s[29], self.fpath.d[29] - 3.5, self.motionPlanner.csp)
 
@@ -850,6 +883,7 @@ class CarlagymEnv(gym.Env):
         self.Input, MPC_unsolved, x_m = self.lon_lat_controller_ipopt.calc_input(
             x_current=[ego_state[0],ego_state[1], ego_state[2]],
             obj_info=obj_info,
+            walker_info=walker_dict,
             ref=np.array(
                 [self.fpath.x[29], self.fpath.y[29], self.fpath.yaw[29], self.fpath.s[29], self.fpath.d[29]]),
             ref_left=np.array([ref_left[0], ref_left[1], ref_left[3]]),
@@ -1014,12 +1048,12 @@ class CarlagymEnv(gym.Env):
         reward = reward_cl + reward_dis + reward_speed
 
         done = False
-        if collision or self.n_step >= 400:
+        if collision or self.n_step >= 500:
             self.u_last = np.zeros(self.u_last.shape)
             done = True
 
-        if collision or self.n_step >= 1000:
-            done = True
+        # if collision or self.n_step >= 1000:
+        #     done = True
 
         info = {'reserved': 0}
         obs = state_vector

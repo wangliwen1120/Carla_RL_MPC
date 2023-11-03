@@ -45,7 +45,9 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
         self.Cy = self.param.mpc_Cy
         self.Lane = self.param.lanewidth
         self.stop_line = self.param.dstop
-        self.vehicle_nums = 2
+        self.vehicle_nums = 5  # TRAFFIC_MANAGER.N_SPAWN_CARS)
+        self.walker_nums = 5  # TRAFFIC_MANAGER.N_SPAWN_PEDESTRAINS)
+        self.Width_walker = 0.5
 
         # 横纵向约束
         self.v_min = 0.0
@@ -79,6 +81,21 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
         self.model_ocp()
         self.cons_g()
 
+    def solve_walker(self, walker_info):
+        self.walker_Mux = []
+        for j in range(np.size(walker_info['Walker_actor'])):
+            obj_x = walker_info['Walker_cartesian'][j][0]
+            obj_y = walker_info['Walker_cartesian'][j][1]
+            obj_phi = walker_info['Walker_cartesian'][j][4]
+            obj_speed = walker_info['Walker_cartesian'][j][5]
+            obj_delta_f = walker_info['Walker_cartesian'][j][6]
+            for i in range(self.Np):
+                self.obj_x_ref[i] = obj_x + obj_speed * np.cos(obj_phi) * self.T * i
+                self.obj_y_ref[i] = obj_y + obj_speed * np.sin(obj_phi) * self.T * i
+                self.obj_phi_ref[i] = obj_phi + obj_delta_f * self.T * i
+                self.obj_actor_id[i] = walker_info['Walker_actor'][j].id
+            self.walker_Mux.append(
+                np.concatenate((self.obj_x_ref.T, self.obj_y_ref.T, self.obj_phi_ref.T, self.obj_actor_id.T)))
 
     def solve_obj(self, obj_info):
         self.obj_Mux = []
@@ -156,7 +173,7 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
 
         # g3
         for i in range(self.Np):
-            for _ in range(self.vehicle_nums):
+            for _ in range(self.vehicle_nums + self.walker_nums):
                 self.lbg.append(-np.inf)
                 self.ubg.append(0)
 
@@ -183,14 +200,15 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
         # 相关变量，格式(状态长度， 步长)
         U = ca.SX.sym('U', self.Nu, self.Nc)  # 控制输出
         X = ca.SX.sym('X', self.Nx, self.Np)  # 系统状态
-        C_R = ca.SX.sym('C_R', 1+ self.Nu + self.Nx + self.Nx + self.Nx + self.vehicle_nums*self.Np*6)  # 构建问题的相关参数
+        C_R = ca.SX.sym('C_R', 1 + self.Nu + self.Nx + self.Nx + self.Nx +
+                        self.vehicle_nums * self.Np * 6 + self.walker_nums * self.Np * 5)  # 构建问题的相关参数
         # 这里给定当前/初始位置，目标终点(本车道/左车道)位置
 
         # 权重矩阵
         self.q = C_R[0]
         self.ru = 0
         self.rdu = 0.3
-        self.S = 0.0  # Obstacle avoidance function coefficient
+        self.S = 0.1  # Obstacle avoidance function coefficient
         self.Q1 = self.q * np.eye(self.Nx)  # ego_lane: lane_2
         self.Q2 = (1 - self.q) * np.eye(self.Nx)  # left_lane: lane_1
         self.Ru = self.ru * np.eye(self.Nu)
@@ -213,9 +231,17 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
             k = 12 + j * self.Np * 6
             # if C_R[k+3] != 0:  # 'not vehicle_around'   #all vehicle to cal mot vehicle around
             for i in range(self.Np):
-                Obj_cost = self.S / (((X[0, i] - ca.if_else(C_R[k+3+i*6] != 0,C_R[k+i*6],1e6)) ** 2) +
-                                     ((X[1, i] - ca.if_else(C_R[k+3+i*6] != 0,C_R[k+1+i*6],1e6)) ** 2))
+                Obj_cost = self.S / (((X[0, i] - ca.if_else(C_R[k + 3 + i * 6] != 0, C_R[k + i * 6], 1e6)) ** 2) +
+                                     ((X[1, i] - ca.if_else(C_R[k + 3 + i * 6] != 0, C_R[k + 1 + i * 6], 1e6)) ** 2))
                 obj = obj + Obj_cost
+
+        # for jj in range(self.walker_nums):
+        #     kk = 12 + self.vehicle_nums * self.Np * 6 + jj * self.Np * 5
+        #     # if C_R[k+3] != 0:  # 'not vehicle_around'   #all vehicle to cal mot vehicle around
+        #     for i in range(self.Np):
+        #         Obj_cost = self.S / (((X[0, i] - ca.if_else(C_R[kk+3+i*5] != 0,C_R[kk+i*5],1e6)) ** 2) +
+        #                              ((X[1, i] - ca.if_else(C_R[kk+3+i*5] != 0,C_R[kk+1+i*5],1e6)) ** 2))
+        #         obj = obj + Obj_cost
 
         # Terminal cost function
 
@@ -243,16 +269,25 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
             else:
                 g2.append((U[:, i] - U[:, i - 1]) / self.T)
 
-
         # constraint 3: Obstacle avoidance
         for i in range(self.Np):
             for j in range(self.vehicle_nums):
                 k = 12 + self.Np * j * 6
-                if i==0:
+                if i == 0:
                     cons_obs_h = X[1, i] - C_R[k + 1 + i * 6] + C_R[k + 4 + i * 6] * self.Width
                 else:
-                    cons_obs_h = X[1, i] + (X[0, i]-X[0, i-1])*X[2, i] - C_R[k+1+i*6] + C_R[k+4+i*6] * self.Width
-                g3.append(C_R[k+4+i*6] * cons_obs_h + C_R[k+5+i*6])
+                    cons_obs_h = X[1, i] + (X[0, i] - X[0, i - 1]) * X[2, i] - C_R[k + 1 + i * 6] + C_R[
+                        k + 4 + i * 6] * self.Width
+                g3.append(C_R[k + 4 + i * 6] * cons_obs_h + C_R[k + 5 + i * 6])
+
+            for jj in range(self.walker_nums):
+                kk = 12 + self.Np * self.vehicle_nums * 6 + self.Np * jj * 5
+                if i == 0:
+                    cons_obs_h = X[1, i] - C_R[kk + 1 + i * 5] + C_R[kk + 3 + i * 5] * self.Width_walker
+                else:
+                    cons_obs_h = X[1, i] + (X[0, i] - X[0, i - 1]) * X[2, i] - C_R[kk + 1 + i * 5] + C_R[
+                        kk + 3 + i * 5] * self.Width_walker
+                g3.append(C_R[kk + 3 + i * 5] * cons_obs_h + C_R[kk + 4 + i * 5])
 
         # 定义优化问题
         # 输入变量，这里需要同时将系统状态X也作为优化变量输入，
@@ -270,36 +305,53 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
         # 最终目标，获得求解器
         self.solver = ca.nlpsol('solver', 'ipopt', nlp_prob, opts_setting)
 
-
-    def calc_input(self, x_current, obj_info, ref, ref_left, u_last, csp, fpath, q, ru, rdu):
+    def calc_input(self, x_current, obj_info, walker_info, ref, ref_left, u_last, csp, fpath, q, ru, rdu):
+        ego_f = np.zeros(self.Np)
+        ego_r = np.zeros(self.Np)
         current_x_list = np.zeros(self.Np)
         current_y_list = np.zeros(self.Np)
-        current_phi_list = np.zeros(self.Np)
         for i in range(self.Np):
             current_x_list[i] = x_current[0] + u_last[0] * np.cos(x_current[2]) * self.T * i
             current_y_list[i] = x_current[1] + u_last[0] * np.sin(x_current[2]) * self.T * i
-            current_phi_list[i] = x_current[2] + u_last[1] * self.T * i
+            current_phi_list = x_current[2] + u_last[1] * self.T * i
+
+            ego_x_fl = current_x_list[i] - self.Width / 2 * np.sin(current_phi_list) + self.Length / 2 * np.cos(
+                current_phi_list)
+            ego_x_fr = current_x_list[i] + self.Width / 2 * np.sin(current_phi_list) + self.Length / 2 * np.cos(
+                current_phi_list)
+            ego_x_rl = current_x_list[i] - self.Width / 2 * np.sin(current_phi_list) - self.Length / 2 * np.cos(
+                current_phi_list)
+            ego_x_rr = current_x_list[i] + self.Width / 2 * np.sin(current_phi_list) - self.Length / 2 * np.cos(
+                current_phi_list)
+            ego_f[i] = max(ego_x_fl, ego_x_fr)
+            ego_r[i] = min(ego_x_rl, ego_x_rr)
+
         self.solve_obj(obj_info)
+        self.solve_walker(walker_info)
         obj_Mux = self.obj_Mux
-        #  obs_list:  1. 车的数目  2. x, y, phi, id, l(1) or r(-1),cons or not(0/-1e5) 3.self.Np
-        obs_list = []
-        index = [0,1,2,4]
+        walker_Mux = self.walker_Mux
+
+        obs_list = []  # obs_list:  1. 车的数目  2. x, y, phi, id, l(1) or r(-1),cons or not(0/-1e5) 3.self.Np
+        index = [0, 1, 2, 4]
         for i in range(self.vehicle_nums):
             for j in range(self.Np):
                 for k in index:
                     obs_list.append(obj_Mux[i][k][j])
-                obs_list.append(1 if current_y_list[i] < obj_Mux[i][1][j] else -1)
+                obs_list.append(1 if current_y_list[j] < obj_Mux[i][1][j] else -1)
+                obs_list.append(
+                    0 if ego_f[j] > obj_Mux[i][0][j] and ego_r[j] < (obj_Mux[i][0][j] + self.Length) else -1e5)
 
-                ego_x_fl = current_x_list[j] - self.Width / 2 * np.sin(current_phi_list[j]) + self.Length / 2 * np.cos(current_phi_list[j])
-                ego_x_fr = current_x_list[j] + self.Width / 2 * np.sin(current_phi_list[j]) + self.Length / 2 * np.cos(current_phi_list[j])
-                ego_x_rl = current_x_list[j] - self.Width / 2 * np.sin(current_phi_list[j]) - self.Length / 2 * np.cos(current_phi_list[j])
-                ego_x_rr = current_x_list[j] + self.Width / 2 * np.sin(current_phi_list[j]) - self.Length / 2 * np.cos(current_phi_list[j])
-                ego_f = max(ego_x_fl, ego_x_fr)
-                ego_r = min(ego_x_rl, ego_x_rr)
-                obs_list.append(0 if ego_f+10 > obj_Mux[i][0][j] and ego_r < (obj_Mux[i][0][j] + self.Length+10) else -1e5)
+        walker_list = []  # x, y, phi, l(1) or r(-1),cons or not(0/-1e5) 3.self.Np
+        for i in range(self.walker_nums):
+            for j in range(self.Np):
+                for k in range(3):
+                    walker_list.append(walker_Mux[i][k][j])
+                walker_list.append(1 if current_y_list[j] < walker_Mux[i][1][j] else -1)
+                walker_list.append(
+                    0 if ego_f[j] > walker_Mux[i][0][j] and ego_r[j] < (walker_Mux[i][0][j] + self.Length) else -1e5)
 
         # 初始化优化参数
-        C_R = np.concatenate(([q,u_last[0],u_last[1]],x_current,ref[:3],ref_left[:3],obs_list))
+        C_R = np.concatenate(([q, u_last[0], u_last[1]], x_current, ref[:3], ref_left[:3], obs_list, walker_list))
 
         # 控制约束
         self.lbx = []
@@ -318,6 +370,8 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
             self.lbx.append(-np.inf)
             self.lbx.append(y_min)
             self.lbx.append(-np.inf)
+
+            x_max = np.inf
             if obj_info['Ego_preceding'][0] != None:  # if no vehicle_ahead
                 obj_preceding_x = obj_info['Ego_preceding'][2][0]
                 obj_preceding_y = obj_info['Ego_preceding'][2][1]
@@ -325,19 +379,35 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
                 obj_preceding_speed = obj_info['Ego_preceding'][2][5]
                 obj_preceding_delta_f = obj_info['Ego_preceding'][2][6]
                 obj_preceding_x_ref = obj_preceding_x + obj_preceding_speed * np.cos(obj_preceding_phi) * self.T * i
-                self.ubx.append(obj_preceding_x_ref - self.stop_line)
-            else:
-                self.ubx.append(np.inf)
+                x_max = obj_preceding_x_ref - self.stop_line
+
+            for j in range(self.walker_nums):
+                walker_x = walker_info['Walker_cartesian'][j][0]
+                walker_y = walker_info['Walker_cartesian'][j][1]
+                walker_vx = walker_info['Walker_cartesian'][j][2]
+                walker_vy = walker_info['Walker_cartesian'][j][3]
+                walker_y_i = walker_y + walker_vy * self.T * i
+
+                walker_before = False
+                if current_x_list[i] + self.Length / 2.0 < walker_x \
+                        < current_x_list[i] + self.Length / 2.0 + self.stop_line * 2:
+                    walker_before = True
+                walker_width_danger = False
+                if current_y_list[i] - self.Width / 2.0 - self.Width_walker < walker_y_i \
+                        < current_y_list[i] + self.Width / 2.0 + self.Width_walker:
+                    walker_width_danger = True
+                if walker_before and walker_width_danger:
+                    x_max = min(x_max, walker_x + walker_vx * self.T * i - self.stop_line)
+            self.ubx.append(x_max)
             self.ubx.append(y_max)
             self.ubx.append(np.inf)
-
 
         # 初始化优化目标变量
         init_control = np.concatenate((self.u0.reshape(-1, 1), self.next_states.reshape(-1, 1)))
         start_time = time.time()
         res = self.solver(x0=init_control, p=C_R, lbg=self.lbg,
-                     lbx=self.lbx, ubg=self.ubg, ubx=self.ubx)
-        print('t_cost =', time.time() - start_time)
+                          lbx=self.lbx, ubg=self.ubg, ubx=self.ubx)
+        # print('t_cost =', time.time() - start_time)
         # the feedback is in the series [u0, x0, u1, x1, ...]
         # 获得最优控制结果estimated_opt，u0，x_m
         estimated_opt = res['x'].full()
@@ -346,7 +416,6 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
         self.next_states = np.concatenate((x_m[1:], x_m[-1:]), axis=0)
 
         self.u0 = np.concatenate((u0[1:], u0[-1:]))
-
 
         MPC_unsolved = False
         return np.array([estimated_opt[0], estimated_opt[1]]), MPC_unsolved, x_m

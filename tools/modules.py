@@ -38,6 +38,8 @@ import glob
 import os
 import sys
 import xlrd
+import time
+import threading
 from xlrd import xldate_as_tuple
 
 try:
@@ -1370,7 +1372,9 @@ class ModuleWorld:
                 surface.blit(font_surface, (x - radius / 2, y - radius / 2))
 
     def _render_walkers(self, surface, list_w, world_to_pixel):
-        for w in list_w:
+        for i in range(0, len(list_w), 2):
+        # for w in list_w:
+            w = list_w[i]
             color = COLOR_PLUM_0
 
             # Compute bounding box points
@@ -1717,8 +1721,10 @@ class TrafficManager:
         # Dictionary keys:
         # actor: carla actor instance | sensor: range sensor | control: CruiseControl instance | Frenet State: [s, d]
         self.actors_batch = []
+        self.walkers_batch = []
 
         self.N_SPAWN_CARS = int(cfg.TRAFFIC_MANAGER.N_SPAWN_CARS)
+        self.N_SPAWN_PEDESTRAINS = int(cfg.TRAFFIC_MANAGER.N_SPAWN_PEDESTRAINS)
         self.min_speed = float(cfg.TRAFFIC_MANAGER.MIN_SPEED)
         self.max_speed = float(cfg.TRAFFIC_MANAGER.MAX_SPEED)
         self.LANE_WIDTH = float(cfg.CARLA.LANE_WIDTH)
@@ -1817,7 +1823,7 @@ class TrafficManager:
         d = lane * self.LANE_WIDTH
         x, y, z, yaw = frenet_to_inertial(s, d, self.global_csp)
 
-        blueprint = random.choice(self.blueprints)
+        blueprint = random.choice(self.vehicle_blueprints)
         if blueprint.has_attribute('color'):
             color = random.choice(blueprint.get_attribute('color').recommended_values)
             blueprint.set_attribute('color', color)
@@ -1826,7 +1832,6 @@ class TrafficManager:
                                     rotation=carla.Rotation(pitch=0.0, yaw=math.degrees(yaw), roll=0.0))
 
         otherActor = self.world.try_spawn_actor(blueprint, transform)
-
         # otherActor.set_transform(transform)
         if otherActor is not None:
             # create a line of sight sensor attached to the vehicle
@@ -1856,12 +1861,68 @@ class TrafficManager:
                                           , psi, speed, delta_f, targetSpeed]})
         return otherActor
 
+    def spawn_one_walker(self, s, targetSpeed):
+        d = -6
+        x, y, z, yaw = frenet_to_inertial(s, d, self.global_csp)
+        yaw = math.pi/2
+        blueprint = random.choice(self.walker_blueprints)
+        if blueprint.has_attribute('color'):
+            color = random.choice(blueprint.get_attribute('color').recommended_values)
+            blueprint.set_attribute('color', color)
+        if blueprint.has_attribute('is_invincible'):  # Make pedestrians invincible
+            blueprint.set_attribute('is_invincible', 'True')
+
+        transform = carla.Transform(location=carla.Location(x=x, y=y, z=z + 0.3),
+                                    rotation=carla.Rotation(pitch=0.0, yaw=math.degrees(yaw), roll=0.0))
+
+        otherActor = None
+        try:
+            otherActor = self.world.spawn_actor(blueprint, transform)
+        except RuntimeError as e:
+            print("Failed to spawn a pedestrian at s={}, d={} because {}".format(s, d, e))
+
+        def start_walker_after_delay(walker, walker_controller, delay):
+            time.sleep(delay)
+            walker.apply_control(walker_controller)
+
+        if otherActor is not None:
+            print("A pedestrian is successfully spawned at s={}, d={}".format(s, d))
+
+            walker_controller = carla.WalkerControl()
+            walker_controller.speed = targetSpeed
+            walker_controller.direction = carla.Vector3D(x=0.0,y=1.0,z=0.0)
+            # otherActor.apply_control(walker_controller)
+
+            # 创建一个新的线程来处理延迟开始行走
+            delay = random.random() * (s-2120) * 0.05
+            t = threading.Thread(target=start_walker_after_delay, args=(otherActor, walker_controller, delay))
+            t.start()
+
+            v_S, v_D = velocity_inertial_to_frenet(s, otherActor.get_velocity().x, otherActor.get_velocity().y,
+                                                   self.global_csp)
+            psi = math.radians(otherActor.get_transform().rotation.yaw)
+            psi_Frenet = math.pi / 2.0
+            delta_f = 0
+            speed = get_speed(otherActor)
+            self.walkers_batch.append(
+                {'Actor': otherActor,
+                 'Walker_Frenet_state': [s, d, v_S, v_D, psi_Frenet],
+                 'Walker_Cartesian_state': [x, y, otherActor.get_velocity().x,
+                                         otherActor.get_velocity().y
+                     , psi, speed, delta_f, targetSpeed]})
+
+        return otherActor
+
     def start(self):
         self.world_module = self.module_manager.get_module(MODULE_WORLD)
         self.world = self.world_module.world
         self.tm_port = self.world_module.tm_port
-        blueprints = self.world.get_blueprint_library().filter('vehicle.mercedes-benz.coupe')
-        self.blueprints = [bp for bp in blueprints if int(bp.get_attribute('number_of_wheels')) == 4]
+
+        vehicle_blueprints = self.world.get_blueprint_library().filter('vehicle.mercedes-benz.coupe')
+        self.vehicle_blueprints = [bp for bp in vehicle_blueprints if int(bp.get_attribute('number_of_wheels')) == 4]
+        self.walker_blueprints = list(self.world.get_blueprint_library().filter('walker.pedestrian.*'))
+        # walker_blueprints = self.world.get_blueprint_library().filter('walker.pedestrian.adult.male')
+        self.blueprints = self.vehicle_blueprints + self.walker_blueprints
 
     def reset(self, ego_s, ego_d):
         """
@@ -1885,19 +1946,17 @@ class TrafficManager:
         for actor_dic in self.actors_batch:
             actor_dic['Actor'].destroy()
             actor_dic['Sensor'].destroy()
+        for walker_dic in self.walkers_batch:
+            walker_dic['Actor'].destroy()
 
         # delete class instances and re-initialize lists
         del self.actors_batch[:]
+        del self.walkers_batch[:]
 
         # re-spawn N_INIT_CARS of actors
         ego_lane = int(ego_d / self.LANE_WIDTH)
         ego_grid_n = ego_lane + 9  # in Grid world (see notes above), ego is in column 2 so its grid number will be based on its lane number
-        grid_choices = np.arange(16, 40)
-        # grid_choices = np.arange(21, 38, 4)
-        grid_choices = [36,37]
-        # grid_choices = [29,36,45,52,61]  ## 40:25  50:29  60:33
-        # grid_choices = [21,41,53,24,32]  ## 40:25  50:29  60:33
-        # grid_choices = [21,25,29,33,37,41,45,49,53,57,61,65,69,20,24,28,32,36,40,44,48,52,56,60,64,68]
+        grid_choices = np.arange(16, 80)
         # 通过设置grid_choices可以设置其可能出现的初始位置，可以看上面的Grid world indices示意图。
         # 设置self.N_SPAWN_CARS为需要的障碍车个数
         rnd_indices = np.random.choice(grid_choices, self.N_SPAWN_CARS, replace=False)
@@ -1907,26 +1966,35 @@ class TrafficManager:
             lane = idx - col * 4 - 1  # lane number [-1, 2]
             s = ego_s + col * 10 - 20  # -20 bc ego is on second column
             # targetSpeed = random.uniform(self.min_speed, self.max_speed)  # m/s
-            # targetSpeed = idx/3 + (idx/15)*(-1)**idx  # m/s
-            targetSpeed = 10
-            i = '1'
-            # i=np.array(['0','1'])[1 if idx%rnd_indices[0]==0 else 0]
+            targetSpeed = idx/3 + (idx/15)*(-1)**idx  # m/s
+            # i = '1'
+            i=np.array(['0','1'])[1 if idx%rnd_indices[0]==0 else 0]
             data = xlrd.open_workbook(os.path.abspath('.') + '/tools/ob_v_data_' + i + '.xlsx')
             table = data.sheets()[0]
-            # velocity_curve = table.row_values(0)
             velocity_curve_0 = table.row_values(0)
             velocity_curve = velocity_curve_0 + np.array(random.random())
             self.spawn_one_actor(s, lane, targetSpeed, velocity_curve)
+
+        grid_choices_workers = np.arange(16, 49, 4)
+        walker_pos_indices = np.random.choice(grid_choices_workers, self.N_SPAWN_PEDESTRAINS, replace=False)
+        for idx_walker in walker_pos_indices:
+            col = idx_walker // 4  # col number [0, 19]
+            s = ego_s + col * 10 - 20  # -20 bc ego is on second column
+            targetSpeed = 0.5+2*random.random()
+            self.spawn_one_walker(s, targetSpeed)
 
     def destroy(self):
         # remove actors and sensors
         for actor_dic in self.actors_batch:
             actor_dic['Actor'].destroy()
             actor_dic['Sensor'].destroy()
+        for walker_dic in self.walkers_batch:
+            walker_dic['Actor'].destroy()
 
     def tick(self):
 
         for actor_dic in self.actors_batch:
+
             control = actor_dic['Cruise Control']
 
             state = control.tick()
@@ -1961,6 +2029,30 @@ class TrafficManager:
             # actor_dic['Frenet State'][0] = s
             # IMPORTANT actor d is NOT updated
             control.update_s(s)
+
+        for walker_dic in self.walkers_batch:
+            # Process as pedestrian
+            actor = walker_dic['Actor']
+            s, d,v_S, v_D, psi_Frenet = walker_dic['Walker_Frenet_state']  # Other Frenet state variables
+            x, y, v_x, v_y, yaw, speed, delta_f, targetSpeed = walker_dic[
+                'Walker_Cartesian_state']  # Cartesian state variables
+
+            # Get new state from the actor
+            velocity = actor.get_velocity()  # Returns a carla.Vector3D object
+            new_speed = math.sqrt(
+                velocity.x ** 2 + velocity.y ** 2 + velocity.z ** 2)  # Calculate the length of the velocity vector
+            new_yaw = math.radians(actor.get_transform().rotation.yaw)
+
+            # Update Frenet state based on new speed and yaw
+            v_S, v_D = velocity_inertial_to_frenet(s, new_speed * math.cos(new_yaw), new_speed * math.sin(new_yaw),
+                                                   self.global_csp)
+            psi_Frenet = math.pi / 2.0
+
+            # Update the stored states
+            walker_dic['Walker_Frenet_state'] = [s, d, v_S, v_D, psi_Frenet]
+            walker_dic['Walker_Cartesian_state'] = [x, y, new_speed * math.cos(new_yaw), new_speed * math.sin(new_yaw),
+                                                new_yaw, new_speed, delta_f, targetSpeed]
+
 
 
 class LineOfSightSensor(object):
