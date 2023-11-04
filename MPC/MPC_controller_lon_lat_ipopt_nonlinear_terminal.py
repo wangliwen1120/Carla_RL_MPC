@@ -305,7 +305,7 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
         # 最终目标，获得求解器
         self.solver = ca.nlpsol('solver', 'ipopt', nlp_prob, opts_setting)
 
-    def calc_input(self, x_current, obj_info, walker_info, ref, ref_left, u_last, csp, fpath, q, ru, rdu):
+    def calc_input(self, x_current, obj_info, walker_info, ref, ref_left,ref_right, u_last, csp, fpath, q, ru, rdu):
         ego_f = np.zeros(self.Np)
         ego_r = np.zeros(self.Np)
         current_x_list = np.zeros(self.Np)
@@ -351,7 +351,10 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
                     0 if ego_f[j] > walker_Mux[i][0][j] and ego_r[j] < (walker_Mux[i][0][j] + self.Length) else -1e5)
 
         # 初始化优化参数
-        C_R = np.concatenate(([q, u_last[0], u_last[1]], x_current, ref[:3], ref_left[:3], obs_list, walker_list))
+        if q<0:   ## -1: left  0: ref   1:right
+            C_R = np.concatenate(([-q, u_last[0], u_last[1]], x_current, ref_left[:3], ref[:3], obs_list, walker_list))
+        else:
+            C_R = np.concatenate(([q, u_last[0], u_last[1]], x_current, ref_right[:3], ref[:3], obs_list, walker_list))
 
         # 控制约束
         self.lbx = []
@@ -366,7 +369,7 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
 
         for i in range(self.Np):
             y_min = frenet_to_inertial(fpath.s[i], - 4.2, csp)[1]
-            y_max = frenet_to_inertial(fpath.s[i], + 0.3, csp)[1]
+            y_max = frenet_to_inertial(fpath.s[i], + 4.2, csp)[1]
             self.lbx.append(-np.inf)
             self.lbx.append(y_min)
             self.lbx.append(-np.inf)
@@ -389,6 +392,7 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
                     walker_width_danger = True
                 if walker_before and walker_width_danger:
                     walker_x_max = min(walker_x_max, walker_x + walker_vx * self.T * i - self.stop_line)
+
             if obj_info['Ego_preceding'][0] != None:  # if no vehicle_ahead
                 obj_preceding_x = obj_info['Ego_preceding'][2][0]
                 obj_preceding_y = obj_info['Ego_preceding'][2][1]
@@ -407,7 +411,7 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
         start_time = time.time()
         res = self.solver(x0=init_control, p=C_R, lbg=self.lbg,
                           lbx=self.lbx, ubg=self.ubg, ubx=self.ubx)
-        print('t_cost =', time.time() - start_time)
+        # print('t_cost =', time.time() - start_time)
         # the feedback is in the series [u0, x0, u1, x1, ...]
         # 获得最优控制结果estimated_opt，u0，x_m
         estimated_opt = res['x'].full()
@@ -416,6 +420,10 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
         self.next_states = np.concatenate((x_m[1:], x_m[-1:]), axis=0)
 
         self.u0 = np.concatenate((u0[1:], u0[-1:]))
-
         MPC_unsolved = False
+        stats = self.solver.stats()
+        if not stats['success']:
+            MPC_unsolved = True
+            print("MPC does not have a solution.")
+
         return np.array([estimated_opt[0], estimated_opt[1]]), MPC_unsolved, x_m

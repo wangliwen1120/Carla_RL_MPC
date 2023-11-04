@@ -224,7 +224,7 @@ class CarlagymEnv(gym.Env):
         else:
             self.dt = 0.05
 
-        action_low = 0
+        action_low = -1
         action_high = 1
         self.acton_dim = (1, 1)
         self.action_space = spaces.Box(action_low, action_high, shape=self.acton_dim, dtype='float32')
@@ -831,7 +831,7 @@ class CarlagymEnv(gym.Env):
         # birds-eye view
         spectator = self.world_module.world.get_spectator()
         transform = self.ego.get_transform()
-        spectator.set_transform(carla.Transform(transform.location + carla.Location(z=50), carla.Rotation(pitch=-90)))
+        spectator.set_transform(carla.Transform(transform.location + carla.Location(x=-10,z=20), carla.Rotation(pitch=-45)))
         # # third person view
         # spectator = self.world.get_spectator()
         # transform = ego_vehicle.get_transform()
@@ -892,6 +892,7 @@ class CarlagymEnv(gym.Env):
         #     print("180")
         # print(self.n_step)
         ref_left = frenet_to_inertial(self.fpath.s[29], self.fpath.d[29] - 3.5, self.motionPlanner.csp)
+        ref_right = frenet_to_inertial(self.fpath.s[29], self.fpath.d[29] + 7, self.motionPlanner.csp)
 
         # terminal
         self.Input, MPC_unsolved, x_m = self.lon_lat_controller_ipopt.calc_input(
@@ -901,6 +902,7 @@ class CarlagymEnv(gym.Env):
             ref=np.array(
                 [self.fpath.x[29], self.fpath.y[29], self.fpath.yaw[29], self.fpath.s[29], self.fpath.d[29]]),
             ref_left=np.array([ref_left[0], ref_left[1], ref_left[3]]),
+            ref_right=np.array([ref_right[0], ref_right[1], ref_right[3]]),
             u_last=self.u_last, csp=self.motionPlanner.csp, fpath=fpath,
             q=q, ru=1, rdu=1)
 
@@ -1045,24 +1047,38 @@ class CarlagymEnv(gym.Env):
             reward_offTheRoad = 0
 
         if MPC_unsolved == True:
-            reward_mpcNoResult = -2
-        else:
             reward_mpcNoResult = 0
+        else:
+            reward_mpcNoResult = -2
 
-        reward_dis = 0
+        reward_dis_vehicle = 0
         for i in range(self.N_SPAWN_CARS):
             d_s = self.state[0, (i + 1) * 4] * self.d_max_s
             d_d_f = self.state[0, (i + 1) * 4 + 2]
             d_d = abs(self.state[0, (i + 1) * 4 + 3] - self.state[0, 3])
-            reward_dis -= 30 / (d_s ** 2 + d_d ** 2)
+            reward_dis_vehicle -= 30 / (d_s ** 2 + d_d ** 2)
+
+        reward_dis_walker = 0
+        for i in range(self.N_SPAWN_PEDESTRAINS):
+            d_s = self.state[0, (i + 1 + self.N_SPAWN_CARS) * 4] * self.d_max_s
+            d_d_f = self.state[0, (i + 1 + self.N_SPAWN_CARS) * 4 + 2]
+            d_d = abs(self.state[0, (i + 1 + self.N_SPAWN_CARS) * 4 + 3] - self.state[0, 3])
+            reward_dis_walker -= 30 / (d_s ** 2 + d_d ** 2)
 
         reward_speed = v_S * 3 / self.maxSpeed
 
-        # reward = reward_cl + reward_mpcNoResult + reward_speed + reward_lanechange + reward_offTheRoad + reward_dis_lon + reward_dis_lat
-        reward = reward_cl + reward_dis + reward_speed
+        reward = reward_cl + reward_dis_vehicle + reward_dis_walker + reward_speed + reward_lanechange +reward_mpcNoResult
+
+        obj_S_Mux = []
+        for j in range(np.size(obj_info['Obj_actor'])):
+            obj_S = obj_info['Obj_frenet'][j][0]
+            obj_S_Mux.append(obj_S)
+
+        if MPC_unsolved:
+            self.u_last = np.zeros(self.u_last.shape)
 
         done = False
-        if collision or self.n_step >= 400:
+        if collision or self.n_step >= 400: #or ego_s > max(obj_S_Mux) + 10:
             self.u_last = np.zeros(self.u_last.shape)
             done = True
 

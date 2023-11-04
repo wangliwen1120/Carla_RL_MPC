@@ -1963,7 +1963,10 @@ class TrafficManager:
 
         def start_walker_after_delay(walker, walker_controller, delay):
             time.sleep(delay)
-            walker.apply_control(walker_controller)
+            try:
+                walker.apply_control(walker_controller)
+            except RuntimeError as e:
+                print(f"Actor has been destroyed: {e}")
 
         if otherActor is not None:
             print("A pedestrian is successfully spawned at s={}, d={}".format(s, d))
