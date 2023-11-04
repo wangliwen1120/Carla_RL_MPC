@@ -1062,12 +1062,9 @@ class CarlagymEnv(gym.Env):
         reward = reward_cl + reward_dis + reward_speed
 
         done = False
-        if collision or self.n_step >= 500:
+        if collision or self.n_step >= 400:
             self.u_last = np.zeros(self.u_last.shape)
             done = True
-
-        # if collision or self.n_step >= 1000:
-        #     done = True
 
         info = {'reserved': 0}
         obs = state_vector

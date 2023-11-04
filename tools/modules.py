@@ -1895,7 +1895,7 @@ class TrafficManager:
             self.traffic_manager.auto_lane_change(otherActor, True)
             # 车辆忽略红路灯的概率
             self.traffic_manager.ignore_lights_percentage(otherActor, 100)
-            # 车辆忽略交通贵规则的概率
+            # 车辆忽略交通规则的概率
             self.traffic_manager.ignore_signs_percentage(otherActor, 0)
             # 碰撞检测忽略其他车辆碰撞的几率
             self.traffic_manager.ignore_vehicles_percentage(otherActor, 0)
@@ -2076,7 +2076,7 @@ class TrafficManager:
             targetSpeed = random.uniform(self.min_speed, self.max_speed)  # m/s
             self.spawn_one_actor_TM(s, lane, targetSpeed)
 
-        grid_choices_workers = np.arange(16, 49, 4)
+        grid_choices_workers = np.arange(16, 79, 4)
         walker_pos_indices = np.random.choice(grid_choices_workers, self.N_SPAWN_PEDESTRAINS, replace=False)
         for idx_walker in walker_pos_indices:
             col = idx_walker // 4  # col number [0, 19]
@@ -2147,11 +2147,21 @@ class TrafficManager:
             # Update Frenet state based on new speed and yaw
             v_S, v_D = velocity_inertial_to_frenet(s, new_speed * math.cos(new_yaw), new_speed * math.sin(new_yaw),
                                                    self.global_csp)
-            psi_Frenet = math.pi / 2.0
+
+            # Get the new location of the actor
+            new_location = actor.get_transform().location
+
+            # Convert to Frenet coordinates
+            # new_s, new_d = inertial_to_frenet(new_location.x, new_location.y, self.global_csp)
+
+            # Update Cartesian coordinates
+            new_x = new_location.x
+            new_y = new_location.y
+
 
             # Update the stored states
-            walker_dic['Walker_Frenet_state'] = [s, d, v_S, v_D, psi_Frenet]
-            walker_dic['Walker_Cartesian_state'] = [x, y, new_speed * math.cos(new_yaw), new_speed * math.sin(new_yaw),
+            walker_dic['Walker_Frenet_state'] = [s, d, v_S, v_D, psi_Frenet]  #new_s new_d
+            walker_dic['Walker_Cartesian_state'] = [new_x, new_y, new_speed * math.cos(new_yaw), new_speed * math.sin(new_yaw),
                                                 new_yaw, new_speed, delta_f, targetSpeed]
 
 

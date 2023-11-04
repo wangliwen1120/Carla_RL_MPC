@@ -371,16 +371,7 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
             self.lbx.append(y_min)
             self.lbx.append(-np.inf)
 
-            x_max = np.inf
-            if obj_info['Ego_preceding'][0] != None:  # if no vehicle_ahead
-                obj_preceding_x = obj_info['Ego_preceding'][2][0]
-                obj_preceding_y = obj_info['Ego_preceding'][2][1]
-                obj_preceding_phi = obj_info['Ego_preceding'][2][4]
-                obj_preceding_speed = obj_info['Ego_preceding'][2][5]
-                obj_preceding_delta_f = obj_info['Ego_preceding'][2][6]
-                obj_preceding_x_ref = obj_preceding_x + obj_preceding_speed * np.cos(obj_preceding_phi) * self.T * i
-                x_max = obj_preceding_x_ref - self.stop_line
-
+            walker_x_max = np.inf
             for j in range(self.walker_nums):
                 walker_x = walker_info['Walker_cartesian'][j][0]
                 walker_y = walker_info['Walker_cartesian'][j][1]
@@ -393,12 +384,21 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
                         < current_x_list[i] + self.Length / 2.0 + self.stop_line * 2:
                     walker_before = True
                 walker_width_danger = False
-                if current_y_list[i] - self.Width / 2.0 - self.Width_walker < walker_y_i \
-                        < current_y_list[i] + self.Width / 2.0 + self.Width_walker:
+                if current_y_list[i] - self.Width / 2.0 - self.Width_walker/2.0 < walker_y_i \
+                        < current_y_list[i] + self.Width / 2.0 + self.Width_walker/2.0:
                     walker_width_danger = True
                 if walker_before and walker_width_danger:
-                    x_max = min(x_max, walker_x + walker_vx * self.T * i - self.stop_line)
-            self.ubx.append(x_max)
+                    walker_x_max = min(walker_x_max, walker_x + walker_vx * self.T * i - self.stop_line)
+            if obj_info['Ego_preceding'][0] != None:  # if no vehicle_ahead
+                obj_preceding_x = obj_info['Ego_preceding'][2][0]
+                obj_preceding_y = obj_info['Ego_preceding'][2][1]
+                obj_preceding_phi = obj_info['Ego_preceding'][2][4]
+                obj_preceding_speed = obj_info['Ego_preceding'][2][5]
+                obj_preceding_delta_f = obj_info['Ego_preceding'][2][6]
+                obj_preceding_x_ref = obj_preceding_x + obj_preceding_speed * np.cos(obj_preceding_phi) * self.T * i
+                walker_x_max = min(walker_x_max, obj_preceding_x_ref - self.stop_line)
+
+            self.ubx.append(walker_x_max)
             self.ubx.append(y_max)
             self.ubx.append(np.inf)
 
@@ -407,7 +407,7 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
         start_time = time.time()
         res = self.solver(x0=init_control, p=C_R, lbg=self.lbg,
                           lbx=self.lbx, ubg=self.ubg, ubx=self.ubx)
-        # print('t_cost =', time.time() - start_time)
+        print('t_cost =', time.time() - start_time)
         # the feedback is in the series [u0, x0, u1, x1, ...]
         # 获得最优控制结果estimated_opt，u0，x_m
         estimated_opt = res['x'].full()
