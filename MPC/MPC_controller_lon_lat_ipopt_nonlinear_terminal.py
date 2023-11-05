@@ -305,7 +305,7 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
         # 最终目标，获得求解器
         self.solver = ca.nlpsol('solver', 'ipopt', nlp_prob, opts_setting)
 
-    def calc_input(self, x_current, obj_info, walker_info, ref, ref_left,ref_right, u_last, csp, fpath, q, ru, rdu):
+    def calc_input(self, x_current, obj_info, walker_info, ref, ref_left,ref_right, u_last, csp, fpath, q, fpath_point_num):
         ego_f = np.zeros(self.Np)
         ego_r = np.zeros(self.Np)
         current_x_list = np.zeros(self.Np)
@@ -368,8 +368,12 @@ class MPC_controller_lon_lat_ipopt_nonlinear_terminal:
             self.ubx.append(self.delta_f_max)
 
         for i in range(self.Np):
-            y_min = frenet_to_inertial(fpath.s[i], - 4.2, csp)[1]
-            y_max = frenet_to_inertial(fpath.s[i], + 4.2, csp)[1]
+            if i<fpath_point_num:
+                y_min = frenet_to_inertial(fpath.s[i], - 4.2, csp)[1]
+                y_max = frenet_to_inertial(fpath.s[i], + 4.2, csp)[1]
+            else:
+                y_min = frenet_to_inertial(fpath.s[fpath_point_num], - 4.2, csp)[1]
+                y_max = frenet_to_inertial(fpath.s[fpath_point_num], + 4.2, csp)[1]
             self.lbx.append(-np.inf)
             self.lbx.append(y_min)
             self.lbx.append(-np.inf)

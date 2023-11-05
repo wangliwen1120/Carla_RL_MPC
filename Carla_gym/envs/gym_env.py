@@ -226,7 +226,7 @@ class CarlagymEnv(gym.Env):
 
         action_low = -1
         action_high = 1
-        self.acton_dim = (1, 1)
+        self.acton_dim = (1, 2)
         self.action_space = spaces.Box(action_low, action_high, shape=self.acton_dim, dtype='float32')
         self.obs_dim = (1, (self.N_SPAWN_CARS + self.N_SPAWN_PEDESTRAINS + 1) * 4)
         self.observation_space = spaces.Box(-np.inf, np.inf, shape=self.obs_dim, dtype='float32')
@@ -817,17 +817,18 @@ class CarlagymEnv(gym.Env):
         # normalized
         action = np.array(action)
         if len(action.shape) == 1:
-            for i in action:
-                q = i
+                q = action[0]
+                tf = action[1] + 2.0
                 pass
         elif len(action.shape) == 2:
             for i in range(action.shape[0]):
                 for j in range(action.shape[1]):
-                    q = action[i][j]
+                    q = action[0][0]
+                    tf = action[0][1] + 2.0
                     pass
         else:
             print("Array dimensions greater than 2 are not handled.")
-        # q = (q + 1.0) * 0.5
+
         # birds-eye view
         spectator = self.world_module.world.get_spectator()
         transform = self.ego.get_transform()
@@ -853,13 +854,13 @@ class CarlagymEnv(gym.Env):
 
         if self.n_step == 1:
             fpath, self.lanechange, off_the_road = self.motionPlanner.run_step_single_path(ego_state, self.f_idx,
-                                                                                           df_n=0, Tf=3, Vf_n=0)
+                                                                                           df_n=0, Tf=tf, Vf_n=0)
         else:
             self.ref_idx = closest_wp_idx_ref(ego_state, self.fpath, self.f_idx)
             ego_state_ref = [self.fpath.x[self.ref_idx], self.fpath.y[self.ref_idx], speed, acc,
                              self.fpath.yaw[self.ref_idx], temp, self.max_s]
             fpath, self.lanechange, off_the_road = self.motionPlanner.run_step_single_path(ego_state_ref, self.f_idx,
-                                                                                           df_n=0, Tf=3, Vf_n=0)
+                                                                                           df_n=0, Tf=tf, Vf_n=0)
 
         self.fpath = fpath
         """
@@ -891,8 +892,10 @@ class CarlagymEnv(gym.Env):
         # if self.n_step == 180:
         #     print("180")
         # print(self.n_step)
-        ref_left = frenet_to_inertial(self.fpath.s[29], self.fpath.d[29] - 3.5, self.motionPlanner.csp)
-        ref_right = frenet_to_inertial(self.fpath.s[29], self.fpath.d[29] + 7, self.motionPlanner.csp)
+
+        fpath_point_num = int(tf*10)-1
+        ref_left = frenet_to_inertial(self.fpath.s[fpath_point_num], self.fpath.d[fpath_point_num] - 3.5, self.motionPlanner.csp)
+        ref_right = frenet_to_inertial(self.fpath.s[fpath_point_num], self.fpath.d[fpath_point_num] + 3.5, self.motionPlanner.csp)
 
         # terminal
         self.Input, MPC_unsolved, x_m = self.lon_lat_controller_ipopt.calc_input(
@@ -900,11 +903,11 @@ class CarlagymEnv(gym.Env):
             obj_info=obj_info,
             walker_info=walker_dict,
             ref=np.array(
-                [self.fpath.x[29], self.fpath.y[29], self.fpath.yaw[29], self.fpath.s[29], self.fpath.d[29]]),
+                [self.fpath.x[fpath_point_num], self.fpath.y[fpath_point_num], self.fpath.yaw[fpath_point_num], self.fpath.s[fpath_point_num], self.fpath.d[fpath_point_num]]),
             ref_left=np.array([ref_left[0], ref_left[1], ref_left[3]]),
             ref_right=np.array([ref_right[0], ref_right[1], ref_right[3]]),
             u_last=self.u_last, csp=self.motionPlanner.csp, fpath=fpath,
-            q=q, ru=1, rdu=1)
+            q=q, fpath_point_num=fpath_point_num)
 
         self.u_last = self.Input
         self.x_m = x_m
@@ -1065,20 +1068,32 @@ class CarlagymEnv(gym.Env):
             d_d = abs(self.state[0, (i + 1 + self.N_SPAWN_CARS) * 4 + 3] - self.state[0, 3])
             reward_dis_walker -= 30 / (d_s ** 2 + d_d ** 2)
 
+        state_choose = np.array([state_vector[0], state_vector[2], state_vector[4]])
+        max_id = np.where(state_choose == np.max(state_choose))[0][0]
+        if max_id == 0:
+            reward_choose = -5.0 * q + 5.0
+        elif max_id == 1:
+            if q < 0:
+                reward_choose = 10.0 * q + 10.0
+            else:
+                reward_choose = -10.0 * q + 10.0
+        else:
+            reward_choose = 5.0 * q + 5.0
+
+        # reward_target = 0.05 * tf
+
         reward_speed = v_S * 3 / self.maxSpeed
 
-        reward = reward_cl + reward_dis_vehicle + reward_dis_walker + reward_speed + reward_lanechange +reward_mpcNoResult
+        reward = reward_cl + reward_dis_vehicle + reward_dis_walker + reward_speed \
+                  + reward_lanechange +reward_mpcNoResult + reward_choose
 
         obj_S_Mux = []
         for j in range(np.size(obj_info['Obj_actor'])):
             obj_S = obj_info['Obj_frenet'][j][0]
             obj_S_Mux.append(obj_S)
 
-        if MPC_unsolved:
-            self.u_last = np.zeros(self.u_last.shape)
-
         done = False
-        if collision or self.n_step >= 400: #or ego_s > max(obj_S_Mux) + 10:
+        if collision or self.n_step >= 800 or ego_s > max(obj_S_Mux) + 10:
             self.u_last = np.zeros(self.u_last.shape)
             done = True
 
